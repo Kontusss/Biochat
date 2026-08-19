@@ -293,6 +293,9 @@ class TestBiochatUIBuild:
 
     def test_create_biochat_ui_builds_blocks(self):
         """create_biochat_ui returns a Gradio Blocks object without launching."""
+        import pytest
+        pytest.importorskip("gradio", reason="gradio not installed in this environment")
+
         from biomni.ui.biochat_ui import create_biochat_ui
 
         class DummyAgent:
@@ -348,7 +351,8 @@ class TestLicensePreservation:
         with open(readme_path) as f:
             content = f.read()
         assert "## Attribution" in content
-        assert "Built on top of" in content or "Built on Biomni" in content
+        content_lower = content.lower()
+        assert "built on top of" in content_lower or "built on biomni" in content_lower
         assert "Biomni" in content
         assert "Biochat" in content
 

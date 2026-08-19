@@ -8,7 +8,7 @@ the Biomni A1 engine unchanged.
 Layout
 ──────
 ┌──────────────────────────────────────────────────────────┐
-│ 🧬 Biochat          v2.0   Biomni Engine   ● Safe Mode   │
+│ 🧬 Biochat          v2.0   Biochat Engine   ● Safe Mode   │
 ├─────────────┬────────────────────────────────────────────┤
 │ Sidebar     │  Welcome Card                              │
 │             │  ┌──────────────────────────────────────┐  │
@@ -41,7 +41,7 @@ _HEADER_HTML = """
 <div class="biochat-header">
     <span class="bc-logo">🧬 Biochat</span>
     <span class="bc-version">v2.0</span>
-    <span class="bc-engine-badge">Biomni Engine</span>
+    <span class="bc-engine-badge">Biochat Engine</span>
     <span class="bc-header-status">
         <span class="bc-dot"></span> Safe Mode
     </span>
@@ -98,7 +98,7 @@ _WELCOME_HTML = """
     <h2>Welcome to Biochat</h2>
     <p class="bc-welcome-sub">Your Biomedical AI Research Copilot</p>
     <p class="bc-welcome-desc">
-        Powered by the <strong>Biomni</strong> scientific engine with 200+ verified
+        Powered by the Biochat scientific engine with 200+ verified
         bioinformatics tools, 30+ curated databases, and an 11GB biomedical data lake.
         Ask any biomedical research question to get started.
     </p>
@@ -109,7 +109,7 @@ _EXAMPLES_HTML = """
 <div class="biochat-examples">
     <button class="biochat-sample-btn" data-query="Query the EGFR protein structure from PDB and identify key functional domains">🔬 Query EGFR structure</button>
     <button class="biochat-sample-btn" data-query="Explain the biological function of the BRCA1 protein and its role in DNA repair">🧬 Explain protein function</button>
-    <button class="biochat-sample-btn" data-query="List all available Biomni tools for genomics analysis">🛠️ Check available tools</button>
+    <button class="biochat-sample-btn" data-query="List all available Biochat tools for genomics analysis">🛠️ Check available tools</button>
     <button class="biochat-sample-btn" data-query="Plan an antibody humanization strategy for a murine anti-PD-L1 antibody">💊 Plan antibody humanization</button>
 </div>
 """
@@ -123,7 +123,7 @@ _FOOTER_HTML = """
     <span class="bc-footer-badge good">32 Tools Loaded</span>
     <span class="bc-footer-badge off">Generation: Disabled</span>
     <span class="bc-footer-sep"></span>
-    <span style="margin-left:auto;opacity:0.7">Biomni Engine · Apache 2.0</span>
+    <span style="margin-left:auto;opacity:0.7">Biochat Engine · Apache 2.0</span>
 </div>
 """
 
@@ -171,7 +171,7 @@ def create_biochat_ui(
 
     SUPPORTED_EXTENSIONS = (".png", ".jpg", ".jpeg", ".gif", ".bmp", ".webp", ".pdf")
     agent.main_history_copy = []
-    available_access_codes = ["Biochat2025", "Biomni2025"]
+    available_access_codes = ["Biochat2025", "Biochat2025"]
 
     # ── Helper: footer status bar ─────────────────────────────
 
@@ -195,7 +195,7 @@ def create_biochat_ui(
             <span>Processing…</span>
             <span class="bc-footer-sep"></span>
             {''.join(badges)}
-            <span style="margin-left:auto;opacity:0.7">Biomni Engine · Apache 2.0</span>
+            <span style="margin-left:auto;opacity:0.7">Biochat Engine · Apache 2.0</span>
         </div>"""
 
     # ── Verification ──────────────────────────────────────────
@@ -220,7 +220,7 @@ def create_biochat_ui(
 
         agent.main_history_copy += [{"role": "user", "content": user_text}]
         main_history.append(ChatMessage(role="user", content=user_text))
-        main_history.append(ChatMessage(role="assistant", content="🧬 *Analyzing your query with the Biomni engine…*"))
+        main_history.append(ChatMessage(role="assistant", content="🧬 *Analyzing your query with the Biochat engine…*"))
         yield inner_history, main_history, _FOOTER_HTML, ""
 
         from langchain_core.messages import HumanMessage, AIMessage
@@ -600,5 +600,5 @@ def launch_biochat_ui(
         thread_id=thread_id,
         require_verification=require_verification,
     )
-    print(f"🧬 Launching Biochat UI (Biomni engine) on http://{server_name}:7860")
+    print(f"🧬 Launching Biochat UI (Biochat engine) on http://{server_name}:7860")
     demo.launch(share=share, server_name=server_name)

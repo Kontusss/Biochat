@@ -1,7 +1,7 @@
 """
 Biochat Streamlit UI — ChatGPT-style biomedical AI chat.
 
-A polished, modern chat interface powered by the Biomni engine through
+A polished, modern chat interface powered by the Biochat engine through
 the BioAgentService layer.  All agent logic is delegated to the service;
 this module handles only rendering and user interaction.
 
@@ -26,6 +26,8 @@ if str(_PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(_PROJECT_ROOT))
 
 import streamlit as st
+
+from biomni.ui.sanitize import sanitize_visible_text, render_trace_event
 
 # ═══════════════════════════════════════════════════════════════════
 # Page configuration
@@ -138,7 +140,14 @@ section[data-testid="stSidebar"] {
   background: var(--bc-green);
   animation: bc-pulse 2s ease-in-out infinite;
 }
+.biochat-header .bc-status-dot-processing {
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  background: var(--bc-amber);
+  animation: bc-pulse-fast 0.8s ease-in-out infinite;
+}
 @keyframes bc-pulse { 0%,100%{opacity:1} 50%{opacity:0.35} }
+@keyframes bc-pulse-fast { 0%,100%{opacity:1} 50%{opacity:0.2} }
 
 /* ── Welcome card ────────────────────────────────────────── */
 .biochat-welcome {
@@ -155,21 +164,6 @@ section[data-testid="stSidebar"] {
 .biochat-welcome .bcw-subtitle {
   font-size: 14px; color: var(--bc-text-secondary); margin-bottom: 14px;
 }
-.biochat-welcome .bcw-caps {
-  text-align: left; max-width: 480px; margin: 0 auto;
-  font-size: 13px; line-height: 1.9; color: var(--bc-text-secondary);
-}
-
-/* ── Example pills ───────────────────────────────────────── */
-.biochat-examples-grid {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-  justify-content: center;
-  max-width: 680px;
-  margin: 16px auto 0;
-}
-
 /* ── Chat messages ───────────────────────────────────────── */
 .biochat-chat { display: flex; flex-direction: column; gap: 2px; }
 
@@ -342,6 +336,17 @@ table.bc-table tr:hover td {
   animation: bc-spin 0.7s linear infinite;
 }
 @keyframes bc-spin { to { transform: rotate(360deg); } }
+
+/* Streaming cursor (shown while the answer is still being generated) */
+.bc-stream-cursor {
+  display: inline-block;
+  width: 8px; height: 17px;
+  margin-left: 2px;
+  vertical-align: text-bottom;
+  background: var(--bc-accent);
+  animation: bc-blink 1s steps(2) infinite;
+}
+@keyframes bc-blink { 0%,100%{opacity:1} 50%{opacity:0} }
 
 /* Status badge */
 .bc-status-badge {
@@ -650,13 +655,13 @@ def build_trace_text(status: str = "running") -> str:
     if status == "running":
         return (
             "已接收用户提问。\n"
-            "正在调用 Biochat / Biomni agent 引擎。\n"
+            "正在调用 Biochat agent 引擎。\n"
             "检索相关工具和数据库中...\n"
             "正在生成回答..."
         )
     return (
         "已接收用户提问。\n"
-        "已调用 Biochat / Biomni agent 引擎。\n"
+        "已调用 Biochat agent 引擎。\n"
         "已按需查询工具和数据库。\n"
         "回答生成完成。"
     )
@@ -665,19 +670,6 @@ def build_trace_text(status: str = "running") -> str:
 # ═══════════════════════════════════════════════════════════════════
 # Sidebar
 # ═══════════════════════════════════════════════════════════════════
-
-_EXAMPLES: list[tuple[str, str]] = [
-    ("🔬 CRISPR 筛选设计",
-     "Plan a CRISPR screen to identify genes that regulate T cell exhaustion, "
-     "generate 32 genes that maximize the perturbation effect."),
-    ("🧬 scRNA-seq 注释",
-     "Perform scRNA-seq annotation and generate meaningful hypotheses about cell populations."),
-    ("💊 ADMET 预测",
-     "Predict ADMET properties for this compound: CC(C)CC1=CC=C(C=C1)C(C)C(=O)O"),
-    ("🧪 sgRNA 设计",
-     "Design sgRNA sequences for knocking out the human TP53 gene with minimum off-target effects."),
-]
-
 
 def render_sidebar() -> dict[str, Any]:
     """Render the sidebar and return settings selected by the user."""
@@ -707,12 +699,34 @@ def render_sidebar() -> dict[str, Any]:
     if "active_session_id" not in st.session_state:
         st.session_state.active_session_id = "default"
 
-    # ── Example prompts ─────────────────────────────────────
-    st.sidebar.markdown("---")
-    st.sidebar.caption("💡 快速操作")
-    for label, query in _EXAMPLES:
-        if st.sidebar.button(label, key=f"sb_ex_{hash(query) % 99999}", use_container_width=True):
-            st.session_state.pending_prompt = query
+    # Auto-track current conversation as a session
+    msgs = st.session_state.get("messages", [])
+    if msgs:
+        first_user_msg = next((m["content"] for m in msgs if m["role"] == "user"), "新对话")
+        title = first_user_msg[:40] + ("..." if len(first_user_msg) > 40 else "")
+        st.session_state.sessions[st.session_state.active_session_id] = {
+            "title": title,
+            "message_count": len(msgs),
+        }
+
+    # Render session list
+    if st.session_state.sessions:
+        for sid, sinfo in sorted(
+            st.session_state.sessions.items(),
+            key=lambda x: x[1].get("message_count", 0), reverse=True
+        ):
+            is_active = sid == st.session_state.active_session_id
+            prefix = "▸ " if is_active else "  "
+            label = f"{prefix}{sinfo['title']} ({sinfo['message_count']})"
+            if st.sidebar.button(
+                label, key=f"session_{sid}",
+                use_container_width=True,
+                help=f"切换到: {sinfo['title']}",
+            ):
+                st.session_state.active_session_id = sid
+                st.rerun()
+    else:
+        st.sidebar.caption("  暂无历史会话")
 
     st.sidebar.markdown("---")
 
@@ -722,8 +736,6 @@ def render_sidebar() -> dict[str, Any]:
         ("ok", "✅ 结构工具 — 已验证"),
         ("ok", "✅ 30+ 数据库 — 已加载"),
         ("ok", "✅ 安全过滤 — 已启用"),
-        ("warn", "⚠️ 抗体人源化 — 未安装"),
-        ("off", "🔒 生成功能 — 已禁用"),
     ]
     for cls, label in status_items:
         color = {"ok": "#16a34a", "warn": "#f59e0b", "off": "#9ca3af"}[cls]
@@ -748,8 +760,8 @@ def render_sidebar() -> dict[str, Any]:
     st.sidebar.markdown("---")
     st.sidebar.markdown(
         '<div style="font-size:10px;color:#9ca3af;line-height:1.5">'
-        'Built on <a href="https://github.com/snap-stanford/Biomni">Biomni</a>'
-        ' · Apache 2.0 · <a href="https://github.com/snap-stanford/Biomni/blob/main/license_info.md">License Info</a>'
+        'Powered by Biochat Engine'
+        ' · <a href="https://github.com/snap-stanford/Biomni">Apache 2.0</a>'
         '</div>',
         unsafe_allow_html=True,
     )
@@ -767,27 +779,10 @@ def render_welcome_card() -> None:
         '<div class="biochat-welcome">'
         '<div class="bcw-icon">🧬</div>'
         '<h1>你好，我是 Biochat</h1>'
-        '<p class="bcw-subtitle">您的生物医学 AI 研究助手 — 基于 Biomni 引擎</p>'
-        '<div class="bcw-caps">'
-        '✅ 查询蛋白质结构、基因组变异和数据库<br>'
-        '✅ 分析生物医学文献，生成研究假设<br>'
-        '✅ 设计 CRISPR 筛选、sgRNA 序列和克隆实验<br>'
-        '✅ 预测 ADMET 属性，分析药物相互作用<br>'
-        '⚠️ 所有结果请与领域专家验证<br>'
-        '🔒 不会伪造未安装工具的结果'
-        '</div>'
+        '<p class="bcw-subtitle">您的生物医学 AI 研究助手</p>'
         '</div>',
         unsafe_allow_html=True,
     )
-
-    # Example prompt pills
-    st.markdown('<div class="biochat-examples-grid">', unsafe_allow_html=True)
-    cols = st.columns(len(_EXAMPLES))
-    for i, (label, query) in enumerate(_EXAMPLES):
-        with cols[i]:
-            if st.button(label, key=f"welcome_ex_{i}", use_container_width=True):
-                st.session_state.pending_prompt = query
-    st.markdown("</div>", unsafe_allow_html=True)
 
 
 # ═══════════════════════════════════════════════════════════════════
@@ -840,6 +835,9 @@ def stream_agent_response(user_query: str):
             elif status == "error":
                 answer_so_far = event.get("answer_so_far", content)
                 break
+            elif status == "answering":
+                answer_so_far = event.get("answer_so_far", content)
+                current_step = "✍️ 正在生成回答..."
             elif status == "thinking":
                 current_step = "🤔 分析思考中..."
             elif status == "retrieving":
@@ -906,6 +904,7 @@ def render_assistant_card_streaming(
         "retrieving": ("检索工具中", "retrieving"),
         "executing": ("执行代码中", "running"),
         "observing": ("获取结果中", "running"),
+        "answering": ("生成回答中", "running"),
         "completed": ("已完成", "completed"),
         "error": ("出错", "error"),
     }
@@ -923,6 +922,14 @@ def render_assistant_card_streaming(
             f'请耐心等待，复杂任务可能需要几分钟...</div>'
             f'</div>'
             f'</div>'
+        )
+    elif status == "answering" and answer_html:
+        # Incremental answer text — plain pre-wrap (no markdown) so the
+        # card streams smoothly without re-layout flicker; a blinking
+        # cursor conveys that generation is still in progress.
+        body_html = (
+            f'<div style="white-space:pre-wrap;word-break:break-word">{answer_html}'
+            f'<span class="bc-stream-cursor"></span></div>'
         )
     elif status == "completed" and answer_html:
         body_html = answer_html
@@ -961,6 +968,7 @@ def main() -> None:
         "messages": [],
         "pending_prompt": None,
         "is_processing": False,
+        "streaming_prompt": None,   # prompt text while streaming is active
     }
     for key, default in defaults.items():
         if key not in st.session_state:
@@ -973,120 +981,32 @@ def main() -> None:
     settings = render_sidebar()
 
     # ═══════════════════════════════════════════════════════════
-    # Handle pending prompt (triggered by sidebar or example)
+    # Phase 1: Accept user input — append to messages + rerun
+    #           so the user message renders BEFORE streaming starts.
     # ═══════════════════════════════════════════════════════════
 
     prompt = st.session_state.pending_prompt
     if prompt and not st.session_state.is_processing:
+        # Clear pending; store for streaming phase after rerun
         st.session_state.pending_prompt = None
-        st.session_state.is_processing = True
-
-        # Append user message immediately
+        st.session_state.streaming_prompt = prompt
+        # Append user message so it renders now
         st.session_state.messages.append({
             "role": "user",
             "content": prompt,
             "timestamp": datetime.now(timezone.utc).isoformat(),
         })
-
-        # ── Streaming response with real-time UI updates ──────
-        card_placeholder = st.empty()
-
-        # Show initial loading card IMMEDIATELY before blocking on agent
-        card_placeholder.markdown(
-            render_assistant_card_streaming(
-                answer_html="",
-                trace_lines=[],
-                status="thinking",
-                current_step="🔍 正在初始化 Agent 引擎...",
-                trace_expanded=True,
-            ),
-            unsafe_allow_html=True,
-        )
-
-        final_answer = ""
-        final_trace_lines: list[str] = []
-        final_status = "thinking"
-
-        for update in stream_agent_response(prompt):
-            final_status = update["status"]
-            final_trace_lines = update.get("trace_lines", [])
-
-            if update["status"] == "completed":
-                final_answer = update["answer_so_far"]
-                answer_html = simple_markdown_to_html(final_answer)
-                card_placeholder.markdown(
-                    render_assistant_card_streaming(
-                        answer_html=answer_html,
-                        trace_lines=final_trace_lines,
-                        status="completed",
-                        current_step="✅ 完成",
-                        trace_expanded=False,
-                    ),
-                    unsafe_allow_html=True,
-                )
-                break
-            elif update["status"] == "error":
-                final_answer = update["answer_so_far"]
-                answer_html = simple_markdown_to_html(final_answer)
-                card_placeholder.markdown(
-                    render_assistant_card_streaming(
-                        answer_html=answer_html,
-                        trace_lines=final_trace_lines,
-                        status="error",
-                        current_step="❌ 出错",
-                        trace_expanded=True,
-                    ),
-                    unsafe_allow_html=True,
-                )
-                break
-            else:
-                # Show real-time streaming state
-                card_placeholder.markdown(
-                    render_assistant_card_streaming(
-                        answer_html="",
-                        trace_lines=final_trace_lines,
-                        status=update["status"],
-                        current_step=update.get("current_step", "处理中..."),
-                        trace_expanded=True,
-                    ),
-                    unsafe_allow_html=True,
-                )
-
-        # ── Final render (settled card, trace collapsed) ──────
-        if final_status == "completed":
-            answer_html = simple_markdown_to_html(final_answer)
-            card_placeholder.markdown(
-                render_assistant_card(
-                    answer=answer_html,
-                    trace="\n".join(final_trace_lines) if final_trace_lines else "",
-                    trace_expanded=False,
-                    status_label="已完成",
-                    status_class="completed",
-                ),
-                unsafe_allow_html=True,
-            )
-        elif final_status == "error":
-            answer_html = simple_markdown_to_html(final_answer)
-            card_placeholder.markdown(
-                render_assistant_card(
-                    answer=answer_html,
-                    trace="\n".join(final_trace_lines) if final_trace_lines else "",
-                    trace_expanded=True,
-                    status_label="错误",
-                    status_class="error",
-                ),
-                unsafe_allow_html=True,
-            )
-
-        # Save to session
-        st.session_state.messages.append({
-            "role": "assistant",
-            "content": final_answer,
-            "trace": "\n".join(final_trace_lines) if final_trace_lines else "",
-            "timestamp": datetime.now(timezone.utc).isoformat(),
-        })
-        st.session_state.is_processing = False
         st.rerun()
+
+    # ═══════════════════════════════════════════════════════════
+    # Phase 2: Streaming trigger — set flag only.  Actual streaming
+    #           happens inside the chat rendering area below, so the
+    #           processing card flows naturally after user messages.
+    # ═══════════════════════════════════════════════════════════
+
+    streaming_prompt = st.session_state.streaming_prompt
+    if streaming_prompt and not st.session_state.is_processing:
+        st.session_state.is_processing = True
 
     # ═══════════════════════════════════════════════════════════
     # Render UI
@@ -1097,13 +1017,17 @@ def main() -> None:
     # ── Header ──────────────────────────────────────────────
     from biomni.core.settings import biochat_settings as _cfg
 
+    # Dynamic status: show "就绪" when idle, "处理中" when busy
+    status_text = "处理中..." if st.session_state.is_processing else "就绪"
+    status_dot_class = "bc-status-dot" if not st.session_state.is_processing else "bc-status-dot-processing"
+
     st.markdown(
         '<div class="biochat-header">'
         '<span class="bc-title">🧬 Biochat</span>'
         '<span class="bc-version">v2.0</span>'
         f'<span class="bc-model">{_cfg.llm_model}</span>'
-        '<span class="bc-status">'
-        '<span class="bc-status-dot"></span> 就绪'
+        f'<span class="bc-status">'
+        f'<span class="{status_dot_class}"></span> {status_text}'
         '</span>'
         '</div>',
         unsafe_allow_html=True,
@@ -1112,7 +1036,8 @@ def main() -> None:
     # ── Chat messages ───────────────────────────────────────
     st.markdown('<div class="biochat-chat">', unsafe_allow_html=True)
 
-    if not st.session_state.messages:
+    # Only show welcome card when truly idle (no messages AND not processing)
+    if not st.session_state.messages and not st.session_state.is_processing:
         render_welcome_card()
 
     for msg in st.session_state.messages:
@@ -1123,6 +1048,9 @@ def main() -> None:
         if role == "user":
             st.markdown(render_user_bubble(content), unsafe_allow_html=True)
         else:
+            # P0: sanitize before rendering — no internal reasoning may reach UI
+            content = sanitize_visible_text(content)
+            trace = sanitize_visible_text(trace)
             answer_html = simple_markdown_to_html(content)
             st.markdown(
                 render_assistant_card(
@@ -1133,6 +1061,136 @@ def main() -> None:
                 unsafe_allow_html=True,
             )
 
+    # ── Streaming response: INSIDE chat area, below all messages ──
+    streaming_prompt = st.session_state.get("streaming_prompt")
+    if streaming_prompt and st.session_state.is_processing:
+        st.session_state.streaming_prompt = None
+
+        card_placeholder = st.empty()
+        card_placeholder.markdown(
+            render_assistant_card_streaming(
+                answer_html="", trace_lines=[],
+                status="thinking",
+                current_step="🔍 正在初始化 Agent 引擎...",
+                trace_expanded=True,
+            ),
+            unsafe_allow_html=True,
+        )
+
+        final_answer = ""
+        final_trace_lines: list[str] = []
+        final_status = "thinking"
+        last_stream_render = 0.0  # throttle card updates during token streaming
+
+        for update in stream_agent_response(streaming_prompt):
+            final_status = update["status"]
+            # P0: sanitize trace lines — whitelist status events only
+            final_trace_lines = [
+                sanitize_visible_text(line) for line in update.get("trace_lines", [])
+                if sanitize_visible_text(line)
+            ]
+
+            if update["status"] == "completed":
+                # P0: real-time sanitize of accumulated answer
+                final_answer = sanitize_visible_text(update["answer_so_far"])
+                card_placeholder.markdown(
+                    render_assistant_card_streaming(
+                        answer_html=simple_markdown_to_html(final_answer),
+                        trace_lines=final_trace_lines,
+                        status="completed", current_step="✅ 完成",
+                        trace_expanded=False,
+                    ),
+                    unsafe_allow_html=True,
+                )
+                break
+            elif update["status"] == "error":
+                final_answer = sanitize_visible_text(update["answer_so_far"])
+                card_placeholder.markdown(
+                    render_assistant_card_streaming(
+                        answer_html=simple_markdown_to_html(final_answer),
+                        trace_lines=final_trace_lines,
+                        status="error", current_step="❌ 出错",
+                        trace_expanded=True,
+                    ),
+                    unsafe_allow_html=True,
+                )
+                break
+            elif update["status"] == "answering":
+                # Stream the final answer token-by-token as it is generated.
+                # Render as plain pre-wrap text (no markdown) so the card
+                # grows smoothly without re-layout flicker; throttle updates
+                # so the browser isn't flooded on every token.
+                partial = sanitize_visible_text(update.get("answer_so_far", ""))
+                # Trim a trailing half-written tag (e.g. `<` or `</sol`)
+                # so it doesn't flash in the streamed text.
+                partial = re.sub(r"</?(?:[a-zA-Z_][\w:-]*)?$", "", partial)
+                now = time.time()
+                if partial and now - last_stream_render >= 0.2:
+                    card_placeholder.markdown(
+                        render_assistant_card_streaming(
+                            answer_html=_escape(partial),
+                            trace_lines=final_trace_lines,
+                            status="answering",
+                            current_step="✍️ 正在生成回答...",
+                            trace_expanded=False,
+                        ),
+                        unsafe_allow_html=True,
+                    )
+                    last_stream_render = now
+            else:
+                card_placeholder.markdown(
+                    render_assistant_card_streaming(
+                        answer_html="", trace_lines=final_trace_lines,
+                        status=update["status"],
+                        current_step=update.get("current_step", "处理中..."),
+                        trace_expanded=True,
+                    ),
+                    unsafe_allow_html=True,
+                )
+
+        # Final settled card (P0: answer + trace both sanitized)
+        final_answer = sanitize_visible_text(final_answer)
+        trace_str = "\n".join(final_trace_lines) if final_trace_lines else ""
+        if not final_answer:
+            from biomni.ui.sanitize import FALLBACK_MESSAGE
+            final_answer = FALLBACK_MESSAGE
+        if final_status == "completed":
+            card_placeholder.markdown(
+                render_assistant_card(
+                    answer=simple_markdown_to_html(final_answer),
+                    trace=trace_str, trace_expanded=False,
+                    status_label="已完成", status_class="completed",
+                ),
+                unsafe_allow_html=True,
+            )
+        elif final_status == "error":
+            card_placeholder.markdown(
+                render_assistant_card(
+                    answer=simple_markdown_to_html(final_answer),
+                    trace=trace_str, trace_expanded=True,
+                    status_label="错误", status_class="error",
+                ),
+                unsafe_allow_html=True,
+            )
+
+        st.session_state.messages.append({
+            "role": "assistant",
+            "content": final_answer,
+            "trace": trace_str,
+            "timestamp": datetime.now(timezone.utc).isoformat(),
+        })
+        st.session_state.is_processing = False
+        st.rerun()
+
+    # Auto-scroll anchor: JS scrolls to this element after every render
+    st.markdown('<div id="biochat-bottom"></div>', unsafe_allow_html=True)
+    st.markdown(
+        """<script>
+        var bottom = window.parent.document.getElementById('biochat-bottom');
+        if (bottom) { bottom.scrollIntoView({behavior: 'smooth', block: 'end'}); }
+        </script>""",
+        unsafe_allow_html=True,
+    )
     st.markdown("</div>", unsafe_allow_html=True)  # close chat
 
     # ── Chat input ──────────────────────────────────────────
@@ -1147,10 +1205,7 @@ def main() -> None:
     # ── Footer ──────────────────────────────────────────────
     st.markdown(
         '<div class="biochat-footer">'
-        '<strong>Biochat</strong> — 基于 '
-        '<a href="https://github.com/snap-stanford/Biomni">Biomni</a> '
-        '科学引擎构建 · Apache 2.0 · '
-        '非临床用途 · 结果请与专家验证'
+        '<strong>Biochat</strong> · Apache 2.0'
         '</div>',
         unsafe_allow_html=True,
     )

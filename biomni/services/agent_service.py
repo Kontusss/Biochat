@@ -127,6 +127,7 @@ class BioAgentService:
                 default_config.path = self._settings.data_path
                 default_config.timeout_seconds = self._settings.timeout_seconds
                 default_config.use_tool_retriever = self._settings.use_tool_retriever
+                default_config.tool_profile = self._settings.tool_profile
                 default_config.commercial_mode = self._settings.commercial_mode
                 default_config.base_url = self._settings.base_url
                 default_config.api_key = self._settings.api_key
@@ -137,6 +138,7 @@ class BioAgentService:
                     source=self._settings.llm_source,
                     timeout_seconds=self._settings.timeout_seconds,
                     use_tool_retriever=self._settings.use_tool_retriever,
+                    tool_profile=self._settings.tool_profile,
                     base_url=self._settings.base_url,
                     api_key=self._settings.api_key,
                     commercial_mode=self._settings.commercial_mode,
@@ -232,6 +234,8 @@ class BioAgentService:
         trace_lines: list[str] = []
         step_count: int = 0
         solution_found: bool = False
+        gen_buffer: str = ""
+        """Raw tokens of the current LLM generation (reset at each run boundary)."""
 
         try:
             # ── Phase 1: Tool retrieval (if enabled) ──────────────
@@ -276,6 +280,45 @@ class BioAgentService:
 
             for event in self._agent.go_stream(request.message):
                 step_count += 1
+
+                # ── Token-level events: stream the final answer live ──
+                # Tokens are buffered per LLM generation.  As soon as the
+                # model opens the <solution> tag, everything after it is
+                # forwarded incrementally as `answering` events so the UI
+                # can stream the final answer token-by-token.  Tokens
+                # before the tag (thinking) never leave this service layer.
+                if event.get("type") == "token":
+                    token = event.get("content", "")
+                    if not isinstance(token, str):
+                        token = str(token)
+
+                    gen_buffer += token
+
+                    if not solution_found and "<solution>" in gen_buffer:
+                        incremental = gen_buffer.split("<solution>", 1)[1]
+                        if "</solution>" in incremental:
+                            incremental = incremental.split("</solution>", 1)[0]
+                        # Trim a trailing half-written tag (e.g. "<" or
+                        # "</sol") so it doesn't flash in the streamed text.
+                        incremental = _re.sub(r"</?(?:[a-zA-Z_][\w:-]*)?$", "", incremental)
+                        incremental = incremental.strip()
+                        if incremental:
+                            yield {
+                                "status": "answering",
+                                "content": "",
+                                "answer_so_far": incremental,
+                                "trace_line": "",
+                                "language": "",
+                            }
+
+                    if event.get("chunk_position") == "last":
+                        gen_buffer = ""  # end of this LLM run
+                    continue
+
+                # ── Message-level events (legacy parsing path) ──
+                if event.get("type") == "message":
+                    gen_buffer = ""  # node boundary — token buffer is stale
+
                 text = self._extract_text_from_event(event)
 
                 if not text or not text.strip():
@@ -319,7 +362,7 @@ class BioAgentService:
                     trace_lines.append(f"💻 执行 {language.upper()} 代码 (步骤 {step_count})...")
                     yield {
                         "status": "executing",
-                        "content": code[:500],
+                        "content": "",  # do NOT leak generated code content
                         "answer_so_far": "",
                         "trace_line": f"💻 正在执行 {language.upper()} 代码...",
                         "language": language,
@@ -332,11 +375,11 @@ class BioAgentService:
                 )
                 if observation_match:
                     obs = observation_match.group(1).strip()
-                    obs_short = obs[:200] + ("..." if len(obs) > 200 else "")
-                    trace_lines.append(f"📋 观察结果: {obs_short}")
+                    # SECURITY: trace panel shows event status only, not
+                    # the raw execution output content.
                     yield {
                         "status": "observing",
-                        "content": obs_short,
+                        "content": "",  # do NOT leak observation content
                         "answer_so_far": "",
                         "trace_line": f"📋 获取执行结果 ({len(obs)} 字符)",
                         "language": "",
@@ -356,10 +399,12 @@ class BioAgentService:
                     thinking = text_stripped
 
                 if thinking and len(thinking) > 10:
-                    trace_lines.append(f"🤔 {thinking[:150]}...")
+                    # SECURITY: never expose model thinking content in the
+                    # trace panel — record a status line only.  The raw
+                    # thinking text stays internal to the service layer.
                     yield {
                         "status": "thinking",
-                        "content": thinking[:300],
+                        "content": "",  # do NOT leak reasoning text
                         "answer_so_far": "",
                         "trace_line": f"🤔 推理中... (步骤 {step_count})",
                         "language": "",
@@ -554,37 +599,63 @@ class BioAgentService:
 
     @staticmethod
     def _clean_agent_text(text: str) -> str:
-        """Strip raw LangChain / LangGraph delimiters and internal tags.
+        """Strip internal tags and render user-facing Markdown.
 
-        Transforms the raw agent transcript into user-facing Markdown.
-        Does NOT fabricate or alter scientific content.
+        Removes ALL raw XML tags (execute, observation, solution, think,
+        thinking, reasoning, scratchpad, etc.), role delimiters,
+        parsing-error retries, agent apologies, and hidden chain-of-thought
+        sections.  Only the final answer content reaches the chat bubble.
         """
         import re
 
         if not text or not text.strip():
             return ""
 
-        # Remove role delimiters
+        # 1. Strip apology / retry prefixes (agent self-correction noise)
+        text = re.sub(
+            r"^(抱歉|I'm sorry|I apologize|Apologies)[^。\n]*[。\n]\s*",
+            "", text, flags=re.IGNORECASE | re.DOTALL,
+        )
+        text = re.sub(
+            r"^(好的|OK|Let me|我来)[^。\n]*重新[^。\n]*[。\n]\s*",
+            "", text, flags=re.DOTALL,
+        )
+
+        # 2. Strip agent meta-talk about tags / format requirements
+        text = re.sub(
+            r"由于当前没有需要执行的具体任务[^。\n]*[。\n]\s*",
+            "", text,
+        )
+        text = re.sub(
+            r"Please follow the instruction[^。\n]*[。\n]\s*",
+            "", text, flags=re.IGNORECASE,
+        )
+
+        # 3. Remove role delimiters
         for pattern in [
             r"=+\s*(?:Human|Ai|AI|Tool|System)\s+Message\s*=+",
             r"^(?:Human|Ai|AI|Tool|System)\s+Message\s*:?\s*",
         ]:
             text = re.sub(pattern, "", text, flags=re.MULTILINE | re.IGNORECASE)
 
-        # Strip <execute>...</execute> and <observation>...</observation> blocks
+        # 4. Strip <execute>...</execute> blocks (code, not for user display)
         text = re.sub(r"<execute>.*?</execute>", "", text, flags=re.DOTALL)
+        # 5. Strip <observation>...</observation> blocks
         text = re.sub(r"<observation>.*?</observation>", "", text, flags=re.DOTALL)
 
-        # Clean up <solution> tags but keep content
-        text = re.sub(r"</?solution>", "", text)
+        # 6. Full internal-reasoning sanitization — removes <think>,
+        #    <thinking>, <reasoning>, <scratchpad>, self-critique headings,
+        #    tag residue ("标签结尾。") and all leftover XML-like tags.
+        from biomni.utils.text_cleanup import sanitize_assistant_message
+        text = sanitize_assistant_message(text)
 
-        # Remove plan checkboxes: "[ ]" → ""
+        # 7. Remove plan checkboxes
         text = re.sub(r"\[ \]\s*", "", text)
 
-        # Collapse excessive blank lines
+        # 8. Collapse excessive blank lines
         text = re.sub(r"\n{3,}", "\n\n", text)
 
-        # Remove repeated separator lines
+        # 9. Remove separator lines
         text = re.sub(r"={3,}", "", text)
 
         return text.strip()

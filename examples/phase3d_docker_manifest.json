@@ -1,0 +1,15 @@
+{
+  "manifest_version": "3D-1d-example",
+  "runtime": "docker",
+  "method": "hdock",
+  "calibration": "uncalibrated",
+  "score_parsed": false,
+  "ranking_performed": false,
+  "jobs": [
+    {
+      "candidate_id": "example_candidate_001",
+      "receptor_pdb": "examples/receptor.pdb",
+      "ligand_pdb": "examples/ligand.pdb"
+    }
+  ]
+}

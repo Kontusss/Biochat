@@ -81,6 +81,157 @@ def build_parsing_error_html() -> str:
     )
 
 
+# ═══════════════════════════════════════════════════════════════
+# Internal reasoning sanitization
+# ═══════════════════════════════════════════════════════════════
+
+# XML-like internal reasoning tags — content between these tags is
+# hidden chain-of-thought and must NEVER reach the user.
+_INTERNAL_REASONING_TAGS = (
+    "think",
+    "thinking",
+    "reasoning",
+    "analysis",
+    "reflection",
+    "scratchpad",
+    "chain_of_thought",
+    "chain-of-thought",
+    "inner_monologue",
+    "inner-monologue",
+    "self_critique",
+    "self-critique",
+)
+
+# Build one combined regex matching any internal reasoning block
+_INTERNAL_TAG_RE = re.compile(
+    r"</?(?:" + "|".join(_INTERNAL_REASONING_TAGS) + r")>",
+    re.IGNORECASE | re.DOTALL,
+)
+
+# Paired-tag block removal (content between open and close tags)
+_INTERNAL_BLOCK_PATTERNS = [
+    re.compile(
+        rf"<{tag}>(.*?)</{tag}>",
+        re.IGNORECASE | re.DOTALL,
+    )
+    for tag in _INTERNAL_REASONING_TAGS
+]
+
+# Markdown / Chinese headings that introduce hidden reasoning sections
+_REASONING_HEADINGS = (
+    r"\*\*\s*思考过程\s*[:：]\*\*",
+    r"\*\*\s*思考过程\*\*",
+    r"思考过程\s*[:：]",
+    r"内部推理\s*[:：]",
+    r"推理过程\s*[:：]",
+    r"草稿\s*[:：]",
+    r"自我批评\s*[:：]",
+    r"self-critique\s*[:：]",
+    r"Chain.?of.?Thought\s*[:：]",
+    r"CoT\s*[:：]",
+    r"scratchpad\s*[:：]",
+    r"内部独白\s*[:：]",
+)
+
+_REASONING_HEADING_RE = re.compile(
+    r"(?:^|\n)\s*(?:" + "|".join(_REASONING_HEADINGS) + r")[^\n]*",
+    re.IGNORECASE,
+)
+
+# Cleanup residue left by tag-stripping heuristics
+_TAG_RESIDUE_PATTERNS = (
+    r"标签\s*结尾\s*[。.]",
+    r"标签\s*开始\s*[。.]",
+    r"标签\s*结束\s*[。.]",
+    r"<\s*/\s*(?:" + "|".join(_INTERNAL_REASONING_TAGS) + r")\s*>",
+    r"<\s*(?:" + "|".join(_INTERNAL_REASONING_TAGS) + r")\s*>",
+)
+
+_TAG_RESIDUE_RE = re.compile(
+    "|".join(_TAG_RESIDUE_PATTERNS),
+    re.IGNORECASE,
+)
+
+
+def strip_internal_reasoning(text: str) -> str:
+    """Remove hidden chain-of-thought / internal reasoning from *text*.
+
+    Removes:
+      - Paired internal tags (``<think>...</think>`` etc.) including content.
+      - Reasoning section headings (``**思考过程:**``, ``内部推理：`` etc.)
+        and the lines they introduce.
+      - Leftover opening/closing tags.
+      - Tag cleanup residue (``标签结尾。``, ``标签开始。``).
+
+    Args:
+        text: Raw assistant message text.
+
+    Returns:
+        Sanitized text with internal reasoning removed.
+    """
+    if not text:
+        return ""
+
+    result = text
+
+    # 1. Remove paired internal blocks (tags + content)
+    for pattern in _INTERNAL_BLOCK_PATTERNS:
+        result = pattern.sub("", result)
+
+    # 2. Remove reasoning headings and the lines they start.
+    #    A reasoning heading runs until the next blank line or section
+    #    marker; the following loop collapses leftover blank lines.
+    result = _REASONING_HEADING_RE.sub("", result)
+
+    # 3. Remove any remaining internal tags (open or close)
+    result = _INTERNAL_TAG_RE.sub("", result)
+
+    # 4. Remove tag cleanup residue phrases
+    result = _TAG_RESIDUE_RE.sub("", result)
+
+    # 5. Collapse 3+ newlines to at most 2
+    result = re.sub(r"\n{3,}", "\n\n", result)
+
+    return result.strip()
+
+
+def strip_xml_like_tags(text: str) -> str:
+    """Remove all XML-like tags (``<tag>`` / ``</tag>``) from *text*.
+
+    Unlike :func:`strip_internal_reasoning`, this removes EVERY tag
+    regardless of name, but keeps the text content between them.
+    """
+    if not text:
+        return ""
+    result = re.sub(r"</?[a-zA-Z_][\w:-]*\s*/?>", "", text)
+    return re.sub(r"\n{3,}", "\n\n", result).strip()
+
+
+def sanitize_assistant_message(text: str) -> str:
+    """Full sanitization for user-facing assistant messages.
+
+    Order matters:
+    1. Strip internal reasoning blocks (tags + content).
+    2. Strip any remaining XML-like tags (keeping content).
+    3. Remove reasoning headings and tag residue.
+    4. Collapse excess whitespace.
+
+    Args:
+        text: Raw assistant message.
+
+    Returns:
+        Clean user-facing text.
+    """
+    if not text:
+        return ""
+    result = strip_internal_reasoning(text)
+    result = strip_xml_like_tags(result)
+    # Second pass to catch residue exposed by tag stripping
+    result = _TAG_RESIDUE_RE.sub("", result)
+    result = re.sub(r"\n{3,}", "\n\n", result)
+    return result.strip()
+
+
 # ── Backward-compatible aliases ──────────────────────────────
 clean_message_content = strip_ansi_escape_codes
 should_skip_message = is_message_empty

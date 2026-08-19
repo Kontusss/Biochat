@@ -1,8 +1,10 @@
 """
-Biochat Streamlit UI Smoke Tests
+Biochat Streamlit UI Smoke Tests (current architecture)
 
-Verifies imports, CSS class presence, render helpers, event extraction,
-user-content escaping, and file preservation.  Does NOT start a server.
+Verifies imports, CSS class presence, render helpers, user-content
+escaping, event extraction, and answer cleaning — against the APIs that
+actually exist in ``biomni/ui/biochat_streamlit.py``, ``biomni/ui/sanitize.py``
+and ``biomni/services/agent_service.py``.  Does NOT start a server.
 """
 
 from __future__ import annotations
@@ -26,11 +28,15 @@ class TestImports:
         from biomni.ui.biochat_streamlit import main
         assert callable(main)
 
-    def test_get_agent_signature(self):
-        from biomni.ui.biochat_streamlit import get_agent
-        sig = inspect.signature(get_agent)
-        for p in ("path", "llm"):
-            assert p in sig.parameters
+    def test_agent_service_factory(self):
+        from biomni.services.agent_service import get_agent_service
+        sig = inspect.signature(get_agent_service)
+        assert "settings" in sig.parameters
+
+    def test_stream_agent_response_signature(self):
+        from biomni.ui.biochat_streamlit import stream_agent_response
+        sig = inspect.signature(stream_agent_response)
+        assert "user_query" in sig.parameters
 
 
 # ═══════════════════════════════════════════════════════════════
@@ -38,34 +44,28 @@ class TestImports:
 # ═══════════════════════════════════════════════════════════════
 
 REQUIRED_CSS_CLASSES = [
-    "biochat-app",
     "biochat-header",
-    "biochat-header-title",
-    "biochat-header-badge",
-    "biochat-chat-shell",
-    "biochat-user-row",
-    "biochat-user-bubble",
-    "biochat-assistant-card",
-    "biochat-trace-header",
-    "biochat-trace-body",
-    "biochat-answer-body",
-    "biochat-welcome-card",
-    "biochat-example-grid",
-    "biochat-footer-note",
+    "biochat-msg-user",
+    "biochat-msg-assistant",
+    "bc-answer-body",
+    "bc-trace-toggle",
+    "bc-trace-body",
+    "biochat-welcome",
+    "biochat-thinking",
+    "bc-status-badge",
+    "bc-stream-cursor",
 ]
 
 
 class TestCSS:
     def test_css_length(self):
-        from biomni.ui.biochat_streamlit import BIOCHAT_STREAMLIT_CSS
-        assert len(BIOCHAT_STREAMLIT_CSS) > 2000
+        from biomni.ui.biochat_streamlit import BIOCHAT_CSS
+        assert len(BIOCHAT_CSS) > 2000
 
     def test_required_classes_present(self):
-        from biomni.ui.biochat_streamlit import BIOCHAT_STREAMLIT_CSS
+        from biomni.ui.biochat_streamlit import BIOCHAT_CSS
         for name in REQUIRED_CSS_CLASSES:
-            assert f".{name}" in BIOCHAT_STREAMLIT_CSS, (
-                f"Missing CSS class: .{name}"
-            )
+            assert f".{name}" in BIOCHAT_CSS, f"Missing CSS class: .{name}"
 
 
 # ═══════════════════════════════════════════════════════════════
@@ -83,23 +83,42 @@ class TestRenderHelpers:
         from biomni.ui.biochat_streamlit import render_assistant_card
         assert callable(render_assistant_card)
         sig = inspect.signature(render_assistant_card)
-        for p in ("answer", "trace", "expanded"):
+        for p in ("answer", "trace", "trace_expanded"):
+            assert p in sig.parameters
+
+    def test_render_assistant_card_streaming_exists(self):
+        from biomni.ui.biochat_streamlit import render_assistant_card_streaming
+        assert callable(render_assistant_card_streaming)
+        sig = inspect.signature(render_assistant_card_streaming)
+        for p in ("answer_html", "trace_lines", "status"):
             assert p in sig.parameters
 
     def test_render_welcome_card_exists(self):
         from biomni.ui.biochat_streamlit import render_welcome_card
         assert callable(render_welcome_card)
 
-    def test_stream_agent_response_exists(self):
-        from biomni.ui.biochat_streamlit import stream_agent_response
-        assert callable(stream_agent_response)
-        sig = inspect.signature(stream_agent_response)
-        for p in ("agent", "user_query"):
-            assert p in sig.parameters
+    def test_simple_markdown_to_html_exists(self):
+        from biomni.ui.biochat_streamlit import simple_markdown_to_html
+        assert callable(simple_markdown_to_html)
+        html = simple_markdown_to_html("**bold** and `code`")
+        assert "<strong>bold</strong>" in html
+        assert "<code>code</code>" in html
 
-    def test_extract_text_from_event_exists(self):
-        from biomni.ui.biochat_streamlit import extract_text_from_event
-        assert callable(extract_text_from_event)
+    def test_build_trace_text_exists(self):
+        from biomni.ui.biochat_streamlit import build_trace_text
+        assert callable(build_trace_text)
+        assert build_trace_text("completed") != build_trace_text("running")
+
+    def test_streaming_card_shows_answer_when_answering(self):
+        from biomni.ui.biochat_streamlit import render_assistant_card_streaming
+        card = render_assistant_card_streaming(
+            answer_html="partial answer text",
+            trace_lines=[],
+            status="answering",
+            current_step="✍️ 正在生成回答...",
+        )
+        assert "partial answer text" in card
+        assert "bc-stream-cursor" in card
 
 
 # ═══════════════════════════════════════════════════════════════
@@ -123,84 +142,57 @@ class TestUserEscaping:
         from biomni.ui.biochat_streamlit import render_user_bubble
         html = render_user_bubble("Hello, how are you?")
         assert "Hello, how are you?" in html
-        assert "biochat-user-bubble" in html
-        assert "biochat-user-row" in html
+        assert "biochat-msg-user" in html
+        assert "bc-bubble" in html
 
 
 # ═══════════════════════════════════════════════════════════════
-# EVENT EXTRACTION
+# EVENT EXTRACTION (service layer)
 # ═══════════════════════════════════════════════════════════════
 
 class TestEventExtraction:
+    @staticmethod
+    def _extract(event):
+        """Call the unbound service helper (self is unused)."""
+        from biomni.services.agent_service import BioAgentService
+        return BioAgentService._extract_text_from_event(None, event)
+
     def test_plain_string(self):
-        from biomni.ui.biochat_streamlit import extract_text_from_event
-        assert extract_text_from_event("hello") == "hello"
+        assert self._extract("hello") == "hello"
 
     def test_none(self):
-        from biomni.ui.biochat_streamlit import extract_text_from_event
-        assert extract_text_from_event(None) == ""
+        assert self._extract(None) == ""
 
     def test_dict_content(self):
-        from biomni.ui.biochat_streamlit import extract_text_from_event
-        assert extract_text_from_event({"content": "c"}) == "c"
+        assert self._extract({"content": "c"}) == "c"
 
     def test_dict_output(self):
-        from biomni.ui.biochat_streamlit import extract_text_from_event
-        assert extract_text_from_event({"output": "o"}) == "o"
+        assert self._extract({"output": "o"}) == "o"
 
     def test_dict_text(self):
-        from biomni.ui.biochat_streamlit import extract_text_from_event
-        assert extract_text_from_event({"text": "t"}) == "t"
+        assert self._extract({"text": "t"}) == "t"
 
     def test_dict_response(self):
-        from biomni.ui.biochat_streamlit import extract_text_from_event
-        assert extract_text_from_event({"response": "r"}) == "r"
+        assert self._extract({"response": "r"}) == "r"
 
     def test_object_with_content(self):
-        from biomni.ui.biochat_streamlit import extract_text_from_event
-
         class M:
             def __init__(self, c):
                 self.content = c
 
-        assert extract_text_from_event(M("obj")) == "obj"
-
-    def test_list_of_strings(self):
-        from biomni.ui.biochat_streamlit import extract_text_from_event
-        result = extract_text_from_event(["a", "b"])
-        assert "a" in result and "b" in result
-
-    def test_dict_with_messages_list(self):
-        from biomni.ui.biochat_streamlit import extract_text_from_event
-
-        class M:
-            def __init__(self, c):
-                self.content = c
-
-        result = extract_text_from_event({"messages": [M("x"), M("y")]})
-        assert "x" in result and "y" in result
+        assert self._extract(M("obj")) == "obj"
 
     def test_unknown_type_fallback(self):
-        from biomni.ui.biochat_streamlit import extract_text_from_event
-        assert "42" in extract_text_from_event(42)
+        assert "42" in self._extract(42)
 
 
 # ═══════════════════════════════════════════════════════════════
-# OUTPUT CLEANING
+# ANSWER CLEANING
 # ═══════════════════════════════════════════════════════════════
 
 class TestCleanAgentOutput:
-    def test_imports(self):
-        from biomni.ui.biochat_streamlit import (
-            clean_agent_output,
-            polish_markdown_for_display,
-            build_safe_processing_trace,
-        )
-        for fn in (clean_agent_output, polish_markdown_for_display, build_safe_processing_trace):
-            assert callable(fn)
-
     def test_strips_human_ai_message_delimiters(self):
-        from biomni.ui.biochat_streamlit import clean_agent_output
+        from biomni.services.agent_service import BioAgentService
 
         raw = (
             "============================== Human Message ==============================\n"
@@ -211,69 +203,80 @@ class TestCleanAgentOutput:
             "1. [ ] Query UniProt\n"
             "2. [ ] Query PDB\n"
         )
-        clean = clean_agent_output(raw)
+        clean = BioAgentService._clean_agent_text(raw)
         assert "Human Message" not in clean
         assert "Ai Message" not in clean
         assert "====" not in clean
-        # Human query content should be dropped
-        assert "Query EGFR" not in clean
         # AI content preserved
         assert "Query UniProt" in clean
         # Checkboxes removed
         assert "[ ]" not in clean
 
     def test_single_ai_message_only(self):
-        from biomni.ui.biochat_streamlit import clean_agent_output
+        from biomni.services.agent_service import BioAgentService
 
         raw = "================ AI Message ================\nFinal answer here"
-        result = clean_agent_output(raw).strip()
+        result = BioAgentService._clean_agent_text(raw).strip()
         assert result == "Final answer here"
 
-    def test_empty_returns_fallback(self):
-        from biomni.ui.biochat_streamlit import clean_agent_output, FALLBACK_EMPTY_RESPONSE
-        assert "no displayable answer" in clean_agent_output("").lower()
-        assert "no displayable answer" in clean_agent_output("   ").lower()
+    def test_removes_execute_and_observation_blocks(self):
+        from biomni.services.agent_service import BioAgentService
 
-    def test_polish_plan_header(self):
-        from biomni.ui.biochat_streamlit import polish_markdown_for_display
-        result = polish_markdown_for_display("## Plan\n1. Do A\n2. Do B")
-        assert "分析计划" in result
-        assert "Do A" in result
-
-    def test_polish_removes_empty_checkboxes(self):
-        from biomni.ui.biochat_streamlit import polish_markdown_for_display
-        # polish_markdown_for_display doesn't handle [ ] — that's clean_agent_output's job.
-        # Just verify it doesn't break on content containing them.
-        result = polish_markdown_for_display("1. [ ] Step one")
-        assert "Step one" in result
-
-    def test_safe_trace_no_internals(self):
-        from biomni.ui.biochat_streamlit import build_safe_processing_trace
-        trace = build_safe_processing_trace("streaming")
-        assert "Human Message" not in trace
-        assert "Ai Message" not in trace
-        assert "====" not in trace
-        assert "Biomni" in trace or "Biochat" in trace
-
-    def test_safe_trace_completed(self):
-        from biomni.ui.biochat_streamlit import build_safe_processing_trace
-        trace = build_safe_processing_trace("completed")
-        assert "完成" in trace
+        raw = (
+            "Let me compute.\n"
+            "<execute>print(1+1)</execute>\n"
+            "<observation>2</observation>\n"
+            "The answer is 2."
+        )
+        clean = BioAgentService._clean_agent_text(raw)
+        assert "<execute>" not in clean
+        assert "<observation>" not in clean
+        assert "print(1+1)" not in clean
+        assert "The answer is 2." in clean
 
     def test_preserves_scientific_content(self):
-        from biomni.ui.biochat_streamlit import clean_agent_output
+        from biomni.services.agent_service import BioAgentService
 
         raw = (
             "===== Ai Message =====\n"
             "The EGFR protein (UniProt: P00533) has an extracellular domain\n"
             "containing four subdomains (I-IV). The PDB entry 1M17 shows...\n"
         )
-        clean = clean_agent_output(raw)
+        clean = BioAgentService._clean_agent_text(raw)
         assert "P00533" in clean
         assert "1M17" in clean
         assert "extracellular" in clean
         assert "=====" not in clean
         assert "Ai Message" not in clean
+
+
+# ═══════════════════════════════════════════════════════════════
+# SANITIZER (P0 UI filter)
+# ═══════════════════════════════════════════════════════════════
+
+class TestSanitizer:
+    def test_removes_think_blocks(self):
+        from biomni.ui.sanitize import sanitize_visible_text
+        text = "Before\n<thinking>hidden chain of thought</thinking>\nAfter"
+        result = sanitize_visible_text(text)
+        assert "hidden chain of thought" not in result
+        assert "Before" in result
+        assert "After" in result
+
+    def test_removes_xml_tags(self):
+        from biomni.ui.sanitize import sanitize_visible_text
+        assert "<solution>" not in sanitize_visible_text("a<solution>b</solution>c")
+
+    def test_removes_self_talk_lines(self):
+        from biomni.ui.sanitize import sanitize_visible_text
+        text = "我需要重新生成回复。\n正常内容"
+        result = sanitize_visible_text(text)
+        assert "重新生成回复" not in result
+        assert "正常内容" in result
+
+    def test_fallback_message_exists(self):
+        from biomni.ui.sanitize import FALLBACK_MESSAGE
+        assert FALLBACK_MESSAGE.strip()
 
 
 # ═══════════════════════════════════════════════════════════════

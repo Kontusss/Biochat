@@ -6,158 +6,125 @@
   <a href="https://www.biorxiv.org/content/10.1101/2025.05.30.656746v1">
     <img src="https://img.shields.io/badge/Read-Paper-green?style=for-the-badge" alt="Paper" />
   </a>
-  <img src="https://img.shields.io/badge/License-Apache%202.0-blue?style=for-the-badge" alt="License" />
-  <img src="https://img.shields.io/badge/Python-3.11+-yellow?style=for-the-badge" alt="Python" />
+  <a href="https://github.com/snap-stanford/Biomni">
+    <img src="https://img.shields.io/badge/Built_on-Biomni-purple?style=for-the-badge" alt="Biomni" />
+  </a>
+  <img src="https://img.shields.io/badge/Python-3.11+-blue.svg?style=for-the-badge" alt="Python" />
+  <img src="https://img.shields.io/badge/License-Apache%202.0-orange.svg?style=for-the-badge" alt="License" />
+  <img src="https://img.shields.io/badge/Version-v0.0.8-red.svg?style=for-the-badge" alt="Version" />
+  <img src="https://img.shields.io/badge/Tools-600+-brightgreen.svg?style=for-the-badge" alt="Tools" />
 </p>
 
-# Biochat: A General-Purpose Biomedical AI Agent
+# Biochat: 通用生物医学 AI Agent
 
-> **Built on [Biomni](https://github.com/snap-stanford/Biomni)** — Biochat preserves Biomni's original scientific tooling and extends it with an enhanced user experience, modern design, and project-level engineering.
+> 🧬 自主执行生物医学研究任务的 AI Agent — 600+ 专业工具、代码级推理、多模态 UI
+>
+> Built on [Biomni](https://github.com/snap-stanford/Biomni)（Stanford SNAP Group）— 完整保留上游科学工具链，并新增现代化 UI、服务层与工程化能力
 
-## Overview
+## ✨ 核心特性
 
-Biochat is a general-purpose biomedical AI agent that autonomously executes research tasks across diverse biomedical subfields. It integrates large language model (LLM) reasoning with retrieval-augmented planning and code-based execution to help scientists accelerate research and generate testable hypotheses.
+- 🤖 **自主任务执行** — 规划 → 工具检索 → 代码执行 → 观察反思的完整 Agent 循环，端到端完成复杂研究任务
+- 🧬 **600+ 生物医学工具** — 覆盖 20+ 子领域：基因组学、CRISPR 筛选设计、scRNA-seq 注释、ADMET 预测、罕见病诊断、文献挖掘等
+- 💊 **抗体设计管线** — 扩散模型序列生成、结构预测、HDock 分子对接、可开发性评估、多维度候选排序的一站式工作流
+- 📚 **知识库增强** — 内置 sgRNA 设计指南、单细胞注释等 know-how 文档，检索增强规划
+- 🔌 **8 大 LLM 供应商** — Anthropic / OpenAI / Azure / Gemini / Groq / Bedrock / Ollama / 任意 OpenAI 兼容接口（DeepSeek、vLLM…）
+- 💬 **现代化双 UI** — Streamlit（ChatGPT 风格，推荐）+ Gradio（旧版），支持多会话、流式输出、进度可视化、PDF 导出
+- 🧩 **MCP 集成** — 通过 Model Context Protocol 接入外部工具服务
+- 🔒 **安全可控** — 访问码验证、商业/非商业数据集自动隔离、代码执行超时控制
 
-### What Biochat Can Do
+## 🛠️ 技术栈
 
-- **Biomedical Q&A** — Answer complex questions using 30+ integrated databases (UniProt, Ensembl, PDB, ClinVar, KEGG, ChEMBL…)
-- **CRISPR Screen Design** — Plan genome-wide screens, design sgRNA sequences, analyze gene essentiality
-- **scRNA-seq Annotation** — Annotate cell types, identify markers, generate population hypotheses
-- **ADMET Prediction** — Predict absorption, distribution, metabolism, excretion, and toxicity of compounds
-- **Drug Repurposing** — Identify new therapeutic indications for existing drugs
-- **Rare Disease Diagnosis** — Analyze phenotypes and variants for diagnostic hypotheses
-- **Literature Mining** — Search PubMed / bioRxiv, extract and synthesize findings
-- **Experimental Protocol Design** — Generate detailed protocols for cloning, cell culture, and more
+- **框架**: LangChain + Pydantic + Streamlit / Gradio
+- **Agent 引擎**: Biomni A1（规划-检索-执行-反思循环）
+- **LLM**: Anthropic Claude / OpenAI GPT / Gemini / DeepSeek 等 8 种供应商
+- **数据湖**: ~11GB 精选生物医学数据集（首次运行自动下载）
+- **工具协议**: MCP (Model Context Protocol)
+- **工程化**: ruff + pre-commit + pytest
 
-## Architecture
+## 🚀 快速开始
 
-```
-┌─────────────────────────────────────────────────────────┐
-│                    User Interface                        │
-│  ┌───────────────────┐  ┌─────────────────────────────┐ │
-│  │   Streamlit UI    │  │   Gradio UI (legacy)        │ │
-│  │  (ChatGPT-style)  │  │   (ProtChat-inspired)       │ │
-│  └────────┬──────────┘  └──────────────┬──────────────┘ │
-│           │                            │                 │
-├───────────┼────────────────────────────┼─────────────────┤
-│           │      Service Layer          │                 │
-│  ┌────────┴────────────────────────────┴──────────────┐ │
-│  │             BioAgentService                         │ │
-│  │  • Lazy agent initialization & caching             │ │
-│  │  • Unified run_task() with structured output       │ │
-│  │  • Progress callbacks for real-time UI updates     │ │
-│  └────────┬───────────────────────────────────────────┘ │
-│           │                                              │
-│  ┌────────┴───────────────────────────────────────────┐ │
-│  │            SessionService                           │ │
-│  │  • Multi-session chat history                      │ │
-│  │  • Pluggable storage backend                       │ │
-│  └────────┬───────────────────────────────────────────┘ │
-│           │                                              │
-├───────────┼──────────────────────────────────────────────┤
-│           │      Core Infrastructure                      │
-│  ┌────────┴───────────────────────────────────────────┐ │
-│  │  BiochatSettings  │  Logging  │  Error Types       │ │
-│  └────────┬───────────────────────────────────────────┘ │
-│           │                                              │
-├───────────┼──────────────────────────────────────────────┤
-│           │      Biomni Engine (A1 Agent)                 │
-│  ┌────────┴───────────────────────────────────────────┐ │
-│  │  Planning → Tool Retrieval → Code Execution →       │ │
-│  │  Observation → Iteration → Solution                 │ │
-│  └────────────────────────────────────────────────────┘ │
-└─────────────────────────────────────────────────────────┘
-```
-
-### Key Components
-
-| Layer | Component | Responsibility |
-|-------|-----------|----------------|
-| **Core** | `biomni.core.settings` | Unified configuration via env vars |
-| **Core** | `biomni.core.logging` | Structured logging with levels |
-| **Core** | `biomni.core.errors` | Typed exception hierarchy |
-| **Service** | `BioAgentService` | Agent lifecycle, task execution, output parsing |
-| **Service** | `SessionService` | Multi-session chat history management |
-| **Prompts** | `SystemPromptBuilder` | Modular system prompt assembly |
-| **Schemas** | `chat.py` | Structured request/response data types |
-| **Engine** | `biomni.agent.A1` | Biomni's core agent (preserved unchanged) |
-| **Tools** | `biomni.tool.*` | 200+ biomedical tool functions (preserved) |
-
-## Quick Start
-
-### Prerequisites
+### 环境要求
 
 - Python 3.11+
-- Conda (recommended for environment management)
-- ~15GB free disk space (~11GB data lake + dependencies)
-- API key for at least one LLM provider (Anthropic, OpenAI, DeepSeek, etc.)
+- Conda（推荐，用于环境管理）
+- ~15GB 可用磁盘空间（~11GB 数据湖 + 依赖）
+- 至少一个 LLM 供应商的 API Key（Anthropic / OpenAI / DeepSeek 等）
 
-### Installation
+### 安装与启动
 
-**Step 1: Set up the environment**
+#### macOS / Linux（一键启动）
 
 ```bash
-# Follow the environment setup guide
-# See biomni_env/README.md for detailed instructions
-cd biomni_env
-bash setup.sh
+# 1. 克隆项目
+git clone <repository_url>
+cd Biochat-main
+
+# 2. 安装 Conda 环境（首次运行，含 R/CLI 工具，耗时较长）
+cd biomni_env && bash setup.sh && cd ..
 conda activate biomni_e1
-```
 
-**Step 2: Install Biochat**
-
-```bash
-# From the Biomni-main directory
+# 3. 安装 Biochat
 pip install -e .
-```
 
-**Step 3: Configure API keys**
-
-```bash
-# Copy the example env file
+# 4. 配置 API Key
 cp .env.example .env
+vim .env   # 填入你的 API Key，详见下方「配置说明」
 
-# Edit .env with your API keys
-# Required for your chosen provider:
-ANTHROPIC_API_KEY=your_key_here      # for Claude models
-# or
-OPENAI_API_KEY=your_key_here         # for GPT models
-# or
-CUSTOM_MODEL_BASE_URL=...            # for DeepSeek / custom models
-CUSTOM_MODEL_API_KEY=your_key_here
+# 5. 一键启动 🚀
+bash start.sh
 ```
 
-### Launch the UI
+启动成功后显示：
 
-**Streamlit (Recommended):**
+```
+==========================================
+  🧬 Biochat 启动中...
+  引擎: Biochat
+  模型: deepseek-chat
+  Source: Custom
+  数据: ./data
+  UI: Streamlit (ChatGPT 风格)
+  地址: http://localhost:8501
+==========================================
+```
+
+> 首次启动会自动下载 ~11GB 数据湖，请耐心等待；后续启动秒开。
+
+#### 手动启动（不依赖脚本）
 
 ```bash
-streamlit run biomni/ui/biochat_streamlit.py
-# → http://localhost:8501
+conda activate biomni_e1
+
+# Streamlit UI（推荐）
+streamlit run biomni/ui/biochat_streamlit.py    # → http://localhost:8501
+
+# Gradio UI（旧版）
+python scripts/biochat_demo.py                  # → http://localhost:7860
 ```
 
-**Gradio (Legacy):**
+#### Windows 环境
 
-```bash
-python scripts/biochat_demo.py
-# → http://localhost:7860
-```
+项目未提供原生 Windows 启动脚本（`start.sh` 为 Bash），推荐使用 **WSL2**，在 WSL 内按上述 macOS/Linux 步骤操作即可。若需原生运行，请手动执行：安装依赖 → 复制 `.env` → 运行 `streamlit run biomni/ui/biochat_streamlit.py`。
 
-### Basic Python Usage
+### 访问服务
 
-```python
-from biomni.agent import A1
+| 界面 | 地址 | 说明 |
+|------|------|------|
+| **Streamlit UI** | http://localhost:8501 | ChatGPT 风格，推荐 |
+| **Gradio UI** | http://localhost:7860 | 旧版（ProtChat 风格） |
 
-# Initialize (downloads ~11GB data lake on first run)
-agent = A1(path='./data', llm='claude-sonnet-4-20250514')
+## 🐍 Python 接口
 
-# Execute biomedical tasks
-agent.go("Plan a CRISPR screen to identify genes that regulate T cell exhaustion")
-agent.go("Perform scRNA-seq annotation and generate hypotheses about cell populations")
-agent.go("Predict ADMET properties for CC(C)CC1=CC=C(C=C1)C(C)C(=O)O")
-```
+### 服务层 API（推荐）
 
-### Using the Service Layer (New)
+| 功能 | 方法 | 说明 |
+|------|------|------|
+| 全局服务单例 | `get_agent_service()` | 懒加载 + 缓存，避免重复初始化 |
+| 初始化 | `svc.ensure_initialized()` | 首次调用时初始化 A1 Agent |
+| 单次任务 | `svc.run_task(ChatRequest)` | 结构化输出（答案 / 工具调用 / 状态） |
+| 流式任务 | `svc.run_task_stream(...)` | 事件流 + 进度回调，实时更新 UI |
+| 健康检查 | `svc.health_check()` | 服务状态检查 |
+| 资源释放 | `svc.shutdown()` | 关闭 Agent、释放资源 |
 
 ```python
 from biomni.services.agent_service import get_agent_service
@@ -166,141 +133,31 @@ from biomni.schemas.chat import ChatRequest
 svc = get_agent_service()
 svc.ensure_initialized()
 
-response = svc.run_task(ChatRequest(message="Explain EGFR signaling pathway"))
-print(response.answer)       # Cleaned final answer (Markdown)
-print(response.tool_calls)   # Tools used: ['genomics.query_gene', ...]
-print(response.status)       # AgentStatus.COMPLETED
+response = svc.run_task(ChatRequest(message="Explain the EGFR signaling pathway"))
+print(response.answer)        # 清洗后的最终答案（Markdown）
+print(response.tool_calls)    # 使用过的工具: ['genomics.query_gene', ...]
+print(response.status)        # AgentStatus.COMPLETED
 ```
 
-## Configuration
-
-Biochat uses a unified settings system. All options can be set via environment variables.
-
-### Environment Variables
-
-| Variable | Description | Default |
-|----------|-------------|---------|
-| `BIOCHAT_LLM` | LLM model name | `claude-sonnet-4-5` |
-| `BIOCHAT_DATA_PATH` | Data lake directory | `./data` |
-| `BIOCHAT_TIMEOUT_SECONDS` | Code execution timeout | `600` |
-| `BIOCHAT_TEMPERATURE` | LLM temperature | `0.7` |
-| `BIOCHAT_SOURCE` | LLM provider (Anthropic/OpenAI/Gemini/Groq/Custom) | auto-detect |
-| `BIOCHAT_USE_TOOL_RETRIEVER` | Enable tool retrieval | `true` |
-| `BIOCHAT_COMMERCIAL_MODE` | Exclude non-commercial datasets | `false` |
-| `BIOCHAT_CUSTOM_BASE_URL` | Custom model API URL | — |
-| `BIOCHAT_CUSTOM_API_KEY` | Custom model API key | — |
-| `BIOCHAT_ACCESS_CODE` | UI access code (comma-separated) | — |
-
-All `BIOCHAT_*` vars have backward-compatible `BIOMNI_*` aliases.
-
-### LLM Providers
-
-Biochat supports Claude, GPT-4, Gemini, Groq, DeepSeek, Ollama, AWS Bedrock, and any OpenAI-compatible custom endpoint. See `biomni/llm.py` for the full list.
+### A1 Agent 直接使用
 
 ```python
-from biomni.config import default_config
+from biomni.agent import A1
 
-# Claude
-default_config.llm = "claude-sonnet-4-20250514"
+# 初始化（首次运行自动下载 ~11GB 数据湖）
+agent = A1(path='./data', llm='claude-sonnet-4-5')
 
-# GPT-4
-default_config.llm = "gpt-4"
+# 执行生物医学任务
+agent.go("Plan a CRISPR screen to identify genes that regulate T cell exhaustion")
+agent.go("Perform scRNA-seq annotation and generate hypotheses about cell populations")
+agent.go("Predict ADMET properties for CC(C)CC1=CC=C(C=C1)C(C)C(=O)O")
 
-# DeepSeek (custom endpoint)
-default_config.llm = "deepseek-chat"
-default_config.source = "Custom"
-default_config.base_url = "https://api.deepseek.com/v1"
-default_config.api_key = "sk-..."
+# 流式输出
+for event in agent.go_stream("Design sgRNA sequences targeting TP53"):
+    print(event)
 ```
 
-## Supported LLM Providers
-
-| Provider | Models | Setup |
-|----------|--------|-------|
-| **Anthropic** | Claude Sonnet 4, Opus 4, Haiku 4.5 | `ANTHROPIC_API_KEY` |
-| **OpenAI** | GPT-4, GPT-4o, o1, o3 | `OPENAI_API_KEY` |
-| **Azure OpenAI** | GPT-4 deployments | `OPENAI_API_KEY` + `OPENAI_ENDPOINT` |
-| **Google Gemini** | gemini-2.5-pro, gemini-2.5-flash | `GEMINI_API_KEY` |
-| **Groq** | Llama, Mixtral via Groq | `GROQ_API_KEY` |
-| **AWS Bedrock** | Claude, Llama, Titan via Bedrock | AWS credentials |
-| **Ollama** | Local models (Llama, Qwen, DeepSeek…) | Local Ollama server |
-| **Custom** | Any OpenAI-compatible API (DeepSeek, SGLang, vLLM…) | `CUSTOM_MODEL_BASE_URL` + `CUSTOM_MODEL_API_KEY` |
-
-## Project Structure
-
-```
-Biomni-main/
-├── biomni/                          # Main package
-│   ├── agent/                       # Biomni agent engine
-│   │   ├── a1.py                    # A1 agent class (core reasoning loop)
-│   │   └── ...
-│   ├── core/                        # ✨ NEW: Core infrastructure
-│   │   ├── settings.py              #     Unified configuration
-│   │   ├── logging.py               #     Structured logging
-│   │   └── errors.py                #     Typed exceptions
-│   ├── services/                    # ✨ NEW: Service layer
-│   │   ├── agent_service.py         #     BioAgentService wrapper
-│   │   └── session_service.py       #     Session management
-│   ├── schemas/                     # ✨ NEW: Data schemas
-│   │   └── chat.py                  #     Request/Response types
-│   ├── prompts/                     # ✨ NEW: Prompt management
-│   │   └── system_prompt.py         #     SystemPromptBuilder
-│   ├── tool/                        # 200+ biomedical tools
-│   ├── ui/                          # User interfaces
-│   │   ├── biochat_streamlit.py     # Streamlit UI (ChatGPT-style)
-│   │   ├── biochat_ui.py            # Gradio UI
-│   │   └── biochat_theme.py         # Design system
-│   ├── config.py                    # Legacy config (backward compat)
-│   ├── llm.py                       # Multi-provider LLM factory
-│   └── utils.py                     # Utility functions
-├── scripts/                         # Launch scripts
-├── docs/                            # Documentation
-├── tutorials/                       # Example notebooks
-├── tests/                           # Test suite
-├── .env.example                     # Environment template
-├── start.sh / start_streamlit.sh    # Convenience launchers
-├── pyproject.toml                   # Project metadata
-└── README.md                        # This file
-```
-
-## Safety & Security
-
-### ⚠️ Code Execution Warning
-
-**Biochat executes LLM-generated code with full system privileges.** This is a powerful capability that requires careful handling:
-
-- **Always run in isolated / sandboxed environments** for production use
-- The agent can access files, network, and system commands
-- **Never run with access to sensitive data or credentials**
-- **Never expose to untrusted users** without strict sandboxing
-- Use Docker, VMs, or container isolation for production deployments
-
-### Data Safety
-
-- API keys are managed via **environment variables** — never hardcoded
-- Uploaded files are processed locally and not sent to external services
-- Database queries go directly to public APIs; Biochat stores no query data
-
-### Clinical Disclaimer
-
-> **Biochat is a research tool, NOT a medical device.** It is designed to enhance research productivity. It should NOT be used for:
-> - Autonomous clinical decision-making
-> - Direct patient care or diagnosis
-> - Generating medical advice without expert review
->
-> **Always validate results with qualified domain experts** before applying to real-world problems.
-
-### Data Licensing
-
-Biochat's data ecosystem includes datasets with varying licenses:
-
-- **Academic use**: All datasets are available for non-commercial research
-- **Commercial use**: Set `commercial_mode=True` to automatically exclude datasets with non-commercial licenses
-- **Review required**: Always review `license_info.md` before commercial deployment
-
-## MCP (Model Context Protocol) Support
-
-Biochat supports MCP servers for external tool integration:
+### MCP 集成
 
 ```python
 agent = A1()
@@ -308,31 +165,272 @@ agent.add_mcp(config_path="./mcp_config.yaml")
 agent.go("Find FDA active ingredient information for ibuprofen")
 ```
 
-See [MCP Integration Docs](docs/mcp_integration.md) for details.
+详见 [MCP 集成文档](docs/mcp_integration.md)。
 
-## Contributing
+## 🎯 Agent 工作流程
 
-Biochat welcomes contributions! See [CONTRIBUTION.md](CONTRIBUTION.md) for guidelines. Areas of interest:
+```
+用户任务
+   │
+   ▼
+┌─────────────────────────────────────────────────┐
+│  ① 规划 Planning                                  │
+│     结合任务模板与知识库制定分步执行计划              │
+└────────────────────────┬────────────────────────┘
+                         ▼
+┌─────────────────────────────────────────────────┐
+│  ② 工具检索 Tool Retrieval                        │
+│     从 600+ 生物医学工具中检索本次任务所需函数        │
+└────────────────────────┬────────────────────────┘
+                         ▼
+┌─────────────────────────────────────────────────┐
+│  ③ 代码执行 Code Execution                        │
+│     生成并运行分析代码（查询数据库 / 统计分析 / 建模）  │
+└────────────────────────┬────────────────────────┘
+                         ▼
+┌─────────────────────────────────────────────────┐
+│  ④ 观察与反思 Observation & Self-critique         │
+│     检查中间结果、修正假设、必要时重新规划            │
+└────────────────────────┬────────────────────────┘
+                         │
+                         └──────► 迭代直至输出最终解决方案
+```
 
-- **New biomedical tools and analysis functions**
-- **Curated datasets and knowledge bases**
-- **Software integrations**
-- **Know-how documents and protocol guides**
-- **UI/UX improvements**
+### 典型任务示例
 
-## Attribution
+| 任务类型 | 示例提问 | 主要工具域 |
+|----------|----------|-----------|
+| 🧫 CRISPR 筛选设计 | Plan a CRISPR screen to identify genes that regulate T cell exhaustion | `synthetic_biology` `genomics` |
+| 🔬 scRNA-seq 注释 | Perform scRNA-seq annotation and generate hypotheses | `cell_biology` `genomics` |
+| 💊 ADMET 预测 | Predict ADMET properties for CC(C)CC1=CC=C(C=C1)C(C)C(=O)O | `pharmacology` |
+| 🧪 抗体设计 | Design antibody candidates against HER2 with developability | `antibody_design` |
+| 📖 文献挖掘 | Search PubMed for recent advances in CAR-T therapy | `literature` |
+| 🩺 罕见病诊断 | Analyze phenotypes and variants for diagnostic hypotheses | `database` `pathology` |
 
-Biochat is built on top of **[Biomni](https://github.com/snap-stanford/Biomni)**, an open-source biomedical AI platform developed by the Stanford SNAP Group. Biochat preserves all of Biomni's original scientific tooling while adding:
+## 📁 项目结构
 
-- Enhanced UI layer (ChatGPT-style Streamlit + ProtChat-inspired Gradio)
-- Service layer with structured output and session management
-- Unified configuration and logging
-- Project-level documentation and packaging
-- Modern design system and UX improvements
+```
+Biochat-main/
+├── biomni/                                 # 核心包
+│   ├── agent/                              # Agent 引擎
+│   │   ├── a1.py                           # A1 Agent 主类（推理循环）
+│   │   ├── workflow.py                     # 任务工作流编排
+│   │   ├── self_critic.py                  # 自我反思与结果校验
+│   │   ├── retrieval.py                    # 工具检索
+│   │   ├── mcp_server.py                   # MCP 服务构建
+│   │   ├── resource_manager.py             # 数据湖资源管理
+│   │   └── conversation_exporter.py        # 对话导出
+│   ├── llm/                                # LLM 层
+│   │   ├── factory.py                      # 多供应商模型工厂
+│   │   ├── source_detector.py              # API Key 自动检测
+│   │   └── providers/                      # anthropic/openai/azure/gemini/
+│   │                                       #   groq/bedrock/ollama/custom
+│   ├── tool/                               # 600+ 生物医学工具
+│   │   ├── genomics.py / pharmacology.py … # 20+ 子领域工具模块
+│   │   ├── tool_registry.py                # 工具注册中心
+│   │   ├── tool_description/               # 工具描述与目录（catalog.yaml）
+│   │   ├── antibody_design/                # 抗体设计管线（扩散/对接/可开发性）
+│   │   └── data/                           # 工具数据文件
+│   ├── knowledge/                          # 知识库（know-how 文档 + 加载器）
+│   │   └── docs/                           # sgRNA 设计指南、单细胞注释等
+│   ├── services/                           # 服务层
+│   │   ├── agent_service.py                # BioAgentService（懒加载/结构化输出）
+│   │   └── session_service.py              # 多会话历史管理
+│   ├── schemas/                            # 数据模型
+│   │   └── chat.py                         # ChatRequest/ChatResponse
+│   ├── prompts/                            # Prompt 工程
+│   │   ├── system_prompt.py                # 系统提示词构建
+│   │   └── task_templates.py               # 任务模板
+│   ├── core/                               # 核心基础设施
+│   │   ├── settings.py                     # 统一配置（环境变量）
+│   │   ├── logging.py                      # 结构化日志
+│   │   └── errors.py                       # 类型化异常
+│   ├── environment/                        # 环境/软件目录管理
+│   ├── model/                              # 检索器与资源选择器
+│   ├── ui/                                 # 用户界面
+│   │   ├── biochat_streamlit.py            # Streamlit UI（ChatGPT 风格）
+│   │   ├── biochat_ui.py                   # Gradio UI
+│   │   └── biochat_theme.py                # 设计系统
+│   └── utils/                              # 工具函数（代码执行/PDF 导出/文本清洗）
+├── biomni_env/                             # Conda 环境搭建（setup.sh / yml）
+├── scripts/                                # 脚本（demo / 审计 / 冒烟测试）
+├── docs/                                   # 文档（配置 / MCP / 构建）
+├── tutorials/                              # 示例 Notebook
+├── tests/                                  # 测试套件（pytest）
+├── data/                                   # 数据湖（~11GB，首次运行下载）
+├── figs/                                   # 图片资源
+├── third_party/                            # 上游归档（不在运行时路径）
+├── .env.example                            # 环境变量模板
+├── start.sh                                # 一键启动脚本
+├── pyproject.toml                          # 项目配置（依赖、ruff 规则）
+├── CONTRIBUTION.md                         # 贡献指南
+├── license_info.md                         # 数据集许可说明
+└── LICENSE                                 # Apache 2.0
+```
 
-### Citing Biomni
+## ⚙️ 配置说明
 
-If you use Biochat in your research, please cite the underlying Biomni work:
+通过 `.env` 文件配置（`start.sh` 每次启动自动加载）：
+
+```bash
+# ── LLM API Key（按需填写） ────────────────────────────────
+ANTHROPIC_API_KEY=your_anthropic_api_key_here    # Claude 模型
+OPENAI_API_KEY=your_openai_api_key_here          # GPT 模型
+# GEMINI_API_KEY=your_gemini_api_key_here         # Gemini
+# GROQ_API_KEY=your_groq_api_key_here             # Groq
+
+# ── 自定义模型服务（如 DeepSeek） ───────────────────────────
+LLM_SOURCE=Custom
+CUSTOM_MODEL_BASE_URL=https://api.deepseek.com/v1
+CUSTOM_MODEL_API_KEY=your_custom_api_key_here
+
+# ── LLM 配置 ──────────────────────────────────────────────
+# BIOCHAT_LLM=deepseek-chat            # 模型名称
+# BIOCHAT_SOURCE=Custom                # 供应商
+# BIOCHAT_TEMPERATURE=0.7              # 生成温度
+# BIOCHAT_TIMEOUT_SECONDS=600          # 代码执行超时（秒）
+# BIOCHAT_USE_TOOL_RETRIEVER=true      # 启用工具检索
+# BIOCHAT_COMMERCIAL_MODE=false        # 排除非商业许可数据集
+
+# ── 数据路径 ──────────────────────────────────────────────
+# BIOCHAT_DATA_PATH=./data             # 数据湖位置（~11GB）
+
+# ── UI 访问码（可选） ───────────────────────────────────────
+# BIOCHAT_ACCESS_CODE=Biochat2025      # 留空则不校验
+```
+
+### 环境变量一览
+
+| 变量 | 说明 | 默认值 |
+|------|------|--------|
+| `BIOCHAT_LLM` | LLM 模型名称 | `claude-sonnet-4-5` |
+| `BIOCHAT_SOURCE` | LLM 供应商（Anthropic/OpenAI/Gemini/Groq/Custom…） | 自动检测 |
+| `BIOCHAT_DATA_PATH` | 数据湖目录 | `./data` |
+| `BIOCHAT_TEMPERATURE` | 生成温度 | `0.7` |
+| `BIOCHAT_TIMEOUT_SECONDS` | 代码执行超时 | `600` |
+| `BIOCHAT_USE_TOOL_RETRIEVER` | 启用工具检索 | `true` |
+| `BIOCHAT_COMMERCIAL_MODE` | 排除非商业许可数据集 | `false` |
+| `BIOCHAT_CUSTOM_BASE_URL` | 自定义模型 API 地址 | — |
+| `BIOCHAT_CUSTOM_API_KEY` | 自定义模型 API Key | — |
+| `BIOCHAT_ACCESS_CODE` | UI 访问码（逗号分隔） | — |
+
+> 所有 `BIOCHAT_*` 变量均向后兼容 `BIOMNI_*` 旧命名。
+
+### 支持的 LLM 供应商
+
+| 供应商 | 代表模型 | 配置 |
+|--------|----------|------|
+| **Anthropic** | Claude Sonnet 4.5 / Opus 4 / Haiku 4.5 | `ANTHROPIC_API_KEY` |
+| **OpenAI** | GPT-4 / GPT-4o / o1 / o3 | `OPENAI_API_KEY` |
+| **Azure OpenAI** | GPT-4 部署 | `OPENAI_API_KEY` + `OPENAI_ENDPOINT` |
+| **Google Gemini** | gemini-2.5-pro / flash | `GEMINI_API_KEY` |
+| **Groq** | Llama / Mixtral | `GROQ_API_KEY` |
+| **AWS Bedrock** | Claude / Llama / Titan | AWS 凭证 |
+| **Ollama** | 本地模型（Llama / Qwen / DeepSeek…） | 本地 Ollama 服务 |
+| **Custom** | 任意 OpenAI 兼容接口（DeepSeek / SGLang / vLLM…） | `CUSTOM_MODEL_BASE_URL` + `CUSTOM_MODEL_API_KEY` |
+
+> 💡 **推荐**：Claude Sonnet 4.5 或 GPT-4 生物医学推理能力最佳；DeepSeek 是高性价比选择。
+
+## 📝 开发指南
+
+### 常用命令
+
+```bash
+# 测试
+python -m pytest tests/                          # 运行全部测试
+
+# 代码质量
+ruff check .                                     # 静态检查
+ruff format .                                    # 格式化
+pre-commit install                               # 安装提交前钩子
+
+# 项目审计
+python scripts/audit_import_usage.py             # 上游代码引用审计
+python scripts/audit_runtime_tools.py            # 运行时工具审计
+python scripts/smoke_test_antibody_hdock.py      # 抗体设计冒烟测试
+
+# 构建文档
+cd docs && make html                             # Sphinx 文档
+```
+
+### 贡献
+
+欢迎贡献！详见 [CONTRIBUTION.md](CONTRIBUTION.md)，重点关注方向：
+
+- 新增生物医学工具与分析函数
+- 精选数据集与知识库
+- 软件集成
+- know-how 文档与实验方案指南
+- UI/UX 改进
+
+## ⚠️ 安全与合规
+
+### 代码执行警告
+
+**Biochat 会以完整系统权限执行 LLM 生成的代码**，请务必注意：
+
+- 生产环境请**始终在隔离 / 沙箱环境中运行**（Docker、VM 等）
+- Agent 可访问文件、网络和系统命令
+- **切勿**在包含敏感数据或凭据的环境中运行
+- **切勿**在未严格沙箱化的情况下暴露给不受信任的用户
+
+### 临床免责声明
+
+> **Biochat 是研究工具，不是医疗设备。** 禁止用于：
+> - 自主临床决策
+> - 直接患者诊疗或诊断
+> - 未经专家审核的医疗建议生成
+>
+> **任何结果在应用于实际问题前，都必须经过领域专家验证。**
+
+### 数据许可
+
+- **学术用途**：全部数据集可用于非商业研究
+- **商业用途**：设置 `BIOCHAT_COMMERCIAL_MODE=true` 自动排除非商业许可数据集
+- **部署前**：请务必审阅 [license_info.md](license_info.md)
+
+## 🐛 常见问题
+
+### 首次启动为什么很慢？
+
+首次运行需自动下载 **~11GB 精选生物医学数据湖**，后续启动不再重复下载。
+
+### 可以跳过数据湖下载吗？
+
+可以，传入 `expected_data_lake_files=[]` 给 `A1()` 即可跳过，但部分工具将不可用。
+
+### 修改 .env 后不生效？
+
+`start.sh` 每次启动都会重新加载 `.env`，重启服务即可生效。若手动启动，请确保在启动命令前 `source .env` 或使用 `python-dotenv`。
+
+### 端口被占用怎么办？
+
+```bash
+# 查看占用端口的进程
+lsof -i :8501    # Streamlit
+lsof -i :7860    # Gradio
+
+# 结束进程（替换 PID 为实际进程 ID）
+kill -9 <PID>
+```
+
+### 推荐使用什么 LLM？
+
+Claude Sonnet 4.5 或 GPT-4 的生物医学推理能力最佳；预算有限可选 DeepSeek（`LLM_SOURCE=Custom`）。
+
+### Biochat 可以处理 PHI（受保护健康信息）吗？
+
+**不可以。** Biochat 未针对 PHI 设计，请仅在隔离环境中使用。
+
+### Biochat 和 Biomni 有什么区别？
+
+Biochat = Biomni 引擎 + 工程化增强层：同样的 A1 Agent 与 600+ 工具，新增现代化双 UI、服务层结构化 API、统一配置/日志、多供应商 LLM 工厂与完整文档体系。详见 [BIOCHAT_ORIGINAL_CONTRIBUTIONS.md](BIOCHAT_ORIGINAL_CONTRIBUTIONS.md)。
+
+## 🙏 致谢与引用
+
+Biochat 基于 **[Biomni](https://github.com/snap-stanford/Biomni)**（Stanford SNAP Group，Apache License 2.0）构建，完整保留其全部科学工具链。上游模块中不再处于运行时路径的部分归档于 `third_party/biomni_upstream_archive/`（审计：`scripts/audit_import_usage.py`）。上游对照详见 [THIRD_PARTY_PROVENANCE.md](THIRD_PARTY_PROVENANCE.md)。
+
+若 Biochat 对您的研究有帮助，请引用底层 Biomni 工作：
 
 ```bibtex
 @article{huang2025biomni,
@@ -347,25 +445,19 @@ If you use Biochat in your research, please cite the underlying Biomni work:
 }
 ```
 
-## License
+## 📚 参考资源
 
-Biochat is licensed under the **Apache License 2.0**, same as the upstream Biomni project. See [LICENSE](LICENSE) for the full text.
+- [Biomni 论文](https://www.biorxiv.org/content/10.1101/2025.05.30.656746v1)
+- [Biomni GitHub](https://github.com/snap-stanford/Biomni)
+- [配置文档](docs/configuration.md)
+- [MCP 集成文档](docs/mcp_integration.md)
+- [已知冲突](docs/known_conflicts.md)
+- [LangChain 文档](https://python.langchain.com/)
+- [MCP 协议](https://modelcontextprotocol.io/)
+- [Streamlit 文档](https://docs.streamlit.io/)
 
-> **Important**: Certain integrated tools, databases, and datasets may carry more restrictive commercial licenses. Review `license_info.md` carefully before commercial use. Biochat does not claim ownership of any third-party code, data, or algorithms.
+## 📄 许可证
 
-## FAQ
+Biochat 采用 **Apache License 2.0**（与上游 Biomni 一致），详见 [LICENSE](LICENSE)。
 
-**Q: Why is the first run so slow?**
-A: Biochat downloads ~11GB of curated biomedical data on first run. Subsequent runs are fast.
-
-**Q: Can I skip the data lake download?**
-A: Yes — pass `expected_data_lake_files=[]` to `A1()`. Some tools will be unavailable.
-
-**Q: What LLM should I use?**
-A: Claude Sonnet 4.5 or GPT-4 provide the best biomedical reasoning. DeepSeek is a good budget option.
-
-**Q: Is this safe for PHI (Protected Health Information)?**
-A: **No.** Biochat is not designed for PHI. Use in isolated environments only.
-
-**Q: How does Biochat differ from Biomni?**
-A: Biochat is Biomni + engineering layer. Same engine, better UX, structured APIs, cleaner codebase.
+> **注意**：部分集成工具、数据库与数据集可能附带更严格的商业许可，商业使用前请仔细审阅 [license_info.md](license_info.md)。Biochat 不对任何第三方代码、数据或算法主张所有权。

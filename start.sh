@@ -1,7 +1,7 @@
 #!/bin/bash
 # ============================================
 #  Biochat 一键启动脚本
-#  引擎: Biomni  |  UI: Biochat Streamlit (ChatGPT 风格)
+#  引擎: Biochat  |  UI: Biochat Streamlit (ChatGPT 风格)
 #  首次运行自动下载 ~11GB 数据湖，请耐心等待
 # ============================================
 #
@@ -47,7 +47,7 @@ DATA="${BIOCHAT_DATA_PATH:-${BIOMNI_DATA_PATH:-./data}}"
 
 echo "=========================================="
 echo "  🧬 Biochat 启动中..."
-echo "  引擎: Biomni"
+echo "  引擎: Biochat"
 echo "  模型: ${MODEL}"
 echo "  Source: ${SOURCE}"
 echo "  数据: ${DATA}"

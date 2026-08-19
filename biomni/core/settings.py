@@ -211,6 +211,7 @@ class BiochatSettings:
     data_path: str
     timeout_seconds: int
     use_tool_retriever: bool
+    tool_profile: str
     commercial_mode: bool
     recursion_limit: int
 
@@ -234,6 +235,7 @@ class BiochatSettings:
         "data_path": ("BIOCHAT_DATA_PATH", "BIOCHAT_PATH", "BIOMNI_DATA_PATH", "BIOMNI_PATH"),
         "timeout_seconds": ("BIOCHAT_TIMEOUT_SECONDS", "BIOMNI_TIMEOUT_SECONDS"),
         "use_tool_retriever": ("BIOCHAT_USE_TOOL_RETRIEVER", "BIOMNI_USE_TOOL_RETRIEVER"),
+        "tool_profile": ("BIOCHAT_TOOL_PROFILE", "BIOMNI_TOOL_PROFILE"),
         "commercial_mode": ("BIOCHAT_COMMERCIAL_MODE", "BIOMNI_COMMERCIAL_MODE"),
         "recursion_limit": ("BIOCHAT_RECURSION_LIMIT", "BIOMNI_RECURSION_LIMIT"),
         "llm_model": ("BIOCHAT_LLM", "BIOCHAT_LLM_MODEL", "BIOMNI_LLM", "BIOMNI_LLM_MODEL"),
@@ -250,6 +252,7 @@ class BiochatSettings:
         data_path: str | None = None,
         timeout_seconds: int | None = None,
         use_tool_retriever: bool | None = None,
+        tool_profile: str | None = None,
         commercial_mode: bool | None = None,
         recursion_limit: int | None = None,
         llm_model: str | None = None,
@@ -278,6 +281,12 @@ class BiochatSettings:
             if use_tool_retriever is not None
             else _env_bool(*self._ENV_MAP["use_tool_retriever"], default=True)
         )
+        raw_profile = (
+            tool_profile
+            if tool_profile is not None
+            else _env(*self._ENV_MAP["tool_profile"], default="full")
+        )
+        self.tool_profile = raw_profile.lower() if raw_profile.lower() in ("minimal", "full") else "full"
         self.commercial_mode = (
             commercial_mode
             if commercial_mode is not None
@@ -359,6 +368,7 @@ class BiochatSettings:
             "data_path": self.data_path,
             "timeout_seconds": self.timeout_seconds,
             "use_tool_retriever": self.use_tool_retriever,
+            "tool_profile": self.tool_profile,
             "commercial_mode": self.commercial_mode,
             "recursion_limit": self.recursion_limit,
             "llm_model": self.llm_model,
@@ -397,3 +407,6 @@ def _get_settings() -> BiochatSettings:
 
 
 biochat_settings: BiochatSettings = _get_settings()
+
+# Convenience constant — the active tool profile ("minimal" or "full").
+BIOCHAT_TOOL_PROFILE: str = biochat_settings.tool_profile

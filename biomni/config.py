@@ -46,6 +46,9 @@ class BiomniConfig:
 
     # Tool settings
     use_tool_retriever: bool = True
+    # Runtime tool profile: "minimal" (demo + antibody pipeline + engine
+    # glue) or "full" (every attributed Biomni tool).
+    tool_profile: str = "full"
 
     # Data licensing settings
     commercial_mode: bool = False  # If True, excludes non-commercial datasets
@@ -73,6 +76,10 @@ class BiomniConfig:
         if os.getenv("BIOCHAT_USE_TOOL_RETRIEVER") or os.getenv("BIOMNI_USE_TOOL_RETRIEVER"):
             val = os.getenv("BIOCHAT_USE_TOOL_RETRIEVER") or os.getenv("BIOMNI_USE_TOOL_RETRIEVER")
             self.use_tool_retriever = val.lower() == "true"
+        if os.getenv("BIOCHAT_TOOL_PROFILE") or os.getenv("BIOMNI_TOOL_PROFILE"):
+            profile = (os.getenv("BIOCHAT_TOOL_PROFILE") or os.getenv("BIOMNI_TOOL_PROFILE")).lower()
+            if profile in ("minimal", "full"):
+                self.tool_profile = profile
         if os.getenv("BIOCHAT_COMMERCIAL_MODE") or os.getenv("BIOMNI_COMMERCIAL_MODE"):
             val = os.getenv("BIOCHAT_COMMERCIAL_MODE") or os.getenv("BIOMNI_COMMERCIAL_MODE")
             self.commercial_mode = val.lower() == "true"
@@ -98,6 +105,7 @@ class BiomniConfig:
             "llm": self.llm,
             "temperature": self.temperature,
             "use_tool_retriever": self.use_tool_retriever,
+            "tool_profile": self.tool_profile,
             "commercial_mode": self.commercial_mode,
             "base_url": self.base_url,
             "api_key": self.api_key,

@@ -1,0 +1,5052 @@
+meta:
+  source: snap-stanford/Biomni (Apache-2.0)
+  generator: scripts/build_tool_catalog.py
+  fields:
+  - literature
+  - biochemistry
+  - bioimaging
+  - bioengineering
+  - biophysics
+  - glycoengineering
+  - cancer_biology
+  - cell_biology
+  - molecular_biology
+  - genetics
+  - genomics
+  - immunology
+  - microbiology
+  - pathology
+  - pharmacology
+  - physiology
+  - synthetic_biology
+  - systems_biology
+  - support_tools
+  - database
+  - lab_automation
+  - protocols
+  - antibody_design
+literature:
+- description: Fetches supplementary information for a paper given its DOI and saves
+    it to a specified directory.
+  name: fetch_supplementary_info_from_doi
+  optional_parameters:
+  - default: supplementary_info
+    description: Directory to save supplementary files
+    name: output_dir
+    type: str
+  required_parameters:
+  - default: null
+    description: The paper DOI
+    name: doi
+    type: str
+- description: Query arXiv for papers based on the provided search query.
+  name: query_arxiv
+  optional_parameters:
+  - default: 10
+    description: The maximum number of papers to retrieve.
+    name: max_papers
+    type: int
+  required_parameters:
+  - default: null
+    description: The search query string.
+    name: query
+    type: str
+- description: Query Google Scholar for papers based on the provided search query
+    and return the first search result.
+  name: query_scholar
+  optional_parameters: []
+  required_parameters:
+  - default: null
+    description: The search query string.
+    name: query
+    type: str
+- description: Query PubMed for papers based on the provided search query.
+  name: query_pubmed
+  optional_parameters:
+  - default: 10
+    description: The maximum number of papers to retrieve.
+    name: max_papers
+    type: int
+  - default: 3
+    description: Maximum number of retry attempts with modified queries.
+    name: max_retries
+    type: int
+  required_parameters:
+  - default: null
+    description: The search query string.
+    name: query
+    type: str
+- description: Search using Google search and return formatted results.
+  name: search_google
+  optional_parameters:
+  - default: 3
+    description: Number of results to return
+    name: num_results
+    type: int
+  - default: en
+    description: Language code for search results
+    name: language
+    type: str
+  required_parameters:
+  - default: null
+    description: The search query (e.g., "protocol text or search question")
+    name: query
+    type: str
+- description: Extract the text content of a webpage using requests and BeautifulSoup.
+  name: extract_url_content
+  optional_parameters: []
+  required_parameters:
+  - default: null
+    description: Webpage URL to extract content from
+    name: url
+    type: str
+- description: Extract text content from a PDF file.
+  name: extract_pdf_content
+  optional_parameters: []
+  required_parameters:
+  - default: null
+    description: URL of the PDF file
+    name: url
+    type: str
+- description: Initiate an advanced web search by launching a specialized agent to
+    collect relevant information and citations through multiple rounds of web searches
+    for a given query.
+  name: advanced_web_search_claude
+  optional_parameters:
+  - default: 1
+    description: Maximum number of searches
+    name: max_searches
+    type: int
+  - default: 3
+    description: Maximum number of retry attempts with modified queries.
+    name: max_retries
+    type: int
+  required_parameters:
+  - default: null
+    description: The search query string.
+    name: query
+    type: str
+biochemistry:
+- description: Analyzes circular dichroism (CD) spectroscopy data to determine secondary
+    structure and thermal stability.
+  name: analyze_circular_dichroism_spectra
+  optional_parameters:
+  - default: null
+    description: Temperature values (°C) for thermal denaturation experiment
+    name: temperature_data
+    type: list or numpy.ndarray
+  - default: null
+    description: CD signal values at specific wavelength across different temperatures
+    name: thermal_cd_data
+    type: list or numpy.ndarray
+  - default: ./
+    description: Directory to save result files
+    name: output_dir
+    type: str
+  required_parameters:
+  - default: null
+    description: Name of the biomolecule sample (e.g., "Znf706", "G-quadruplex")
+    name: sample_name
+    type: str
+  - default: null
+    description: Type of biomolecule ("protein" or "nucleic_acid")
+    name: sample_type
+    type: str
+  - default: null
+    description: Wavelength values in nm for CD spectrum
+    name: wavelength_data
+    type: list or numpy.ndarray
+  - default: null
+    description: CD signal intensity values (typically in mdeg or Δε)
+    name: cd_signal_data
+    type: list or numpy.ndarray
+- description: Calculate numeric values for various structural features of an RNA
+    secondary structure.
+  name: analyze_rna_secondary_structure_features
+  optional_parameters:
+  - default: null
+    description: The RNA sequence corresponding to the structure. If provided, sequence-dependent
+      energy calculations will be performed.
+    name: sequence
+    type: str
+  required_parameters:
+  - default: null
+    description: RNA secondary structure in dot-bracket notation (e.g., "(((...)))").
+      Parentheses represent base pairs, dots represent unpaired bases.
+    name: dot_bracket_structure
+    type: str
+- description: Analyze protease kinetics data from fluorogenic peptide cleavage assays,
+    fit the data to Michaelis-Menten kinetics, and determine key kinetic parameters.
+  name: analyze_protease_kinetics
+  optional_parameters:
+  - default: protease_kinetics
+    description: Prefix for output files
+    name: output_prefix
+    type: str
+  - default: ./
+    description: Directory to save output files
+    name: output_dir
+    type: str
+  required_parameters:
+  - default: null
+    description: Array of time points (in seconds) at which measurements were taken
+    name: time_points
+    type: numpy.ndarray
+  - default: null
+    description: 2D array of fluorescence measurements where each row corresponds
+      to a different substrate concentration and each column corresponds to a time
+      point
+    name: fluorescence_data
+    type: numpy.ndarray
+  - default: null
+    description: Array of substrate concentrations (in μM) corresponding to each row
+      in fluorescence_data
+    name: substrate_concentrations
+    type: numpy.ndarray
+  - default: null
+    description: Concentration of the protease enzyme (in μM)
+    name: enzyme_concentration
+    type: float
+- description: Performs in vitro enzyme kinetics assay and analyzes the dose-dependent
+    effects of modulators.
+  name: analyze_enzyme_kinetics_assay
+  optional_parameters:
+  - default: null
+    description: Dictionary of modulators where keys are modulator names and values
+      are lists of concentrations in μM
+    name: modulators
+    type: dict
+  - default: null
+    description: Time points in minutes for time-course measurements
+    name: time_points
+    type: list or numpy.ndarray
+  - default: ./
+    description: Directory to save output files
+    name: output_dir
+    type: str
+  required_parameters:
+  - default: null
+    description: Name of the purified enzyme being tested
+    name: enzyme_name
+    type: str
+  - default: null
+    description: List of substrate concentrations in μM for kinetic analysis
+    name: substrate_concentrations
+    type: list or numpy.ndarray
+  - default: null
+    description: Concentration of the enzyme in nM
+    name: enzyme_concentration
+    type: float
+- description: Analyzes isothermal titration calorimetry (ITC) data to determine binding
+    affinity and thermodynamic parameters.
+  name: analyze_itc_binding_thermodynamics
+  optional_parameters:
+  - default: null
+    description: Path to CSV or TSV file containing ITC thermogram data with columns
+      for injection number, injection volume, and heat released/absorbed.
+    name: itc_data_path
+    type: str
+  - default: null
+    description: Raw ITC thermogram data as a numpy array with shape (n_injections,
+      3) containing injection number, injection volume, and heat.
+    name: itc_data
+    type: numpy.ndarray
+  - default: 298.15
+    description: Temperature in Kelvin at which the experiment was conducted.
+    name: temperature
+    type: float
+  - default: null
+    description: Initial concentration of protein in the cell in molar (M).
+    name: protein_concentration
+    type: float
+  - default: null
+    description: Concentration of ligand in the syringe in molar (M).
+    name: ligand_concentration
+    type: float
+  required_parameters: []
+- description: Perform multiple sequence alignment and phylogenetic analysis to identify
+    conserved protein regions.
+  name: analyze_protein_conservation
+  optional_parameters:
+  - default: ./
+    description: Directory to save output files
+    name: output_dir
+    type: str
+  required_parameters:
+  - default: null
+    description: List of protein sequences in FASTA format from multiple organisms.
+    name: protein_sequences
+    type: list of str
+bioimaging:
+- description: Split a 4D NIfTI file into separate modality files for nnUNet processing.
+    Handles BRATS dataset format with FLAIR, T1w, t1gd, and T2w modalities.
+  name: split_modalities
+  optional_parameters:
+  - default: BRAT
+    description: Base name for the case files
+    name: case_name
+    type: str
+  required_parameters:
+  - default: null
+    description: Path to the 4D NIfTI file to split
+    name: input_file
+    type: str
+  - default: null
+    description: Directory to save the split modality files
+    name: output_dir
+    type: str
+- description: Prepare input data for nnUNet by handling both 4D and pre-split modality
+    files. Automatically detects file format and prepares data accordingly.
+  name: prepare_input_for_nnunet
+  optional_parameters:
+  - default: BRAT
+    description: Base name for the case files
+    name: case_name
+    type: str
+  required_parameters:
+  - default: null
+    description: Path to input file or directory
+    name: input_path
+    type: str
+  - default: null
+    description: Directory to save prepared files
+    name: output_dir
+    type: str
+- description: Segment images using nnUNet with proper environment setup. Supports
+    brain tumor segmentation and other medical image segmentation tasks.
+  name: segment_with_nn_unet
+  optional_parameters:
+  - default: 3d_fullres
+    description: Model type for segmentation
+    name: model_type
+    type: str
+  - default:
+    - 0
+    - 1
+    - 2
+    - 3
+    - 4
+    description: Model folds to use for ensemble prediction
+    name: folds
+    type: list
+  - default: false
+    description: Use test time augmentation
+    name: use_tta
+    type: bool
+  - default: 1
+    description: Number of threads for preprocessing
+    name: num_threads
+    type: int
+  - default: true
+    description: Use mixed precision for faster inference
+    name: mixed_precision
+    type: bool
+  - default: true
+    description: Enable verbose logging
+    name: verbose
+    type: bool
+  - default: true
+    description: Automatically prepare input for nnUNet
+    name: auto_prepare_input
+    type: bool
+  - default: null
+    description: Path to nnUNet results folder
+    name: results_folder
+    type: str
+  required_parameters:
+  - default: null
+    description: Path to input image file or directory
+    name: image_path
+    type: str
+  - default: null
+    description: Directory to save segmentation results
+    name: output_dir
+    type: str
+  - default: null
+    description: Task identifier (e.g., 'Task001_BrainTumour')
+    name: task_id
+    type: str
+- description: Create and save visualization of segmentation results using nilearn.
+    Generates overlay plots and multiple anatomical views.
+  name: create_segmentation_visualization
+  optional_parameters:
+  - default: ./visualization_output
+    description: Directory to save visualization images
+    name: output_dir
+    type: str
+  required_parameters:
+  - default: null
+    description: Path to original MRI file
+    name: original_mri
+    type: str
+  - default: null
+    description: Path to segmentation file
+    name: segmentation
+    type: str
+- description: Perform rigid image registration between two medical images using SimpleITK.
+    Rigid registration handles translation and rotation only, preserving shape and
+    size. Includes preprocessing, similarity metrics calculation, and visualization
+    generation.
+  name: quick_rigid_registration
+  optional_parameters:
+  - default: mutual_information
+    description: 'Similarity metric for registration: ''mutual_information'', ''mean_squares'',
+      ''correlation'', or ''normalized_correlation'''
+    name: metric
+    type: str
+  - default: gradient_descent
+    description: 'Optimization method: ''gradient_descent'', ''lbfgsb'', ''powell'',
+      or ''amoeba'''
+    name: optimizer
+    type: str
+  - default: true
+    description: Whether to preprocess images (denoising and normalization)
+    name: preprocess
+    type: bool
+  - default: true
+    description: Whether to create visualization plots
+    name: create_visualizations
+    type: bool
+  - default: 0.01
+    description: Learning rate for gradient descent optimizer
+    name: learning_rate
+    type: float
+  - default: 100
+    description: Maximum number of optimization iterations
+    name: number_of_iterations
+    type: int
+  - default: 1.0e-06
+    description: Convergence tolerance for optimization
+    name: gradient_convergence_tolerance
+    type: float
+  required_parameters:
+  - default: null
+    description: Path to the reference (fixed) image file (supports .nii, .nii.gz,
+      .nrrd, .mha, .mhd formats)
+    name: fixed_image_path
+    type: str
+  - default: null
+    description: Path to the image to be registered (moving image)
+    name: moving_image_path
+    type: str
+  - default: null
+    description: Directory path to save registration results and outputs
+    name: output_dir
+    type: str
+- description: Perform affine image registration between two medical images using
+    SimpleITK. Affine registration handles translation, rotation, scaling, and shearing.
+    More flexible than rigid registration but still preserves parallel lines.
+  name: quick_affine_registration
+  optional_parameters:
+  - default: mutual_information
+    description: 'Similarity metric for registration: ''mutual_information'', ''mean_squares'',
+      ''correlation'', or ''normalized_correlation'''
+    name: metric
+    type: str
+  - default: gradient_descent
+    description: 'Optimization method: ''gradient_descent'', ''lbfgsb'', ''powell'',
+      or ''amoeba'''
+    name: optimizer
+    type: str
+  - default: true
+    description: Whether to preprocess images (denoising and normalization)
+    name: preprocess
+    type: bool
+  - default: true
+    description: Whether to create visualization plots
+    name: create_visualizations
+    type: bool
+  - default: 0.01
+    description: Learning rate for gradient descent optimizer
+    name: learning_rate
+    type: float
+  - default: 100
+    description: Maximum number of optimization iterations
+    name: number_of_iterations
+    type: int
+  - default: 1.0e-06
+    description: Convergence tolerance for optimization
+    name: gradient_convergence_tolerance
+    type: float
+  required_parameters:
+  - default: null
+    description: Path to the reference (fixed) image file (supports .nii, .nii.gz,
+      .nrrd, .mha, .mhd formats)
+    name: fixed_image_path
+    type: str
+  - default: null
+    description: Path to the image to be registered (moving image)
+    name: moving_image_path
+    type: str
+  - default: null
+    description: Directory path to save registration results and outputs
+    name: output_dir
+    type: str
+- description: Perform deformable (B-spline) image registration between two medical
+    images using SimpleITK. Deformable registration allows for local non-linear transformations,
+    handling complex deformations. Most flexible but computationally intensive registration
+    method.
+  name: quick_deformable_registration
+  optional_parameters:
+  - default: mutual_information
+    description: 'Similarity metric for registration: ''mutual_information'', ''mean_squares'',
+      ''correlation'', or ''normalized_correlation'''
+    name: metric
+    type: str
+  - default: gradient_descent
+    description: 'Optimization method: ''gradient_descent'', ''lbfgsb'', ''powell'',
+      or ''amoeba'''
+    name: optimizer
+    type: str
+  - default: true
+    description: Whether to preprocess images (denoising and normalization)
+    name: preprocess
+    type: bool
+  - default: true
+    description: Whether to create visualization plots
+    name: create_visualizations
+    type: bool
+  - default: 0.01
+    description: Learning rate for gradient descent optimizer
+    name: learning_rate
+    type: float
+  - default: 100
+    description: Maximum number of optimization iterations
+    name: number_of_iterations
+    type: int
+  - default: 1.0e-06
+    description: Convergence tolerance for optimization
+    name: gradient_convergence_tolerance
+    type: float
+  - default: 4
+    description: Number of B-spline control points per dimension for deformable registration
+    name: number_of_control_points
+    type: int
+  required_parameters:
+  - default: null
+    description: Path to the reference (fixed) image file (supports .nii, .nii.gz,
+      .nrrd, .mha, .mhd formats)
+    name: fixed_image_path
+    type: str
+  - default: null
+    description: Path to the image to be registered (moving image)
+    name: moving_image_path
+    type: str
+  - default: null
+    description: Directory path to save registration results and outputs
+    name: output_dir
+    type: str
+- description: Perform batch registration of multiple images to a single reference
+    image. Automatically processes all medical image files in a directory and registers
+    them to the fixed reference. Supports rigid, affine, or deformable registration
+    for all images.
+  name: batch_register_images
+  optional_parameters:
+  - default: rigid
+    description: 'Type of registration to perform: ''rigid'', ''affine'', or ''deformable'''
+    name: transform_type
+    type: str
+  - default: mutual_information
+    description: 'Similarity metric for registration: ''mutual_information'', ''mean_squares'',
+      ''correlation'', or ''normalized_correlation'''
+    name: metric
+    type: str
+  - default: gradient_descent
+    description: 'Optimization method: ''gradient_descent'', ''lbfgsb'', ''powell'',
+      or ''amoeba'''
+    name: optimizer
+    type: str
+  - default: true
+    description: Whether to preprocess images (denoising and normalization)
+    name: preprocess
+    type: bool
+  - default: true
+    description: Whether to create visualization plots for each registration
+    name: create_visualizations
+    type: bool
+  - default: 0.01
+    description: Learning rate for gradient descent optimizer
+    name: learning_rate
+    type: float
+  - default: 100
+    description: Maximum number of optimization iterations
+    name: number_of_iterations
+    type: int
+  - default: 1.0e-06
+    description: Convergence tolerance for optimization
+    name: gradient_convergence_tolerance
+    type: float
+  required_parameters:
+  - default: null
+    description: Path to the reference (fixed) image file
+    name: fixed_image_path
+    type: str
+  - default: null
+    description: Directory path containing multiple images to register (supports .nii,
+      .nii.gz, .nrrd, .mha, .mhd formats)
+    name: moving_images_dir
+    type: str
+  - default: null
+    description: Directory path to save registration results for all images
+    name: output_dir
+    type: str
+- description: Calculate similarity metrics between two medical images. Supports mutual
+    information, mean squared error, correlation, and normalized cross correlation.
+  name: calculate_similarity_metrics
+  required_parameters:
+  - default: null
+    description: Path to the first image file
+    name: image1_path
+    type: str
+  - default: null
+    description: Path to the second image file
+    name: image2_path
+    type: str
+- description: Create visualization plots for registration results. Generates comparison
+    plots, difference images, overlays, and metric charts.
+  name: create_registration_visualization
+  optional_parameters:
+  - default: registration
+    description: Prefix for output files
+    name: prefix
+    type: str
+  required_parameters:
+  - default: null
+    description: Path to the reference (fixed) image file
+    name: fixed_image_path
+    type: str
+  - default: null
+    description: Path to the original moving image file
+    name: moving_image_path
+    type: str
+  - default: null
+    description: Path to the registered image file
+    name: registered_image_path
+    type: str
+  - default: null
+    description: Directory to save visualization files
+    name: output_dir
+    type: str
+bioengineering:
+- description: Analyze cell migration metrics from time-lapse microscopy images.
+  name: analyze_cell_migration_metrics
+  optional_parameters:
+  - default: 1.0
+    description: Conversion factor from pixels to micrometers
+    name: pixel_size_um
+    type: float
+  - default: 1.0
+    description: Time interval between consecutive frames in minutes
+    name: time_interval_min
+    type: float
+  - default: 10
+    description: Minimum number of frames a cell must be tracked to be included in
+      analysis
+    name: min_track_length
+    type: int
+  - default: ./
+    description: Directory to save output files
+    name: output_dir
+    type: str
+  required_parameters:
+  - default: null
+    description: Path to the directory containing time-lapse images or path to a multi-frame
+      TIFF file
+    name: image_sequence_path
+    type: str
+- description: Simulates CRISPR-Cas9 genome editing process including guide RNA design,
+    delivery, and analysis.
+  name: perform_crispr_cas9_genome_editing
+  optional_parameters: []
+  required_parameters:
+  - default: null
+    description: List of guide RNA sequences (20 nucleotides each) targeting the genomic
+      region of interest
+    name: guide_rna_sequences
+    type: List[str]
+  - default: null
+    description: Target genomic sequence to be edited (should be longer than guide
+      RNA and contain the target sites)
+    name: target_genomic_loci
+    type: str
+  - default: null
+    description: Type of cell or tissue being edited (affects delivery efficiency
+      and editing outcomes)
+    name: cell_tissue_type
+    type: str
+- description: Analyze calcium imaging data to quantify neuronal activity metrics
+    including cell counts, event rates, decay times, and signal-to-noise ratios.
+  name: analyze_calcium_imaging_data
+  optional_parameters:
+  - default: ./
+    description: Directory to save output files
+    name: output_dir
+    type: str
+  required_parameters:
+  - default: null
+    description: Path to the time-series stack of fluorescence microscopy images (TIFF
+      format)
+    name: image_stack_path
+    type: str
+- description: Analyzes in vitro drug release kinetics from biomaterial formulations.
+  name: analyze_in_vitro_drug_release_kinetics
+  optional_parameters:
+  - default: Drug
+    description: Name of the drug being analyzed
+    name: drug_name
+    type: str
+  - default: null
+    description: Total amount of drug initially loaded in the formulation. If None,
+      the maximum concentration is used as 100%
+    name: total_drug_loaded
+    type: float
+  - default: ./
+    description: Directory to save output files
+    name: output_dir
+    type: str
+  required_parameters:
+  - default: null
+    description: Time points at which drug concentrations were measured (in hours)
+    name: time_points
+    type: List[float] or numpy.ndarray
+  - default: null
+    description: Measured drug concentration at each time point
+    name: concentration_data
+    type: List[float] or numpy.ndarray
+- description: Quantifies morphological properties of myofibers in microscopy images
+    of tissue sections.
+  name: analyze_myofiber_morphology
+  optional_parameters:
+  - default: 2
+    description: Channel index containing nuclei staining (DAPI, Hoechst, etc.)
+    name: nuclei_channel
+    type: int
+  - default: 1
+    description: Channel index containing myofiber staining (α-Actinin, etc.)
+    name: myofiber_channel
+    type: int
+  - default: otsu
+    description: Method for thresholding ('otsu', 'adaptive', or 'manual')
+    name: threshold_method
+    type: str
+  - default: ./
+    description: Directory to save output files
+    name: output_dir
+    type: str
+  required_parameters:
+  - default: null
+    description: Path to the microscopy image file (typically a multichannel image
+      with nuclei and myofiber staining)
+    name: image_path
+    type: str
+- description: Model neural activity trajectories and decode behavioral variables.
+  name: decode_behavior_from_neural_trajectories
+  optional_parameters:
+  - default: 10
+    description: Number of principal components to use for dimensionality reduction
+    name: n_components
+    type: int
+  - default: ./
+    description: Directory to save output files
+    name: output_dir
+    type: str
+  required_parameters:
+  - default: null
+    description: Neural spiking activity data, shape (n_timepoints, n_neurons)
+    name: neural_data
+    type: numpy.ndarray
+  - default: null
+    description: Behavioral data, shape (n_timepoints, n_behavioral_variables)
+    name: behavioral_data
+    type: numpy.ndarray
+- description: Simulate a whole-cell model represented as a system of ordinary differential
+    equations (ODEs).
+  name: simulate_whole_cell_ode_model
+  optional_parameters:
+  - default: null
+    description: Function defining the system of ODEs. Should take arguments (t, y,
+      *args) where t is time, y is the state vector, and args contains additional
+      parameters. If None, a simple example whole-cell model will be used.
+    name: ode_function
+    type: callable
+  - default: (0, 100)
+    description: Tuple of (start_time, end_time) for the simulation.
+    name: time_span
+    type: tuple
+  - default: 1000
+    description: Number of time points to evaluate.
+    name: time_points
+    type: int
+  - default: '''LSODA'''
+    description: Numerical integration method to use (e.g., 'RK45', 'LSODA', 'BDF').
+    name: method
+    type: str
+  required_parameters:
+  - default: null
+    description: Initial values for each state variable in the model. If dict, keys
+      are variable names and values are initial concentrations/values. If array-like,
+      order must match the order expected by the ODE function.
+    name: initial_conditions
+    type: dict or array-like
+  - default: null
+    description: Model parameters required by the ODE function. Keys are parameter
+      names and values are parameter values.
+    name: parameters
+    type: dict
+biophysics:
+- description: Predicts intrinsically disordered regions (IDRs) in a protein sequence
+    using IUPred2A.
+  name: predict_protein_disorder_regions
+  optional_parameters:
+  - default: 0.5
+    description: The disorder score threshold above which a residue is considered
+      disordered
+    name: threshold
+    type: float
+  - default: disorder_prediction_results.csv
+    description: Filename to save the per-residue disorder scores
+    name: output_file
+    type: str
+  required_parameters:
+  - default: null
+    description: The amino acid sequence of the protein to analyze
+    name: protein_sequence
+    type: str
+- description: Quantifies cell morphology and cytoskeletal organization from fluorescence
+    microscopy images.
+  name: analyze_cell_morphology_and_cytoskeleton
+  optional_parameters:
+  - default: ./results
+    description: Directory to save output files
+    name: output_dir
+    type: str
+  - default: otsu
+    description: Method for cell segmentation ('otsu', 'adaptive', or 'manual')
+    name: threshold_method
+    type: str
+  required_parameters:
+  - default: null
+    description: Path to the fluorescence microscopy image file
+    name: image_path
+    type: str
+- description: Quantify tissue deformation and flow dynamics from microscopy image
+    sequence.
+  name: analyze_tissue_deformation_flow
+  optional_parameters:
+  - default: results
+    description: Directory to save results
+    name: output_dir
+    type: str
+  - default: 1.0
+    description: Physical scale of pixels (e.g., μm/pixel) for proper scaling of metrics
+    name: pixel_scale
+    type: float
+  required_parameters:
+  - default: null
+    description: Sequence of microscopy images (either a list of file paths or a 3D
+      numpy array [time, height, width])
+    name: image_sequence
+    type: list or numpy.ndarray
+glycoengineering:
+- name: find_n_glycosylation_motifs
+  description: Scan a protein sequence for canonical N-glycosylation sequons (N-X-[S/T],
+    X≠P). Returns positions and motifs.
+  required_parameters:
+  - name: sequence
+    type: str
+    description: Protein sequence (one-letter AA codes)
+    default: null
+  optional_parameters:
+  - name: allow_overlap
+    type: bool
+    description: Allow overlapping motif detections
+    default: false
+- name: predict_o_glycosylation_hotspots
+  description: Heuristic O-glycosite hotspot prediction using local S/T density (lightweight
+    baseline; see NetOGlyc 4.0 for SOTA).
+  required_parameters:
+  - name: sequence
+    type: str
+    description: Protein sequence (one-letter AA codes)
+    default: null
+  optional_parameters:
+  - name: window
+    type: int
+    description: Odd-sized window for local density (>=3)
+    default: 7
+  - name: min_st_fraction
+    type: float
+    description: Min S/T fraction in window to flag site
+    default: 0.4
+  - name: disallow_proline_next
+    type: bool
+    description: Avoid S/T immediately followed by Proline
+    default: true
+- name: list_glycoengineering_resources
+  description: 'Curated list of external glycoengineering tools and resources (links
+    and notes) as referenced in issue #198.'
+  required_parameters: []
+  optional_parameters: []
+cancer_biology:
+- description: Analyze DNA Damage Response (DDR) network alterations and dependencies
+    in cancer samples.
+  name: analyze_ddr_network_in_cancer
+  optional_parameters:
+  - default: ./results
+    description: Directory to save output files
+    name: output_dir
+    type: str
+  required_parameters:
+  - default: null
+    description: Path to gene expression data file (CSV format with genes as rows,
+      samples as columns)
+    name: expression_data_path
+    type: str
+  - default: null
+    description: Path to mutation data file (CSV format with genes as rows, samples
+      as columns, values indicating mutation status)
+    name: mutation_data_path
+    type: str
+- description: Analyze flow cytometry data to quantify senescent and apoptotic cell
+    populations.
+  name: analyze_cell_senescence_and_apoptosis
+  optional_parameters: []
+  required_parameters:
+  - default: null
+    description: Path to the FCS file containing flow cytometry data with measurements
+      for senescence-associated β-galactosidase (SA-β-Gal) and Annexin V/7-AAD staining
+    name: fcs_file_path
+    type: str
+- description: Detects and annotates somatic mutations in tumor samples compared to
+    matched normal samples using GATK Mutect2 for variant calling, GATK FilterMutectCalls
+    for filtering, and SnpEff for functional annotation.
+  name: detect_and_annotate_somatic_mutations
+  optional_parameters:
+  - default: GRCh38.105
+    description: SnpEff database to use for annotation
+    name: snpeff_database
+    type: str
+  required_parameters:
+  - default: null
+    description: Path to the tumor sample BAM file
+    name: tumor_bam
+    type: str
+  - default: null
+    description: Path to the matched normal sample BAM file
+    name: normal_bam
+    type: str
+  - default: null
+    description: Path to the reference genome FASTA file
+    name: reference_genome
+    type: str
+  - default: null
+    description: Prefix for output files
+    name: output_prefix
+    type: str
+- description: Detects and characterizes structural variations (SVs) in genomic sequencing
+    data using LUMPY for SV detection followed by annotation with COSMIC and/or ClinVar
+    databases.
+  name: detect_and_characterize_structural_variations
+  optional_parameters:
+  - default: null
+    description: Path to the COSMIC database for cancer annotation
+    name: cosmic_db_path
+    type: str
+  - default: null
+    description: Path to the ClinVar database for clinical annotation
+    name: clinvar_db_path
+    type: str
+  required_parameters:
+  - default: null
+    description: Path to the aligned sequencing data in BAM format
+    name: bam_file_path
+    type: str
+  - default: null
+    description: Path to the reference genome in FASTA format
+    name: reference_genome_path
+    type: str
+  - default: null
+    description: Directory where results will be saved
+    name: output_dir
+    type: str
+- description: Performs Non-negative Matrix Factorization (NMF) on gene expression
+    data to extract metagenes and their associated sample weights for tumor subtype
+    identification.
+  name: perform_gene_expression_nmf_analysis
+  optional_parameters:
+  - default: 10
+    description: Number of metagenes (components) to extract.
+    name: n_components
+    type: int
+  - default: true
+    description: Whether to normalize the expression data before applying NMF.
+    name: normalize
+    type: bool
+  - default: nmf_results
+    description: Directory to save the output files.
+    name: output_dir
+    type: str
+  - default: 42
+    description: Random seed for reproducibility.
+    name: random_state
+    type: int
+  required_parameters:
+  - default: null
+    description: Path to a CSV or TSV file containing gene expression data with genes
+      as rows and samples as columns. Values should be non-negative.
+    name: expression_data_path
+    type: str
+- description: CNVkit-based copy number workflow performing CNV segmentation, purity
+    & ploidy approximation, simplified HRD-style metrics, and focal amplification/deletion
+    detection in selected genes.
+  name: analyze_copy_number_purity_ploidy_and_focal_events
+  optional_parameters:
+  - name: normal_bam
+    type: str
+    default: null
+    description: Path to matched normal BAM (recommended for CNVkit)
+  - name: output_dir
+    type: str
+    default: cn_analysis_results
+    description: Directory to store CNVkit workflow outputs
+  - name: targets_bed
+    type: str
+    default: null
+    description: BED file of target regions for CNVkit (panel/exome)
+  - name: antitargets_bed
+    type: str
+    default: null
+    description: BED file of antitarget regions for CNVkit
+  - name: gene_bed
+    type: str
+    default: null
+    description: Gene BED (chrom, start, end, gene) for focal event annotation
+  - name: focal_genes
+    type: list[str]
+    default: null
+    description: 'Genes to highlight for focal events (defaults: MYC, ERBB2, CDKN2A)'
+  - name: log2_amp_threshold
+    type: float
+    default: 1.0
+    description: Log2 ratio threshold for focal amplification calls
+  - name: log2_del_threshold
+    type: float
+    default: -1.0
+    description: Log2 ratio threshold for focal deep deletion calls
+  required_parameters:
+  - name: tumor_bam
+    type: str
+    default: null
+    description: Path to tumor BAM (indexed)
+  - name: reference_genome
+    type: str
+    default: null
+    description: Path to reference genome FASTA
+cell_biology:
+- description: Quantify the percentage of cells in each cell cycle phase using Calcofluor
+    white stained microscopy images.
+  name: quantify_cell_cycle_phases_from_microscopy
+  optional_parameters:
+  - default: ./results
+    description: Directory to save results
+    name: output_dir
+    type: str
+  required_parameters:
+  - default: null
+    description: List of file paths to microscopy images of cells stained with Calcofluor
+      white
+    name: image_paths
+    type: List[str]
+- description: Quantify cell motility features from time-lapse microscopy images and
+    cluster cells based on motility patterns.
+  name: quantify_and_cluster_cell_motility
+  optional_parameters:
+  - default: ./results
+    description: Directory to save output files
+    name: output_dir
+    type: str
+  - default: 3
+    description: Number of motility pattern clusters to identify
+    name: num_clusters
+    type: int
+  required_parameters:
+  - default: null
+    description: Path to directory containing time-lapse microscopy images in sequential
+      order
+    name: image_sequence_path
+    type: str
+- description: Performs Fluorescence-Activated Cell Sorting (FACS) to enrich cell
+    populations based on fluorescence characteristics.
+  name: perform_facs_cell_sorting
+  optional_parameters:
+  - default: null
+    description: Minimum threshold for the fluorescence parameter. Cells below this
+      value will be excluded
+    name: threshold_min
+    type: float
+  - default: null
+    description: Maximum threshold for the fluorescence parameter. Cells above this
+      value will be excluded
+    name: threshold_max
+    type: float
+  - default: sorted_cells.csv
+    description: Filename to save the sorted cell population data
+    name: output_file
+    type: str
+  required_parameters:
+  - default: null
+    description: Path to the FCS file containing flow cytometry data
+    name: cell_suspension_data
+    type: str
+  - default: null
+    description: The fluorescence parameter to use for sorting (e.g., 'GFP', 'FITC',
+      'PE')
+    name: fluorescence_parameter
+    type: str
+- description: Analyze flow cytometry data to identify and quantify specific cell
+    populations based on surface markers.
+  name: analyze_flow_cytometry_immunophenotyping
+  optional_parameters:
+  - default: null
+    description: Spillover/compensation matrix to correct for fluorescence overlap
+    name: compensation_matrix
+    type: numpy.ndarray
+  - default: ./results
+    description: Directory to save the results
+    name: output_dir
+    type: str
+  required_parameters:
+  - default: null
+    description: Path to the FCS file containing flow cytometry data
+    name: fcs_file_path
+    type: str
+  - default: null
+    description: Dictionary defining the gating strategy. Each key is a population
+      name, and each value is a list of tuples (marker, operator, threshold)
+    name: gating_strategy
+    type: dict
+- description: Quantifies metrics of mitochondrial morphology and membrane potential
+    from fluorescence microscopy images.
+  name: analyze_mitochondrial_morphology_and_potential
+  optional_parameters:
+  - default: ./output
+    description: Directory to save output files
+    name: output_dir
+    type: str
+  required_parameters:
+  - default: null
+    description: Path to the fluorescence microscopy image showing mitochondrial morphology
+      (e.g., MTS-GFP)
+    name: morphology_image_path
+    type: str
+  - default: null
+    description: Path to the fluorescence microscopy image showing mitochondrial membrane
+      potential (e.g., TMRE staining)
+    name: potential_image_path
+    type: str
+molecular_biology:
+- description: Find all Open Reading Frames (ORFs) in a DNA sequence using Biopython,
+    searching both forward and reverse complement strands.
+  name: annotate_open_reading_frames
+  optional_parameters:
+  - default: false
+    description: Whether to search the reverse complement strand
+    name: search_reverse
+    type: bool
+  - default: false
+    description: Whether to filter out ORFs with same end but later start
+    name: filter_subsets
+    type: bool
+  required_parameters:
+  - default: null
+    description: DNA sequence to analyze
+    name: sequence
+    type: str
+  - default: null
+    description: Minimum length of ORF in nucleotides
+    name: min_length
+    type: int
+- description: Annotate a DNA sequence using pLannotate's command-line interface.
+  name: annotate_plasmid
+  optional_parameters:
+  - default: true
+    description: Whether the sequence is circular
+    name: is_circular
+    type: bool
+  required_parameters:
+  - default: null
+    description: The DNA sequence to annotate
+    name: sequence
+    type: str
+- description: Retrieves the coding sequence(s) of a specified gene from NCBI Entrez.
+  name: get_gene_coding_sequence
+  optional_parameters:
+  - default: null
+    description: Email address for NCBI Entrez (recommended)
+    name: email
+    type: str
+  required_parameters:
+  - default: null
+    description: Name of the gene
+    name: gene_name
+    type: str
+  - default: null
+    description: Name of the organism
+    name: organism
+    type: str
+- description: Unified function to retrieve plasmid sequences from either Addgene
+    or NCBI. If is_addgene is True or identifier is numeric, uses Addgene. Otherwise
+    searches NCBI using the plasmid name.
+  name: get_plasmid_sequence
+  optional_parameters:
+  - default: null
+    description: Force Addgene lookup if True, force NCBI if False. If None, attempts
+      to auto-detect based on identifier format.
+    name: is_addgene
+    type: bool
+  required_parameters:
+  - default: null
+    description: Either an Addgene ID or plasmid name
+    name: identifier
+    type: str
+- description: Align short sequences (primers) to a longer sequence, allowing for
+    one mismatch. Checks both forward and reverse complement strands.
+  name: align_sequences
+  optional_parameters: []
+  required_parameters:
+  - default: null
+    description: Target DNA sequence
+    name: long_seq
+    type: str
+  - default: null
+    description: Single primer or list of primers
+    name: short_seqs
+    type: Union[str, List[str]]
+- description: Simulate PCR amplification with given primers and sequence.
+  name: pcr_simple
+  optional_parameters:
+  - default: false
+    description: Whether the sequence is circular
+    name: circular
+    type: bool
+  required_parameters:
+  - default: null
+    description: Either a sequence string or path to plasmid file
+    name: sequence
+    type: str
+  - default: null
+    description: Forward primer sequence (5' to 3')
+    name: forward_primer
+    type: str
+  - default: null
+    description: Reverse primer sequence (5' to 3')
+    name: reverse_primer
+    type: str
+- description: Simulates restriction enzyme digestion of a DNA sequence and returns
+    the resulting fragments with their properties.
+  name: digest_sequence
+  optional_parameters:
+  - default: true
+    description: Whether the DNA sequence is circular (True) or linear (False)
+    name: is_circular
+    type: bool
+  required_parameters:
+  - default: null
+    description: Input DNA sequence to be digested
+    name: dna_sequence
+    type: str
+  - default: null
+    description: Names of restriction enzymes to use for digestion
+    name: enzyme_names
+    type: List[str]
+- description: Identifies restriction enzyme sites in a given DNA sequence for specified
+    enzymes.
+  name: find_restriction_sites
+  optional_parameters:
+  - default: true
+    description: Whether the DNA sequence is circular (True) or linear (False)
+    name: is_circular
+    type: bool
+  required_parameters:
+  - default: null
+    description: Complete input DNA sequence
+    name: dna_sequence
+    type: str
+  - default: null
+    description: List of restriction enzyme names to check
+    name: enzymes
+    type: List[str]
+- description: Finds common restriction enzyme sites in a DNA sequence and returns
+    their cut positions.
+  name: find_restriction_enzymes
+  optional_parameters:
+  - default: false
+    description: Whether the sequence is circular
+    name: is_circular
+    type: bool
+  required_parameters:
+  - default: null
+    description: DNA sequence to analyze
+    name: sequence
+    type: str
+- description: Compare query sequence against reference sequence to identify mutations.
+  name: find_sequence_mutations
+  optional_parameters:
+  - default: 1
+    description: The start position of the query sequence
+    name: query_start
+    type: int
+  required_parameters:
+  - default: null
+    description: The sequence being analyzed
+    name: query_sequence
+    type: str
+  - default: null
+    description: The reference sequence to compare against
+    name: reference_sequence
+    type: str
+- description: Design sgRNAs for CRISPR knockout by searching pre-computed sgRNA libraries.
+    Returns optimized guide RNAs for targeting a specific gene.
+  name: design_knockout_sgrna
+  optional_parameters:
+  - default: human
+    description: Target organism species
+    name: species
+    type: str
+  - default: 1
+    description: Number of guides to return
+    name: num_guides
+    type: int
+  required_parameters:
+  - default: null
+    description: Target gene symbol/name (e.g., "EGFR", "TP53")
+    name: gene_name
+    type: str
+  - default: null
+    description: Path to the data lake
+    name: data_lake_path
+    type: str
+- description: Return a standard protocol for annealing oligonucleotides without phosphorylation.
+  name: get_oligo_annealing_protocol
+  optional_parameters: []
+  required_parameters: []
+- description: Return a customized protocol for Golden Gate assembly based on the
+    number of inserts and specific DNA sequences.
+  name: get_golden_gate_assembly_protocol
+  optional_parameters:
+  - default: 1
+    description: Number of inserts to be assembled
+    name: num_inserts
+    type: int
+  - default: 75.0
+    description: Amount of vector to use in ng
+    name: vector_amount_ng
+    type: float
+  - default: null
+    description: List of insert lengths in bp
+    name: insert_lengths
+    type: List[int]
+  - default: false
+    description: Whether this is for library preparation
+    name: is_library_prep
+    type: bool
+  required_parameters:
+  - default: null
+    description: Type IIS restriction enzyme to be used
+    name: enzyme_name
+    type: str
+  - default: null
+    description: Length of the destination vector in bp
+    name: vector_length
+    type: int
+- description: Return a standard protocol for bacterial transformation.
+  name: get_bacterial_transformation_protocol
+  optional_parameters:
+  - default: ampicillin
+    description: Selection antibiotic
+    name: antibiotic
+    type: str
+  - default: false
+    description: Whether the sequence contains repetitive elements
+    name: is_repetitive
+    type: bool
+  required_parameters: []
+- description: Design a single primer within the given sequence window.
+  name: design_primer
+  optional_parameters:
+  - default: 20
+    description: Length of the primer to design
+    name: primer_length
+    type: int
+  - default: 0.4
+    description: Minimum GC content
+    name: min_gc
+    type: float
+  - default: 0.6
+    description: Maximum GC content
+    name: max_gc
+    type: float
+  - default: 55.0
+    description: Minimum melting temperature in °C
+    name: min_tm
+    type: float
+  - default: 65.0
+    description: Maximum melting temperature in °C
+    name: max_tm
+    type: float
+  - default: 100
+    description: Size of window to search for primers
+    name: search_window
+    type: int
+  required_parameters:
+  - default: null
+    description: Target DNA sequence
+    name: sequence
+    type: str
+  - default: null
+    description: Starting position for primer search
+    name: start_pos
+    type: int
+- description: Design Sanger sequencing primers to verify a specific region in a plasmid.
+    First tries to use primers from an existing primer pool. If they cannot fully
+    cover the region, designs additional primers as needed.
+  name: design_verification_primers
+  optional_parameters:
+  - default: null
+    description: List of existing primers with their sequences and optional names
+    name: existing_primers
+    type: Optional[List[Dict[str, str]]]
+  - default: true
+    description: Whether the plasmid is circular
+    name: is_circular
+    type: bool
+  - default: 800
+    description: Typical read length for each primer in base pairs
+    name: coverage_length
+    type: int
+  - default: 20
+    description: Length of newly designed primers
+    name: primer_length
+    type: int
+  - default: 0.4
+    description: Minimum GC content for new primers
+    name: min_gc
+    type: float
+  - default: 0.6
+    description: Maximum GC content for new primers
+    name: max_gc
+    type: float
+  - default: 55.0
+    description: Minimum melting temperature in °C
+    name: min_tm
+    type: float
+  - default: 65.0
+    description: Maximum melting temperature in °C
+    name: max_tm
+    type: float
+  required_parameters:
+  - default: null
+    description: The complete plasmid sequence
+    name: plasmid_sequence
+    type: str
+  - default: null
+    description: Start and end positions to verify (0-based indexing)
+    name: target_region
+    type: Tuple[int, int]
+- description: Design complementary oligonucleotides with Type IIS restriction enzyme
+    overhangs for Golden Gate assembly based on restriction site analysis of the backbone.
+  name: design_golden_gate_oligos
+  optional_parameters:
+  - default: true
+    description: Whether the backbone is circular
+    name: is_circular
+    type: bool
+  required_parameters:
+  - default: null
+    description: Complete backbone sequence
+    name: backbone_sequence
+    type: str
+  - default: null
+    description: Sequence to be inserted (e.g., sgRNA target sequence)
+    name: insert_sequence
+    type: str
+  - default: null
+    description: Type IIS restriction enzyme to be used
+    name: enzyme_name
+    type: str
+- description: Simulate Golden Gate assembly to predict final construct sequences
+    from backbone and fragment sequences.
+  name: golden_gate_assembly
+  optional_parameters:
+  - default: true
+    description: Whether the backbone is circular
+    name: is_circular
+    type: bool
+  required_parameters:
+  - default: null
+    description: Complete backbone sequence
+    name: backbone_sequence
+    type: str
+  - default: null
+    description: Type IIS restriction enzyme to be used (e.g., "BsmBI", "BsaI")
+    name: enzyme_name
+    type: str
+  - default: null
+    description: 'List of fragments to insert, containing one of: name + fwd_oligo
+      + rev_oligo (oligo pair with matching overhangs) or name + sequence (double-stranded
+      DNA fragment containing restriction sites)'
+    name: fragments
+    type: List[Dict[str, str]]
+genetics:
+- description: Perform liftover of genomic coordinates between hg19 and hg38 formats
+    with detailed intermediate steps.
+  name: liftover_coordinates
+  optional_parameters: []
+  required_parameters:
+  - default: null
+    description: Chromosome number (e.g., '1', 'X')
+    name: chromosome
+    type: str
+  - default: null
+    description: Genomic position
+    name: position
+    type: int
+  - default: null
+    description: Input genome build ('hg19' or 'hg38')
+    name: input_format
+    type: str
+  - default: null
+    description: Output genome build ('hg19' or 'hg38')
+    name: output_format
+    type: str
+  - default: null
+    description: Path to liftover chain files
+    name: data_path
+    type: str
+- description: Performs Bayesian fine-mapping from GWAS summary statistics using deep
+    variational inference to compute posterior inclusion probabilities and credible
+    sets for putative causal variants.
+  name: bayesian_finemapping_with_deep_vi
+  optional_parameters:
+  - default: 5000
+    description: Number of training iterations for the variational inference algorithm
+    name: n_iterations
+    type: int
+  - default: 0.01
+    description: Learning rate for the optimization algorithm
+    name: learning_rate
+    type: float
+  - default: 64
+    description: Hidden dimension size for the neural network
+    name: hidden_dim
+    type: int
+  - default: 0.95
+    description: Threshold for defining the credible set (e.g., 0.95 for a 95% credible
+      set)
+    name: credible_threshold
+    type: float
+  required_parameters:
+  - default: null
+    description: Path to CSV or TSV file containing GWAS summary statistics with variant_id,
+      effect_size, pvalue, and optional se columns
+    name: gwas_summary_path
+    type: str
+  - default: null
+    description: Linkage disequilibrium matrix with pairwise correlations between
+      variants
+    name: ld_matrix
+    type: numpy.ndarray
+- description: Analyzes and categorizes mutations induced by Cas9 at target sites.
+  name: analyze_cas9_mutation_outcomes
+  optional_parameters:
+  - default: null
+    description: Dictionary mapping sequence IDs to cell line information (e.g., wildtype,
+      knockout gene)
+    name: cell_line_info
+    type: dict
+  - default: cas9_mutation_analysis
+    description: Prefix for output files
+    name: output_prefix
+    type: str
+  required_parameters:
+  - default: null
+    description: Dictionary mapping sequence IDs to reference DNA sequences (strings)
+    name: reference_sequences
+    type: dict
+  - default: null
+    description: 'Nested dictionary: {sequence_id: {read_id: sequence}} containing
+      the edited/mutated sequences for each reference'
+    name: edited_sequences
+    type: dict
+- description: Analyzes CRISPR-Cas9 genome editing results by comparing original and
+    edited sequences.
+  name: analyze_crispr_genome_editing
+  optional_parameters:
+  - default: null
+    description: The homology-directed repair template sequence, if used
+    name: repair_template
+    type: str
+  required_parameters:
+  - default: null
+    description: The original DNA sequence before CRISPR-Cas9 editing
+    name: original_sequence
+    type: str
+  - default: null
+    description: The DNA sequence after CRISPR-Cas9 editing
+    name: edited_sequence
+    type: str
+  - default: null
+    description: The CRISPR guide RNA (crRNA) sequence used for targeting
+    name: guide_rna
+    type: str
+- description: Simulate DNA sequences with specified demographic and coalescent histories
+    using msprime.
+  name: simulate_demographic_history
+  optional_parameters:
+  - default: 10
+    description: Number of sample sequences to simulate
+    name: num_samples
+    type: int
+  - default: 100000
+    description: Length of the simulated sequence in base pairs
+    name: sequence_length
+    type: int
+  - default: 1.0e-08
+    description: Per-base recombination rate
+    name: recombination_rate
+    type: float
+  - default: 1.0e-08
+    description: Per-base mutation rate
+    name: mutation_rate
+    type: float
+  - default: constant
+    description: Type of demographic model to simulate (constant, bottleneck, expansion,
+      contraction, sawtooth)
+    name: demographic_model
+    type: str
+  - default: null
+    description: Parameters specific to the chosen demographic model
+    name: demographic_params
+    type: dict
+  - default: kingman
+    description: Type of coalescent model to use (kingman, beta)
+    name: coalescent_model
+    type: str
+  - default: null
+    description: Parameter for beta-coalescent model
+    name: beta_coalescent_param
+    type: float
+  - default: null
+    description: Seed for random number generator
+    name: random_seed
+    type: int
+  - default: simulated_sequences.vcf
+    description: Filename to save the simulated sequences in VCF format
+    name: output_file
+    type: str
+  required_parameters: []
+- description: Identifies binding sites for a specific transcription factor in a genomic
+    sequence.
+  name: identify_transcription_factor_binding_sites
+  optional_parameters:
+  - default: 0.8
+    description: Minimum score threshold for reporting binding sites (0.0-1.0)
+    name: threshold
+    type: float
+  - default: null
+    description: Path to save the results
+    name: output_file
+    type: str
+  required_parameters:
+  - default: null
+    description: The genomic DNA sequence to analyze
+    name: sequence
+    type: str
+  - default: null
+    description: Name of the transcription factor to search for (e.g., 'Hsf1', 'GATA1')
+    name: tf_name
+    type: str
+- description: Fit a linear mixed model for genomic prediction using genotype and
+    phenotype data.
+  name: fit_genomic_prediction_model
+  optional_parameters:
+  - default: null
+    description: Matrix of fixed effects (e.g., environment, management), with individuals
+      in rows and effects in columns.
+    name: fixed_effects
+    type: numpy.ndarray
+  - default: additive
+    description: 'Type of genetic model to fit: "additive" or "additive_dominance".'
+    name: model_type
+    type: str
+  - default: genomic_prediction_results.csv
+    description: File name to save the results.
+    name: output_file
+    type: str
+  required_parameters:
+  - default: null
+    description: Matrix of genotype data, with individuals in rows and markers in
+      columns. Values are typically coded as 0, 1, 2 for additive models or with specific
+      encoding for dominance effects.
+    name: genotypes
+    type: numpy.ndarray
+  - default: null
+    description: Vector or matrix of phenotype data, with individuals in rows and
+      traits in columns.
+    name: phenotypes
+    type: numpy.ndarray
+- description: Performs PCR amplification of a target transgene and visualizes results
+    using agarose gel electrophoresis.
+  name: perform_pcr_and_gel_electrophoresis
+  optional_parameters:
+  - default: null
+    description: Forward primer sequence. If not provided, will be designed based
+      on target_region
+    name: forward_primer
+    type: str
+  - default: null
+    description: Reverse primer sequence. If not provided, will be designed based
+      on target_region
+    name: reverse_primer
+    type: str
+  - default: null
+    description: Tuple of (start, end) positions for the target region in the genomic
+      DNA
+    name: target_region
+    type: tuple
+  - default: 58
+    description: Annealing temperature for PCR in °C
+    name: annealing_temp
+    type: float
+  - default: 30
+    description: Extension time in seconds
+    name: extension_time
+    type: int
+  - default: 35
+    description: Number of PCR cycles
+    name: cycles
+    type: int
+  - default: 2.0
+    description: Percentage of agarose gel
+    name: gel_percentage
+    type: float
+  - default: pcr_result
+    description: Prefix for output files
+    name: output_prefix
+    type: str
+  required_parameters:
+  - default: null
+    description: Path to file containing genomic DNA sequence in FASTA format or the
+      sequence itself
+    name: genomic_dna
+    type: str
+- description: Perform phylogenetic analysis on a set of protein sequences. This function
+    aligns sequences, constructs a phylogenetic tree, and visualizes evolutionary
+    relationships.
+  name: analyze_protein_phylogeny
+  optional_parameters:
+  - default: ./
+    description: Directory to save output files
+    name: output_dir
+    type: str
+  - default: clustalw
+    description: 'Method for sequence alignment: "clustalw", "muscle", or "pre-aligned"'
+    name: alignment_method
+    type: str
+  - default: fasttree
+    description: 'Method for tree construction: "iqtree" or fallback to neighbor-joining'
+    name: tree_method
+    type: str
+  required_parameters:
+  - default: null
+    description: Path to a FASTA file containing protein sequences or a string with
+      FASTA-formatted sequences
+    name: fasta_sequences
+    type: str
+genomics:
+- description: Annotate cell types based on gene markers and transferred labels using
+    LLM. After leiden clustering, annotate clusters using differentially expressed
+    genes and optionally incorporate transferred labels from reference datasets.
+  name: annotate_celltype_scRNA
+  optional_parameters:
+  - default: leiden
+    description: Clustering method to use for cell type annotation
+    name: cluster
+    type: str
+  - default: claude-3-5-sonnet-20241022
+    description: Language model instance for cell type prediction
+    name: llm
+    type: str
+  - default: null
+    description: Transferred cell type composition for each cluster
+    name: composition
+    type: pd.DataFrame
+  required_parameters:
+  - default: null
+    description: Name of the AnnData file containing scRNA-seq data
+    name: adata_filename
+    type: str
+  - default: null
+    description: Directory containing the data files
+    name: data_dir
+    type: str
+  - default: null
+    description: Information about the scRNA-seq data (e.g., "homo sapiens, brain
+      tissue, normal")
+    name: data_info
+    type: str
+  - default: null
+    description: Path to the data lake
+    name: data_lake_path
+    type: str
+- description: 'Perform cell type annotation of single-cell RNA-seq data using Panhuman
+    Azimuth Neural Network. This function implements the Panhuman Azimuth workflow
+    for cell type annotation using the panhumanpy package, providing hierarchical
+    cell type labels for tissues across the human body. '
+  name: annotate_celltype_with_panhumanpy
+  optional_parameters:
+  - default: null
+    description: 'Column name in adata.var containing gene symbols (default: None,
+      uses index)'
+    name: feature_names_col
+    type: str
+  - default: true
+    description: Whether to perform additional label refinement for consistent granularity
+    name: refine
+    type: bool
+  - default: true
+    description: Whether to generate ANN embeddings and UMAP
+    name: umap
+    type: bool
+  - default: ./output
+    description: Directory to save results
+    name: output_dir
+    type: str
+  required_parameters:
+  - default: null
+    description: Path to the AnnData file containing scRNA-seq data
+    name: adata_path
+    type: str
+- description: Create scVI and scANVI embeddings for single-cell RNA-seq data, saving
+    the results to an AnnData object.
+  name: create_scvi_embeddings_scRNA
+  optional_parameters: []
+  required_parameters:
+  - default: null
+    description: Filename of the AnnData object to load
+    name: adata_filename
+    type: str
+  - default: null
+    description: Column name in adata.obs for batch information
+    name: batch_key
+    type: str
+  - default: null
+    description: Column name in adata.obs for cell type labels
+    name: label_key
+    type: str
+  - default: null
+    description: Directory path where the AnnData file is located and where output
+      will be saved
+    name: data_dir
+    type: str
+- description: Performs batch integration on single-cell RNA-seq data using Harmony
+    and saves the integrated embeddings.
+  name: create_harmony_embeddings_scRNA
+  optional_parameters: []
+  required_parameters:
+  - default: null
+    description: Filename of the AnnData object to load
+    name: adata_filename
+    type: str
+  - default: null
+    description: Column name in adata.obs that defines the batch variable for integration
+    name: batch_key
+    type: str
+  - default: null
+    description: Directory path where the input file is located and output will be
+      saved
+    name: data_dir
+    type: str
+- description: Generate UCE embeddings for single-cell RNA-seq data and map them to
+    a reference dataset for cell type annotation.
+  name: get_uce_embeddings_scRNA
+  optional_parameters:
+  - default: /dfs/project/bioagentos/data/singlecell/
+    description: Root directory for single-cell data storage
+    name: DATA_ROOT
+    type: str
+  - default: null
+    description: Custom command line arguments to pass to the UCE script
+    name: custom_args
+    type: List[str]
+  required_parameters:
+  - default: null
+    description: Filename of the AnnData object to process
+    name: adata_filename
+    type: str
+  - default: null
+    description: Directory where the input data is stored and output will be saved
+    name: data_dir
+    type: str
+- description: Map cell embeddings from the input dataset to the Integrated Megascale
+    Atlas reference dataset using UCE embeddings.
+  name: map_to_ima_interpret_scRNA
+  optional_parameters:
+  - default: null
+    description: Dictionary of custom arguments including 'n_neighbors' and 'metric'
+      for nearest neighbor search
+    name: custom_args
+    type: dict
+  required_parameters:
+  - default: null
+    description: Filename of the AnnData object to be mapped
+    name: adata_filename
+    type: str
+  - default: null
+    description: Directory containing the AnnData file
+    name: data_dir
+    type: str
+- description: Given a gene name, fetch RNA-seq expression data showing the top K
+    tissues with highest transcripts-per-million (TPM) values.
+  name: get_rna_seq_archs4
+  optional_parameters:
+  - default: 10
+    description: The number of tissues to return
+    name: K
+    type: int
+  required_parameters:
+  - default: null
+    description: The gene name for which RNA-seq data is being fetched
+    name: gene_name
+    type: str
+- description: Returns a list of supported databases for gene set enrichment analysis.
+  name: get_gene_set_enrichment_analysis_supported_database_list
+  optional_parameters: []
+  required_parameters: []
+- description: Perform enrichment analysis for a list of genes, with optional background
+    gene set and plotting functionality.
+  name: gene_set_enrichment_analysis
+  optional_parameters:
+  - default: 10
+    description: Number of top pathways to return
+    name: top_k
+    type: int
+  - default: ontology
+    description: Database to use for enrichment analysis (e.g., pathway, transcription,
+      ontology)
+    name: database
+    type: str
+  - default: null
+    description: List of background genes to use for enrichment analysis
+    name: background_list
+    type: list
+  - default: false
+    description: Generate a bar plot of the top K enrichment results
+    name: plot
+    type: bool
+  required_parameters:
+  - default: null
+    description: List of gene symbols to analyze
+    name: genes
+    type: list
+- description: Analyze chromatin interactions from Hi-C data to identify enhancer-promoter
+    interactions and TADs.
+  name: analyze_chromatin_interactions
+  optional_parameters:
+  - default: ./output
+    description: Directory to save output files
+    name: output_dir
+    type: str
+  required_parameters:
+  - default: null
+    description: Path to the Hi-C data file (.cool or .hic format)
+    name: hic_file_path
+    type: str
+  - default: null
+    description: Path to BED file containing genomic coordinates of regulatory elements
+      (enhancers, promoters, CTCF sites, etc.)
+    name: regulatory_elements_bed
+    type: str
+- description: Perform comparative genomics and haplotype analysis on multiple genome
+    samples. Aligns genome samples to a reference, identifies variants, analyzes shared
+    and unique genomic regions, and determines haplotype structure.
+  name: analyze_comparative_genomics_and_haplotypes
+  optional_parameters:
+  - default: ./output
+    description: Directory to store output files
+    name: output_dir
+    type: str
+  required_parameters:
+  - default: null
+    description: Paths to FASTA files containing whole-genome sequences to be analyzed
+    name: sample_fasta_files
+    type: List[str]
+  - default: null
+    description: Path to the reference genome FASTA file
+    name: reference_genome_path
+    type: str
+- description: Perform ChIP-seq peak calling using MACS2 to identify genomic regions
+    with significant binding.
+  name: perform_chipseq_peak_calling_with_macs2
+  optional_parameters:
+  - default: macs2_output
+    description: Prefix for output files
+    name: output_name
+    type: str
+  - default: hs
+    description: 'Effective genome size shorthand: ''hs'' for human, ''mm'' for mouse,
+      etc.'
+    name: genome_size
+    type: str
+  - default: 0.05
+    description: q-value (minimum FDR) cutoff for peak calling
+    name: q_value
+    type: float
+  required_parameters:
+  - default: null
+    description: Path to the ChIP-seq read data file (BAM, BED, or other supported
+      format)
+    name: chip_seq_file
+    type: str
+  - default: null
+    description: Path to the control/input data file (BAM, BED, or other supported
+      format)
+    name: control_file
+    type: str
+- description: Find DNA sequence motifs enriched in genomic regions using the HOMER
+    motif discovery software.
+  name: find_enriched_motifs_with_homer
+  optional_parameters:
+  - default: hg38
+    description: Reference genome for sequence extraction
+    name: genome
+    type: str
+  - default: null
+    description: Path to BED file with background regions for comparison. If None,
+      HOMER will generate random background sequences automatically
+    name: background_file
+    type: str
+  - default: 8,10,12
+    description: Comma-separated list of motif lengths to discover
+    name: motif_length
+    type: str
+  - default: ./homer_motifs
+    description: Directory to save output files
+    name: output_dir
+    type: str
+  - default: 10
+    description: Number of motifs to find
+    name: num_motifs
+    type: int
+  - default: 4
+    description: Number of CPU threads to use
+    name: threads
+    type: int
+  required_parameters:
+  - default: null
+    description: Path to peak file in BED format containing genomic regions to analyze
+      for motif enrichment
+    name: peak_file
+    type: str
+- description: Analyze overlaps between two or more sets of genomic regions.
+  name: analyze_genomic_region_overlap
+  optional_parameters:
+  - default: overlap_analysis
+    description: Prefix for output files
+    name: output_prefix
+    type: str
+  required_parameters:
+  - default: null
+    description: List of genomic region sets. Each item can be either a string path
+      to a BED file or a list of tuples/lists with format (chrom, start, end) or (chrom,
+      start, end, name)
+    name: region_sets
+    type: list
+- description: 'Transfer cell type labels from an annotated reference scRNA-seq dataset
+    to an unannotated query dataset using popV. Loads both AnnData .h5ad files, prepares
+    count layers for scVI, processes the query against the reference, and runs selected
+    annotation methods (default: SCANVI_POPV). Saves predictions to ''output_folder/popv_output/predictions.csv''.
+    This function allows you to use different annotaiton methods i.e. CELLTYPIST,
+    KNN_BBKNN, KNN_HARMONY, KNN_SCANORAMA, KNN_SCVI, ONCLASS, Random_Forest, SCANVI_POPV,
+    Support_Vector, XGboost. Based on you transfer task you can select the multiple
+    best annotation methods. Beware each annotation method adds computational requirements
+    for running the tool. By default it uses SCANVI_POPV method.'
+  name: unsupervised_celltype_transfer_between_scRNA_datasets
+  optional_parameters:
+  - default: null
+    description: Column in query adata.obs with batch information, most likely you
+      will get this from user
+    name: query_batch_key
+    type: str
+  - default: null
+    description: Column in reference adata.obs with batch information, most likely
+      you will get this from user
+    name: ref_batch_key
+    type: str
+  - default: false
+    description: 'Enable CELLTYPiST (reference-based classifier). How it works: regularized
+      logistic regression trained on curated references predicts per-cell probabilities;
+      optional neighbor correction refines labels. Strengths: fast, scalable, strong
+      on common human/mouse types. Weaknesses: depends on reference coverage; limited
+      for novel or out-of-distribution cell types.'
+    name: CELLTYPIST
+    type: bool
+  - default: false
+    description: 'Enable KNN with BBKNN integration. How it works: builds a batch-balanced
+      kNN graph by enforcing a fixed number of neighbors per batch, then uses this
+      graph for downstream analyses. Strengths: simple, fast, preserves local neighborhood
+      structure across batches. Weaknesses: limited global alignment; residual batch
+      effects when shared cell types are sparse; sensitive to k/neighbor parameters.'
+    name: KNN_BBKNN
+    type: bool
+  - default: false
+    description: 'Enable KNN with Harmony integration. How it works: iteratively adjusts
+      PCA embeddings via soft clustering and linear correction to minimize batch effects
+      while preserving structure. Strengths: scalable, effective batch correction
+      in low-D space, often preserves biology. Weaknesses: can overcorrect and merge
+      true biological differences; depends on PCA/parameters.'
+    name: KNN_HARMONY
+    type: bool
+  - default: false
+    description: 'Enable KNN with Scanorama integration. How it works: identifies
+      mutual nearest neighbors across datasets and performs manifold alignment/low-rank
+      correction to merge ''panoramas''. Strengths: strong cross-dataset alignment
+      for shared populations. Weaknesses: slower and more memory-intensive on large
+      data; may distort rare or unique populations.'
+    name: KNN_SCANORAMA
+    type: bool
+  - default: false
+    description: 'Enable KNN with scVI integration (KNN in scVI latent space). How
+      it works: trains a variational autoencoder (negative binomial likelihood) to
+      learn a batch-corrected latent space; runs KNN in this space to transfer labels.
+      Strengths: robust probabilistic embedding that models counts and batch; good
+      transfer performance. Weaknesses: requires training (GPU preferred); sensitive
+      to embedding quality and k.'
+    name: KNN_SCVI
+    type: bool
+  - default: false
+    description: 'Enable OnClass (ontology-aware classifier). How it works: embeds
+      the Cell Ontology graph and trains a classifier over ontology nodes; uses semantic
+      similarity to generalize to unseen labels (zero-shot). Strengths: leverages
+      Cell Ontology; can map to unseen/fine-grained types; interpretable. Weaknesses:
+      dependent on ontology completeness and mapping quality; may assign overly generic
+      labels.'
+    name: ONCLASS
+    type: bool
+  - default: false
+    description: 'Enable Random Forest classifier. How it works: ensemble of decision
+      trees trained on bootstrap samples with feature subsampling; predictions aggregated
+      by majority vote/probabilities. Strengths: robust to noise and nonlinear signals;
+      quick to train; feature importance available. Weaknesses: probability calibration
+      can be poor; needs feature selection with sparse data; sensitive to class imbalance.'
+    name: Random_Forest
+    type: bool
+  - default: true
+    description: 'Enable scANVI via popV (default). How it works: extends scVI with
+      a classification head to learn from labeled reference and unlabeled query (semi-supervised),
+      yielding latent embeddings and probabilistic labels with uncertainty. Strengths:
+      semi-supervised; models batch, label noise; leverages unlabeled data; provides
+      uncertainty. Weaknesses: higher training time; GPU recommended; can degrade
+      with severe label shift or noisy references.'
+    name: SCANVI_POPV
+    type: bool
+  - default: false
+    description: 'Enable Support Vector classifier. How it works: finds a maximum-margin
+      hyperplane; with kernels (e.g., RBF) to model nonlinear boundaries. Strengths:
+      effective in high-dimensional, small-sample settings; kernel flexibility. Weaknesses:
+      hyperparameter tuning needed; not probabilistic by default; scales poorly to
+      very large datasets.'
+    name: Support_Vector
+    type: bool
+  - default: false
+    description: 'Enable XGBoost classifier. How it works: gradient-boosted decision
+      trees trained sequentially with second-order optimization and regularization
+      to minimize loss. Strengths: high accuracy; captures nonlinear interactions;
+      built-in regularization. Weaknesses: many hyperparameters; risk of overfitting
+      noisy, sparse counts; less interpretable.'
+    name: XGboost
+    type: bool
+  - default: 1
+    description: Number of parallel jobs for popV
+    name: n_jobs
+    type: int
+  - default: ./tmp/
+    description: Directory to save trained models and predictions
+    name: output_folder
+    type: str
+  - default: 10
+    description: Number of samples per label (currently unused)
+    name: n_samples_per_label
+    type: int
+  required_parameters:
+  - default: null
+    description: Path to annotated reference AnnData (.h5ad)
+    name: path_to_annotated_h5ad
+    type: str
+  - default: null
+    description: Path to unannotated query AnnData (.h5ad)
+    name: path_to_not_annotated_h5ad
+    type: str
+  - default: null
+    description: Column in reference adata.obs with cell type labels
+    name: ref_labels_key
+    type: str
+- description: Generate State embeddings for single-cell RNA-seq data using the SE-600M
+    model. This function downloads the SE-600M model from Hugging Face, installs required
+    dependencies (git-lfs, uv, arc-state), and generates embeddings for the input
+    AnnData object. The SE-600M model is a state-of-the-art embedding model for single-cell
+    data that can capture complex biological patterns and cell states. Features include
+    real-time streaming output, automatic retry with reduced batch size on failure,
+    GPU detection and warnings, and input validation.
+  name: generate_embeddings_with_state
+  optional_parameters:
+  - default: null
+    description: Name of the output embeddings file. If None, will use input filename
+      with '_state_embeddings' suffix
+    name: output_filename
+    type: str
+  - default: null
+    description: Path to the specific model checkpoint. If None, uses the latest checkpoint
+      in model_folder
+    name: checkpoint
+    type: str
+  - default: X_state
+    description: Name of key to store embeddings in the output AnnData object
+    name: embed_key
+    type: str
+  - default: null
+    description: Path to protein embeddings override (.pt). If omitted, auto-detects
+      in model folder
+    name: protein_embeddings
+    type: str
+  - default: 500
+    description: Batch size for embedding forward pass. Increase to use more VRAM
+      and speed up embedding
+    name: batch_size
+    type: int
+  required_parameters:
+  - default: null
+    description: Name of the input AnnData file (.h5ad format)
+    name: adata_filename
+    type: str
+  - default: null
+    description: Directory containing the input data file
+    name: data_dir
+    type: str
+  - default: null
+    description: Directory where the SE-600M model will be downloaded and stored
+    name: model_folder
+    type: str
+- description: Convert ENSEMBL gene IDs between different species using BioMart homology
+    mapping. This function converts a list of ENSEMBL gene IDs from one species to
+    their homologous counterparts in another species using the Ensembl BioMart database.
+    The conversion is based on one-to-one ortholog mappings between species.
+  name: interspecies_gene_conversion
+  optional_parameters: []
+  required_parameters:
+  - default: null
+    description: List of ENSEMBL gene IDs to convert (e.g., ['ENSG00000007372', 'ENSG00000181449'])
+    name: gene_list
+    type: list[str]
+  - default: null
+    description: 'Source species name. Supported species: human, mouse, rat, zebrafish,
+      fly, drosophila, worm, yeast, chicken, pig, cow, dog, macaque'
+    name: source_species
+    type: str
+  - default: null
+    description: Target species name. Same supported species as source_species
+    name: target_species
+    type: str
+- description: Generate average protein embeddings for a list of Ensembl gene IDs
+    using ESM (Evolutionary Scale Modeling) protein language models. This function
+    fetches all protein isoform sequences for each gene, computes embeddings for each
+    isoform using the specified ESM model and layer, then averages the embeddings
+    across all isoforms to create a single representative embedding per gene. The
+    embeddings are saved as PyTorch tensors for future use. Memory-friendly implementation
+    with rolling averages, small batch processing, and automatic memory management.
+    Automatically handles GPU/CPU device selection and includes error recovery for
+    out-of-memory situations by falling back to single-sequence processing.
+  name: generate_gene_embeddings_with_ESM_models
+  optional_parameters:
+  - default: esm2_t6_8M_UR50D
+    description: ESM model name to use for generating embeddings
+    name: model_name
+    type: str
+  - default: 6
+    description: Which layer of the ESM model to extract embeddings from, generally
+      use last layer
+    name: layer
+    type: int
+  - default: null
+    description: Optional path to save embeddings as PyTorch dictionary
+    name: save_path
+    type: str
+  - default: 1
+    description: Number of sequences to process at once to manage memory usage
+    name: batch_size
+    type: int
+  - default: 1024
+    description: Maximum sequence length to process, longer sequences are filtered
+      out
+    name: max_sequence_length
+    type: int
+  required_parameters:
+  - default: null
+    description: List of Ensembl gene IDs (e.g., ['ENSG00000012048', 'ENSG00000012049'])
+    name: ensembl_gene_ids
+    type: List[str]
+- description: Generate Transcriptformer embeddings for single-cell RNA-seq data.
+    This function downloads model checkpoints, prepares the AnnData object with required
+    fields (ensembl_id, raw counts, assay metadata), and runs inference to generate
+    cell or gene embeddings. Transcriptformer is a transformer-based model that can
+    learn rich representations of single-cell gene expression data. The function automatically
+    handles Ensembl ID pattern detection, model downloading, data preprocessing, and
+    creates missing assay metadata columns with 'unknown' values if needed.
+  name: generate_transcriptformer_embeddings
+  optional_parameters:
+  - default: null
+    description: Name of the output embeddings file. If None, will use input filename
+      with '_transcriptformer_embeddings' suffix
+    name: output_filename
+    type: str
+  - default: tf-sapiens
+    description: 'Type of transcriptformer model to download and use. Options: ''tf-sapiens'',
+      ''tf-exemplar'', ''tf-metazoa'''
+    name: model_type
+    type: str
+  - default: null
+    description: Path to the transcriptformer checkpoint directory. If None, will
+      use './checkpoints/{model_type}'
+    name: checkpoint_path
+    type: str
+  - default: 8
+    description: Batch size for inference
+    name: batch_size
+    type: int
+  - default: 16-mixed
+    description: 'Precision for inference. Options: ''16-mixed'', ''32'''
+    name: precision
+    type: str
+  - default: 30
+    description: Maximum count value to clip to
+    name: clip_counts
+    type: int
+  - default: -1
+    description: Which layer to extract embeddings from (-1 for last layer)
+    name: embedding_layer_index
+    type: int
+  - default: 1
+    description: Number of GPUs to use
+    name: num_gpus
+    type: int
+  - default: 0
+    description: Number of data loading workers
+    name: n_data_workers
+    type: int
+  - default: ensembl_id
+    description: Column name in AnnData.var containing gene identifiers
+    name: gene_col_name
+    type: str
+  - default: null
+    description: Path to pretrained embeddings for out-of-distribution species
+    name: pretrained_embedding
+    type: str
+  - default: true
+    description: Whether to filter genes to only those in the vocabulary
+    name: filter_to_vocabs
+    type: bool
+  - default: None
+    description: Whether to use raw counts from AnnData.raw.X (True), adata.X (False),
+      or auto-detect (None/auto)
+    name: use_raw
+    type: str
+  - default: cell
+    description: 'Type of embeddings to extract: ''cell'' for mean-pooled cell embeddings
+      or ''cge'' for contextual gene embeddings'
+    name: emb_type
+    type: str
+  - default: false
+    description: Remove duplicate genes if found instead of raising an error
+    name: remove_duplicate_genes
+    type: bool
+  - default: false
+    description: Use map-style out-of-memory DataLoader (DistributedSampler-friendly)
+    name: oom_dataloader
+    type: bool
+  required_parameters:
+  - default: null
+    description: Name of the input AnnData file (.h5ad format)
+    name: adata_filename
+    type: str
+  - default: null
+    description: Directory containing the input data file
+    name: data_dir
+    type: str
+immunology:
+- description: Perform ATAC-seq peak calling and differential accessibility analysis
+    using MACS2.
+  name: analyze_atac_seq_differential_accessibility
+  optional_parameters:
+  - default: ./atac_results
+    description: Directory to save output files
+    name: output_dir
+    type: str
+  - default: hs
+    description: Genome size parameter for MACS2
+    name: genome_size
+    type: str
+  - default: 0.05
+    description: q-value cutoff for peak detection
+    name: q_value
+    type: float
+  - default: atac
+    description: Prefix for output file names
+    name: name_prefix
+    type: str
+  required_parameters:
+  - default: null
+    description: Path to the treatment condition BAM file with aligned ATAC-seq reads
+    name: treatment_bam
+    type: str
+  - default: null
+    description: Path to the control condition BAM file with aligned ATAC-seq reads
+    name: control_bam
+    type: str
+- description: Analyzes bacterial growth curve data to determine growth parameters
+    such as doubling time, growth rate, and lag phase.
+  name: analyze_bacterial_growth_curve
+  optional_parameters:
+  - default: .
+    description: Directory where output files will be saved
+    name: output_dir
+    type: str
+  required_parameters:
+  - default: null
+    description: Time points of measurements in hours
+    name: time_points
+    type: List or numpy.ndarray
+  - default: null
+    description: Optical density measurements corresponding to each time point
+    name: od_values
+    type: List or numpy.ndarray
+  - default: null
+    description: Name of the bacterial strain being analyzed
+    name: strain_name
+    type: str
+- description: Simulates the isolation and purification of immune cells from tissue
+    samples.
+  name: isolate_purify_immune_cells
+  optional_parameters:
+  - default: collagenase
+    description: The enzyme used for tissue digestion
+    name: enzyme_type
+    type: str
+  - default: null
+    description: Specific antibody for magnetic-assisted cell sorting
+    name: macs_antibody
+    type: str
+  - default: 45
+    description: Digestion time in minutes
+    name: digestion_time_min
+    type: int
+  required_parameters:
+  - default: null
+    description: The type of tissue sample (e.g., 'adipose', 'kidney', 'liver', 'lung',
+      'spleen')
+    name: tissue_type
+    type: str
+  - default: null
+    description: The immune cell population to isolate (e.g., 'macrophages', 'leukocytes',
+      'T cells')
+    name: target_cell_type
+    type: str
+- description: Estimate cell cycle phase durations using dual-nucleoside pulse labeling
+    data and mathematical modeling.
+  name: estimate_cell_cycle_phase_durations
+  optional_parameters: []
+  required_parameters:
+  - default: null
+    description: Dictionary containing experimental data from flow cytometry with
+      EdU and BrdU labeling, including time points and percentages of labeled cells
+    name: flow_cytometry_data
+    type: dict
+  - default: null
+    description: Initial estimates for cell cycle phase durations and death rates
+    name: initial_estimates
+    type: dict
+- description: Track immune cells under flow conditions and classify their behaviors.
+  name: track_immune_cells_under_flow
+  optional_parameters:
+  - default: ./output
+    description: Directory to save output files
+    name: output_dir
+    type: str
+  - default: 1.0
+    description: Pixel size in micrometers
+    name: pixel_size_um
+    type: float
+  - default: 1.0
+    description: Time interval between frames in seconds
+    name: time_interval_sec
+    type: float
+  - default: right
+    description: Direction of flow ('right', 'left', 'up', 'down')
+    name: flow_direction
+    type: str
+  required_parameters:
+  - default: null
+    description: Path to image sequence directory or video file
+    name: image_sequence_path
+    type: str
+- description: Analyze CFSE-labeled cell samples to quantify cell division and proliferation.
+  name: analyze_cfse_cell_proliferation
+  optional_parameters:
+  - default: FL1-A
+    description: Name of the channel containing CFSE fluorescence data
+    name: cfse_channel
+    type: str
+  - default: null
+    description: Tuple of (min_fsc, max_fsc, min_ssc, max_ssc) for lymphocyte gating
+    name: lymphocyte_gate
+    type: tuple or None
+  required_parameters:
+  - default: null
+    description: Path to the FCS file containing flow cytometry data from CFSE-labeled
+      cells
+    name: fcs_file_path
+    type: str
+- description: Analyze cytokine production (IFN-γ, IL-17) in CD4+ T cells after antigen
+    stimulation.
+  name: analyze_cytokine_production_in_cd4_tcells
+  optional_parameters:
+  - default: ./results
+    description: Directory to save the results file
+    name: output_dir
+    type: str
+  required_parameters:
+  - default: null
+    description: 'Dictionary mapping stimulation conditions to FCS file paths. Expected
+      keys: ''unstimulated'', ''Mtb300'', ''CMV'', ''SEB'''
+    name: fcs_files_dict
+    type: dict
+- description: Analyze ELISA data to quantify EBV antibody titers in plasma/serum
+    samples.
+  name: analyze_ebv_antibody_titers
+  optional_parameters:
+  - default: ./
+    description: Directory to save output files.
+    name: output_dir
+    type: str
+  required_parameters:
+  - default: null
+    description: 'Dictionary containing optical density (OD) readings for each sample.
+      Format: {sample_id: {''VCA_IgG'': float, ''VCA_IgM'': float, ''EA_IgG'': float,
+      ''EA_IgM'': float, ''EBNA1_IgG'': float, ''EBNA1_IgM'': float}}'
+    name: raw_od_data
+    type: dict
+  - default: null
+    description: 'Dictionary containing standard curve data for each antibody type.
+      Format: {antibody_type: [(concentration, OD), ...]}'
+    name: standard_curve_data
+    type: dict
+  - default: null
+    description: 'Dictionary containing metadata for each sample. Format: {sample_id:
+      {''group'': str, ''collection_date'': str}}'
+    name: sample_metadata
+    type: dict
+- description: Analyzes histological images of CNS lesions to quantify immune cell
+    infiltration, demyelination, and tissue damage.
+  name: analyze_cns_lesion_histology
+  optional_parameters:
+  - default: ./output
+    description: Directory to save output files
+    name: output_dir
+    type: str
+  - default: H&E
+    description: 'Type of histological stain used (options: "H&E", "LFB", "IHC")'
+    name: stain_type
+    type: str
+  required_parameters:
+  - default: null
+    description: Path to the microscopy image file of brain or spinal cord tissue
+      section
+    name: image_path
+    type: str
+- description: Analyzes immunohistochemistry images to quantify protein expression
+    and spatial distribution.
+  name: analyze_immunohistochemistry_image
+  optional_parameters:
+  - default: Unknown
+    description: Name of the protein being analyzed
+    name: protein_name
+    type: str
+  - default: ./ihc_results/
+    description: Directory to save output files
+    name: output_dir
+    type: str
+  required_parameters:
+  - default: null
+    description: Path to the microscopy image of tissue section stained with antibodies
+    name: image_path
+    type: str
+microbiology:
+- description: Optimize anaerobic digestion process conditions to maximize VFA production
+    or methane yield.
+  name: optimize_anaerobic_digestion_process
+  optional_parameters:
+  - default: methane_yield
+    description: Target output to maximize, either 'vfa_production' or 'methane_yield'
+    name: target_output
+    type: str
+  - default: rsm
+    description: Method used for optimization, either 'rsm' (Response Surface Methodology)
+      or 'genetic' (Genetic Algorithm)
+    name: optimization_method
+    type: str
+  required_parameters:
+  - default: null
+    description: Dictionary containing waste characteristics such as total_solids,
+      volatile_solids, and cod
+    name: waste_characteristics
+    type: dict
+  - default: null
+    description: Dictionary containing operational parameters and their ranges for
+      hrt, olr, if_ratio, temperature, and ph
+    name: operational_parameters
+    type: dict
+- description: Analyzes arsenic speciation in liquid samples using HPLC-ICP-MS technique.
+    Returns a research log summarizing analysis steps and results.
+  name: analyze_arsenic_speciation_hplc_icpms
+  optional_parameters:
+  - default: Unknown Sample
+    description: Name of the sample being analyzed
+    name: sample_name
+    type: str
+  - default: null
+    description: Dictionary containing calibration standards data with known concentrations
+      for each arsenic species
+    name: calibration_data
+    type: dict
+  required_parameters:
+  - default: null
+    description: Dictionary containing sample data with keys as sample IDs and values
+      as dictionaries with retention times (in minutes) as keys and signal intensities
+      as values
+    name: sample_data
+    type: dict
+- description: Count bacterial colonies from an image of agar plate using computer
+    vision techniques.
+  name: count_bacterial_colonies
+  optional_parameters:
+  - default: 1
+    description: Dilution factor of the plated sample
+    name: dilution_factor
+    type: float
+  - default: 65.0
+    description: Area of the agar plate in square centimeters
+    name: plate_area_cm2
+    type: float
+  - default: ./output
+    description: Directory to save output images and results
+    name: output_dir
+    type: str
+  required_parameters:
+  - default: null
+    description: Path to the image file containing bacterial colonies on agar plate
+    name: image_path
+    type: str
+- description: Annotate a bacterial genome using Prokka to identify genes, proteins,
+    and functional features.
+  name: annotate_bacterial_genome
+  optional_parameters:
+  - default: annotation_results
+    description: Directory where annotation results will be saved
+    name: output_dir
+    type: str
+  - default: ''
+    description: Genus name for the organism
+    name: genus
+    type: str
+  - default: ''
+    description: Species name for the organism
+    name: species
+    type: str
+  - default: ''
+    description: Strain identifier
+    name: strain
+    type: str
+  - default: ''
+    description: Prefix for output files
+    name: prefix
+    type: str
+  required_parameters:
+  - default: null
+    description: Path to the assembled genome sequence file in FASTA format
+    name: genome_file_path
+    type: str
+- description: Quantify bacterial concentration (CFU/mL) using serial dilutions and
+    spot plating.
+  name: enumerate_bacterial_cfu_by_serial_dilution
+  optional_parameters:
+  - default: 1.0
+    description: Volume of the initial bacterial sample in milliliters
+    name: initial_sample_volume_ml
+    type: float
+  - default: 100000000.0
+    description: Estimated concentration of bacteria in the initial sample (CFU/mL)
+    name: estimated_concentration
+    type: float
+  - default: 10
+    description: Factor by which each dilution reduces the concentration
+    name: dilution_factor
+    type: int
+  - default: 8
+    description: Number of serial dilutions to perform
+    name: num_dilutions
+    type: int
+  - default: 3
+    description: Number of replicate spots to plate for each dilution
+    name: spots_per_dilution
+    type: int
+  - default: cfu_enumeration_results.csv
+    description: Filename to save the CFU enumeration results
+    name: output_file
+    type: str
+  required_parameters: []
+- description: Model bacterial population dynamics over time using ordinary differential
+    equations.
+  name: model_bacterial_growth_dynamics
+  optional_parameters:
+  - default: 24
+    description: Total simulation time in hours
+    name: simulation_time
+    type: float
+  - default: 0.1
+    description: Time step for simulation output
+    name: time_step
+    type: float
+  required_parameters:
+  - default: null
+    description: Initial bacterial population size (CFU/ml or cells)
+    name: initial_population
+    type: float
+  - default: null
+    description: Bacterial growth rate (per hour)
+    name: growth_rate
+    type: float
+  - default: null
+    description: Rate at which bacteria are cleared from the system (per hour)
+    name: clearance_rate
+    type: float
+  - default: null
+    description: Maximum carrying capacity of the environment (CFU/ml or cells)
+    name: niche_size
+    type: float
+- description: Quantifies biofilm biomass using crystal violet staining assay data
+    and returns a detailed research log.
+  name: quantify_biofilm_biomass_crystal_violet
+  optional_parameters:
+  - default: null
+    description: Names of the biofilm samples corresponding to od_values
+    name: sample_names
+    type: List[str]
+  - default: 0
+    description: Index of the negative control sample in od_values
+    name: control_index
+    type: int
+  - default: null
+    description: Path to save the results as CSV file
+    name: save_path
+    type: str
+  required_parameters:
+  - default: null
+    description: Optical density measurements from crystal violet staining representing
+      absorbance readings for samples
+    name: od_values
+    type: List[float] or numpy.ndarray
+- description: Perform automated cell segmentation and quantify morphological metrics
+    from fluorescence microscopy images.
+  name: segment_and_analyze_microbial_cells
+  optional_parameters:
+  - default: ./output
+    description: Directory to save output files
+    name: output_dir
+    type: str
+  - default: 50
+    description: Minimum cell size in pixels to filter noise
+    name: min_cell_size
+    type: int
+  required_parameters:
+  - default: null
+    description: Path to the fluorescence microscopy image file
+    name: image_path
+    type: str
+- description: Perform cell segmentation on fluorescence microscopy images using deep
+    learning with pre-trained models from the Cellpose/Omnipose library.
+  name: segment_cells_with_deep_learning
+  optional_parameters:
+  - default: bact_fluor_omni
+    description: 'Name of the pre-trained model to use (Options include: ''bact_fluor_omni'',
+      ''cyto'', ''nuclei'', etc.)'
+    name: model_type
+    type: str
+  - default: null
+    description: Expected diameter of cells in pixels. If None, diameter is automatically
+      estimated
+    name: diameter
+    type: float
+  - default: segmentation_results
+    description: Directory to save segmentation results
+    name: save_dir
+    type: str
+  required_parameters:
+  - default: null
+    description: Path to the fluorescence microscopy image file
+    name: image_path
+    type: str
+- description: Simulate microbial community dynamics using the Generalized Lotka-Volterra
+    (gLV) model.
+  name: simulate_generalized_lotka_volterra_dynamics
+  optional_parameters:
+  - default: glv_simulation_results.csv
+    description: Filename to save the simulation results
+    name: output_file
+    type: str
+  required_parameters:
+  - default: null
+    description: Initial abundances of each microbial species (1D array)
+    name: initial_abundances
+    type: numpy.ndarray
+  - default: null
+    description: Intrinsic growth rates for each microbial species (1D array)
+    name: growth_rates
+    type: numpy.ndarray
+  - default: null
+    description: Matrix of interaction coefficients where A[i,j] represents the effect
+      of species j on species i (2D array)
+    name: interaction_matrix
+    type: numpy.ndarray
+  - default: null
+    description: Time points at which to evaluate the model
+    name: time_points
+    type: numpy.ndarray
+- description: Predict the secondary structure of an RNA molecule using ViennaRNA.
+  name: predict_rna_secondary_structure
+  optional_parameters:
+  - default: rna_structure
+    description: Prefix for output files
+    name: output_prefix
+    type: str
+  required_parameters:
+  - default: null
+    description: The RNA sequence (consisting of A, U, G, C nucleotides)
+    name: rna_sequence
+    type: str
+- description: Performs stochastic simulation of microbial population dynamics using
+    the Gillespie algorithm.
+  name: simulate_microbial_population_dynamics
+  optional_parameters:
+  - default: 100
+    description: Maximum simulation time
+    name: max_time
+    type: float
+  - default: 100
+    description: Number of stochastic simulations to run
+    name: num_simulations
+    type: int
+  - default: 100
+    description: Number of time points to record for trajectories
+    name: time_points
+    type: int
+  required_parameters:
+  - default: null
+    description: Initial population sizes for each microbial species
+    name: initial_populations
+    type: List[int]
+  - default: null
+    description: Per capita growth rates for each species
+    name: growth_rates
+    type: List[float]
+  - default: null
+    description: Per capita death/clearance rates for each species
+    name: clearance_rates
+    type: List[float]
+  - default: null
+    description: Maximum sustainable population for each species
+    name: carrying_capacities
+    type: List[float]
+pathology:
+- description: Analyze aortic diameter and geometry from cardiovascular imaging data
+    to measure aortic root diameter, ascending aorta diameter, and calculate geometric
+    parameters such as tortuosity and dilation indices.
+  name: analyze_aortic_diameter_and_geometry
+  optional_parameters:
+  - default: ./output
+    description: Directory to save output files
+    name: output_dir
+    type: str
+  required_parameters:
+  - default: null
+    description: Path to the cardiovascular imaging data (DICOM, JPG, PNG)
+    name: image_path
+    type: str
+- description: Analyze luminescence-based ATP assay data to determine intracellular
+    ATP concentration.
+  name: analyze_atp_luminescence_assay
+  optional_parameters:
+  - default: cell_count
+    description: Method used to normalize ATP values, either cell_count or protein_content
+    name: normalization_method
+    type: str
+  - default: null
+    description: Path to CSV file with normalization data or dictionary with sample
+      IDs as keys and normalization values
+    name: normalization_data
+    type: str or dict
+  required_parameters:
+  - default: null
+    description: Path to CSV file containing luminescence readings from samples with
+      columns for Sample_ID and Luminescence_Value
+    name: data_file
+    type: str
+  - default: null
+    description: Path to CSV file containing standard curve data with columns for
+      ATP_Concentration (in nM) and Luminescence_Value
+    name: standard_curve_file
+    type: str
+- description: Analyze histological images of thrombus samples stained with H&E to
+    identify and quantify different thrombus components (fresh, cellular lysis, endothelialization,
+    fibroblastic reaction).
+  name: analyze_thrombus_histology
+  optional_parameters:
+  - default: ./output
+    description: Directory to save output files
+    name: output_dir
+    type: str
+  required_parameters:
+  - default: null
+    description: Path to the histological image of thrombus sample stained with H&E
+    name: image_path
+    type: str
+- description: Analyzes intracellular calcium concentration using Rhod-2 fluorescent
+    indicator from microscopy images.
+  name: analyze_intracellular_calcium_with_rhod2
+  optional_parameters:
+  - default: ./output
+    description: Directory to save output files
+    name: output_dir
+    type: str
+  required_parameters:
+  - default: null
+    description: Path to the background image (no cells, just media)
+    name: background_image_path
+    type: str
+  - default: null
+    description: Path to the control image (cells without calcium stimulus)
+    name: control_image_path
+    type: str
+  - default: null
+    description: Path to the sample image (cells with calcium stimulus)
+    name: sample_image_path
+    type: str
+- description: Quantify the volume/density of immunofluorescence-labeled corneal nerve
+    fibers.
+  name: quantify_corneal_nerve_fibers
+  optional_parameters:
+  - default: ./output
+    description: Directory to save output files
+    name: output_dir
+    type: str
+  - default: otsu
+    description: Method for thresholding ('otsu', 'adaptive', 'manual')
+    name: threshold_method
+    type: str
+  required_parameters:
+  - default: null
+    description: Path to the immunofluorescence microscopy image file
+    name: image_path
+    type: str
+  - default: null
+    description: Type of nerve fiber marker (e.g., 'βIII-tubulin', 'SP', 'L1CAM')
+    name: marker_type
+    type: str
+- description: Segment cells and quantify protein expression levels from multichannel
+    tissue images.
+  name: segment_and_quantify_cells_in_multiplexed_images
+  optional_parameters:
+  - default: 0
+    description: Index of the nuclear marker channel (typically DAPI)
+    name: nuclear_channel_index
+    type: int
+  - default: ./output
+    description: Directory to save output files
+    name: output_dir
+    type: str
+  required_parameters:
+  - default: null
+    description: Path to the multichannel image file (tiff stack or similar format)
+    name: image_path
+    type: str
+  - default: null
+    description: List of marker names corresponding to each channel in the image
+    name: markers_list
+    type: List[str]
+- description: Analyze bone microarchitecture parameters from 3D micro-CT images to
+    calculate bone mineral density, bone volume, trabecular number, thickness, and
+    separation.
+  name: analyze_bone_microct_morphometry
+  optional_parameters:
+  - default: ./results
+    description: Directory to save output files
+    name: output_dir
+    type: str
+  - default: null
+    description: Threshold value for bone segmentation. If None, Otsu's method will
+      be used
+    name: threshold_value
+    type: float
+  required_parameters:
+  - default: null
+    description: Path to the micro-CT scan data file (TIFF stack or similar 3D format)
+    name: input_file_path
+    type: str
+pharmacology:
+- description: Run DiffDock molecular docking using a protein PDB file and a SMILES
+    string for the ligand, executing the process in a Docker container.
+  name: run_diffdock_with_smiles
+  optional_parameters:
+  - default: 0
+    description: GPU device ID to use for computation
+    name: gpu_device
+    type: int
+  - default: true
+    description: Whether to use GPU acceleration for docking
+    name: use_gpu
+    type: bool
+  required_parameters:
+  - default: null
+    description: Path to the protein PDB file for docking
+    name: pdb_path
+    type: str
+  - default: null
+    description: SMILES string representation of the ligand molecule
+    name: smiles_string
+    type: str
+  - default: null
+    description: Local directory path where docking results will be saved
+    name: local_output_dir
+    type: str
+- description: Performs molecular docking using AutoDock Vina to predict binding affinities
+    between small molecules and a receptor protein.
+  name: docking_autodock_vina
+  optional_parameters:
+  - default: 1
+    description: Number of CPU cores to use for docking
+    name: ncpu
+    type: int
+  required_parameters:
+  - default: null
+    description: List of SMILES strings representing small molecules to dock
+    name: smiles_list
+    type: List[str]
+  - default: null
+    description: Path to the receptor protein structure PDB file
+    name: receptor_pdb_file
+    type: str
+  - default: null
+    description: 3D coordinates [x, y, z] of the docking box center
+    name: box_center
+    type: List[float]
+  - default: null
+    description: Dimensions [x, y, z] of the docking box
+    name: box_size
+    type: List[float]
+- description: Runs AutoSite on a PDB file to identify potential binding sites and
+    returns a research log with the results.
+  name: run_autosite
+  optional_parameters:
+  - default: 1.0
+    description: Grid spacing parameter for AutoSite calculation
+    name: spacing
+    type: float
+  required_parameters:
+  - default: null
+    description: Path to the input PDB file
+    name: pdb_file
+    type: str
+  - default: null
+    description: Directory where AutoSite results will be saved
+    name: output_dir
+    type: str
+- description: Computes TxGNN model predictions for drug repurposing and returns the
+    top predicted drugs with their scores for a given disease.
+  name: retrieve_topk_repurposing_drugs_from_disease_txgnn
+  optional_parameters:
+  - default: 5
+    description: The number of top drug predictions to return
+    name: k
+    type: int
+  required_parameters:
+  - default: null
+    description: The name of the disease for which to retrieve drug predictions
+    name: disease_name
+    type: str
+  - default: null
+    description: Path to the data lake
+    name: data_lake_path
+    type: str
+- description: Predicts ADMET (Absorption, Distribution, Metabolism, Excretion, Toxicity)
+    properties for a list of compounds using pretrained models.
+  name: predict_admet_properties
+  optional_parameters:
+  - default: MPNN
+    description: 'Type of model to use for ADMET prediction (options: ''MPNN'', ''CNN'',
+      ''Morgan'')'
+    name: ADMET_model_type
+    type: str
+  required_parameters:
+  - default: null
+    description: List of SMILES strings representing chemical compounds to analyze
+    name: smiles_list
+    type: List[str]
+- description: Predicts binding affinity between small molecules and a protein sequence
+    using pre-trained deep learning models.
+  name: predict_binding_affinity_protein_1d_sequence
+  optional_parameters:
+  - default: MPNN-CNN
+    description: 'Deep learning model architecture to use for binding affinity prediction
+      (options: CNN-CNN, MPNN-CNN, Morgan-CNN, Morgan-AAC, Daylight-AAC)'
+    name: affinity_model_type
+    type: str
+  required_parameters:
+  - default: null
+    description: List of SMILES strings representing chemical compounds
+    name: smiles_list
+    type: List[str]
+  - default: null
+    description: Protein sequence in amino acid format
+    name: amino_acid_sequence
+    type: str
+- description: Analyzes the stability of pharmaceutical formulations under accelerated
+    storage conditions.
+  name: analyze_accelerated_stability_of_pharmaceutical_formulations
+  optional_parameters: []
+  required_parameters:
+  - default: null
+    description: List of formulation dictionaries containing name, active ingredient,
+      concentration, and excipients
+    name: formulations
+    type: List[dict]
+  - default: null
+    description: List of storage condition dictionaries containing temperature, humidity
+      (optional), and description
+    name: storage_conditions
+    type: List[dict]
+  - default: null
+    description: List of time points in days to evaluate stability
+    name: time_points
+    type: List[int]
+- description: Generates a detailed protocol for performing a 3D chondrogenic aggregate
+    culture assay to evaluate compounds' effects on chondrogenesis.
+  name: run_3d_chondrogenic_aggregate_assay
+  optional_parameters:
+  - default: 21
+    description: Total duration of the culture period in days
+    name: culture_duration_days
+    type: int
+  - default: 7
+    description: Interval in days between measurements
+    name: measurement_intervals
+    type: int
+  required_parameters:
+  - default: null
+    description: Dictionary with cell information including 'source', 'passage_number',
+      and 'cell_density'
+    name: chondrocyte_cells
+    type: dict
+  - default: null
+    description: List of compounds to test, each with 'name', 'concentration', and
+      'vehicle' keys
+    name: test_compounds
+    type: list of dict
+- description: Grade and monitor adverse events in animal studies using the VCOG-CTCAE
+    standard.
+  name: grade_adverse_events_using_vcog_ctcae
+  optional_parameters: []
+  required_parameters:
+  - default: null
+    description: 'Path to a CSV file containing clinical evaluation data with columns:
+      subject_id, time_point, symptom, severity, measurement (optional)'
+    name: clinical_data_file
+    type: str
+- description: Analyze biodistribution and pharmacokinetic profile of radiolabeled
+    antibodies.
+  name: analyze_radiolabeled_antibody_biodistribution
+  optional_parameters: []
+  required_parameters:
+  - default: null
+    description: Time points (hours) at which measurements were taken
+    name: time_points
+    type: List[float] or numpy.ndarray
+  - default: null
+    description: Dictionary where keys are tissue names and values are lists/arrays
+      of %IA/g measurements corresponding to time_points. Must include 'tumor' as
+      one of the keys
+    name: tissue_data
+    type: dict
+- description: Estimate radiation absorbed doses to tumor and normal organs for alpha-particle
+    radiotherapeutics using the Medical Internal Radiation Dose (MIRD) schema.
+  name: estimate_alpha_particle_radiotherapy_dosimetry
+  optional_parameters:
+  - default: dosimetry_results.csv
+    description: Filename to save the dosimetry results
+    name: output_file
+    type: str
+  required_parameters:
+  - default: null
+    description: Dictionary containing organ/tissue names as keys and a list of time-activity
+      measurements as values. Each measurement should be a tuple of (time_hours, percent_injected_activity).
+      Must include entries for all relevant organs including 'tumor'.
+    name: biodistribution_data
+    type: dict
+  - default: null
+    description: Dictionary containing radiation parameters for the alpha-emitting
+      radionuclide including 'radionuclide', 'half_life_hours', 'energy_per_decay_MeV',
+      'radiation_weighting_factor', and 'S_factors'.
+    name: radiation_parameters
+    type: dict
+- description: Perform a Methylome-wide Association Study (MWAS) to identify CpG sites
+    significantly associated with CYP2C19 metabolizer status.
+  name: perform_mwas_cyp2c19_metabolizer_status
+  optional_parameters:
+  - default: null
+    description: Path to CSV or TSV file containing covariates to adjust for in the
+      regression model (e.g., age, sex, smoking status).
+    name: covariates_path
+    type: str
+  - default: 0.05
+    description: P-value threshold for significance after multiple testing correction.
+    name: pvalue_threshold
+    type: float
+  - default: significant_cpg_sites.csv
+    description: Filename to save significant CpG sites.
+    name: output_file
+    type: str
+  required_parameters:
+  - default: null
+    description: Path to CSV or TSV file containing DNA methylation beta values. Rows
+      should be samples, columns should be CpG sites.
+    name: methylation_data_path
+    type: str
+  - default: null
+    description: Path to CSV or TSV file containing CYP2C19 metabolizer status for
+      each sample. Should have a sample ID column and a status column.
+    name: metabolizer_status_path
+    type: str
+- description: Calculate key physicochemical properties of a drug candidate molecule.
+  name: calculate_physicochemical_properties
+  optional_parameters: []
+  required_parameters:
+  - default: null
+    description: The molecular structure in SMILES format
+    name: smiles_string
+    type: str
+- description: Analyze tumor growth inhibition in xenograft models across different
+    treatment groups.
+  name: analyze_xenograft_tumor_growth_inhibition
+  optional_parameters:
+  - default: ./results
+    description: Directory to save output files
+    name: output_dir
+    type: str
+  required_parameters:
+  - default: null
+    description: Path to CSV or TSV file containing tumor volume measurements
+    name: data_path
+    type: str
+  - default: null
+    description: Name of the column containing time points
+    name: time_column
+    type: str
+  - default: null
+    description: Name of the column containing tumor volume measurements
+    name: volume_column
+    type: str
+  - default: null
+    description: Name of the column containing treatment group labels
+    name: group_column
+    type: str
+  - default: null
+    description: Name of the column containing subject/mouse identifiers
+    name: subject_column
+    type: str
+- description: Analyze western blot or DNA electrophoresis images and return pixel
+    distribution statistics including intensity statistics, percentiles, and brightness
+    distribution. Use this to determine appropriate threshold values for find_roi_from_image.
+  name: analyze_pixel_distribution
+  optional_parameters: []
+  required_parameters:
+  - default: null
+    description: Path to the input grayscale image. Automatically appends .png if
+      no suffix is provided.
+    name: image_path
+    type: str
+- description: Find the ROIs (regions of interest) of protein bands from a Western
+    blot or DNA electrophoresis image using threshold-based blob detection. Returns
+    annotated image path and list of ROI coordinates. Use analyze_pixel_distribution
+    first to determine appropriate threshold values. The returned ROI list can be
+    converted to target_bands format for analyze_western_blot.
+  name: find_roi_from_image
+  optional_parameters:
+  - default: true
+    description: If True, draw green contours (hulls) and blue keypoint boxes for
+      debugging.
+    name: debug
+    type: bool
+  required_parameters:
+  - default: null
+    description: Path to the input image.
+    name: image_path
+    type: str
+  - default: null
+    description: Pixel intensities lower than this value are used to make the binary
+      image. Use analyze_pixel_distribution to determine appropriate values.
+    name: lower_threshold
+    type: int
+  - default: null
+    description: Pixel intensities greater than or equal to this value are used to
+      make the binary image. Use analyze_pixel_distribution to determine appropriate
+      values.
+    name: upper_threshold
+    type: int
+  - default: null
+    description: The actual number of bands expected in the image.
+    name: number_of_bands
+    type: int
+- description: Performs densitometric analysis of Western blot images to quantify
+    relative protein expression.
+  name: analyze_western_blot
+  optional_parameters:
+  - default: ./results
+    description: Directory to save output files
+    name: output_dir
+    type: str
+  required_parameters:
+  - default: null
+    description: Path to the Western blot image file
+    name: blot_image_path
+    type: str
+  - default: null
+    description: List of dictionaries containing information about target protein
+      bands, each with 'name' and 'roi' (region of interest as [x, y, width, height])
+    name: target_bands
+    type: list of dict
+  - default: null
+    description: Dictionary with 'name' and 'roi' for the loading control protein
+      (e.g., β-actin, GAPDH)
+    name: loading_control_band
+    type: dict
+  - default: null
+    description: Dictionary containing information about antibodies used with 'primary'
+      and 'secondary' keys
+    name: antibody_info
+    type: dict
+- description: Query drug-drug interactions from DDInter database to identify potential
+    interactions, mechanisms, and severity levels between specified drugs.
+  name: query_drug_interactions
+  required_parameters:
+  - default: null
+    description: List of drug names to query for interactions
+    name: drug_names
+    type: List[str]
+  optional_parameters:
+  - default: null
+    description: Filter results by specific interaction types
+    name: interaction_types
+    type: List[str]
+  - default: null
+    description: Filter results by severity levels (Major, Moderate, Minor)
+    name: severity_levels
+    type: List[str]
+  - default: null
+    description: Path to data lake directory containing DDInter data
+    name: data_lake_path
+    type: str
+- description: Analyze safety of a drug combination for potential interactions using
+    DDInter database with comprehensive risk assessment and clinical recommendations.
+  name: check_drug_combination_safety
+  required_parameters:
+  - default: null
+    description: List of drugs to analyze for combination safety
+    name: drug_list
+    type: List[str]
+  optional_parameters:
+  - default: true
+    description: Include interaction mechanism descriptions in results
+    name: include_mechanisms
+    type: bool
+  - default: true
+    description: Include management recommendations in results
+    name: include_management
+    type: bool
+  - default: null
+    description: Path to data lake directory containing DDInter data
+    name: data_lake_path
+    type: str
+- description: Analyze interaction mechanisms between two specific drugs providing
+    detailed mechanistic insights and clinical significance assessment.
+  name: analyze_interaction_mechanisms
+  required_parameters:
+  - default: null
+    description: Pair of drug names to analyze (drug1, drug2)
+    name: drug_pair
+    type: Tuple[str, str]
+  optional_parameters:
+  - default: true
+    description: Include detailed mechanistic information in analysis
+    name: detailed_analysis
+    type: bool
+  - default: null
+    description: Path to data lake directory containing DDInter data
+    name: data_lake_path
+    type: str
+- description: Find alternative drugs that don't interact with contraindicated drugs
+    using DDInter database for safer therapeutic substitutions.
+  name: find_alternative_drugs_ddinter
+  required_parameters:
+  - default: null
+    description: Drug to find alternatives for
+    name: target_drug
+    type: str
+  - default: null
+    description: List of drugs to avoid interactions with
+    name: contraindicated_drugs
+    type: List[str]
+  optional_parameters:
+  - default: null
+    description: Limit search to specific therapeutic class
+    name: therapeutic_class
+    type: str
+  - default: null
+    description: Path to data lake directory containing DDInter data
+    name: data_lake_path
+    type: str
+- description: Query FDA adverse event reports for specific drugs from the OpenFDA
+    database to identify potential safety signals, reaction patterns, and regulatory
+    intelligence.
+  name: query_fda_adverse_events
+  required_parameters:
+  - default: null
+    description: Name of the drug to query for adverse events
+    name: drug_name
+    type: str
+  optional_parameters:
+  - default: null
+    description: Optional date range as (start_date, end_date) in YYYY-MM-DD format
+    name: date_range
+    type: Tuple[str, str]
+  - default: null
+    description: Optional filter by severity levels ['serious', 'non_serious']
+    name: severity_filter
+    type: List[str]
+  - default: null
+    description: Optional filter by outcomes ['life_threatening', 'hospitalization',
+      'death']
+    name: outcome_filter
+    type: List[str]
+  - default: 100
+    description: Maximum number of results to return
+    name: limit
+    type: int
+- description: Retrieve FDA drug label information including indications, contraindications,
+    warnings, and dosage information from the OpenFDA database.
+  name: get_fda_drug_label_info
+  required_parameters:
+  - default: null
+    description: Name of the drug to query for label information
+    name: drug_name
+    type: str
+  optional_parameters:
+  - default: null
+    description: Optional list of specific sections to retrieve ['indications_and_usage',
+      'contraindications', 'warnings', 'dosage_and_administration']
+    name: sections
+    type: List[str]
+- description: Check for FDA drug recalls and enforcement actions from the OpenFDA
+    database to identify safety concerns and regulatory actions.
+  name: check_fda_drug_recalls
+  required_parameters:
+  - default: null
+    description: Name of the drug to check for recalls
+    name: drug_name
+    type: str
+  optional_parameters:
+  - default: null
+    description: Optional filter by recall class ['Class I', 'Class II', 'Class III']
+    name: classification
+    type: List[str]
+  - default: null
+    description: Optional date range for recalls as (start_date, end_date)
+    name: date_range
+    type: Tuple[str, str]
+- description: Analyze safety signals across multiple drugs using OpenFDA adverse
+    event data to identify patterns and comparative risk profiles.
+  name: analyze_fda_safety_signals
+  required_parameters:
+  - default: null
+    description: List of drug names to analyze for safety signals
+    name: drug_list
+    type: List[str]
+  optional_parameters:
+  - default: null
+    description: Optional comparison time period as (start_date, end_date)
+    name: comparison_period
+    type: Tuple[str, str]
+  - default: 2.0
+    description: Threshold for signal detection
+    name: signal_threshold
+    type: float
+physiology:
+- description: Generate a 3D model of facial anatomy from MRI scans of the head and
+    neck.
+  name: reconstruct_3d_face_from_mri
+  optional_parameters:
+  - default: ./output
+    description: Directory where output files will be saved
+    name: output_dir
+    type: str
+  - default: subject
+    description: Identifier for the subject, used in output filenames
+    name: subject_id
+    type: str
+  - default: 300
+    description: Threshold value for initial segmentation of facial tissues
+    name: threshold_value
+    type: int
+  required_parameters:
+  - default: null
+    description: 'Path to the MRI scan file (NIfTI format: .nii or .nii.gz)'
+    name: mri_file_path
+    type: str
+- description: Extracts P1 amplitude and latency from Auditory Brainstem Response
+    (ABR) waveform data.
+  name: analyze_abr_waveform_p1_metrics
+  optional_parameters: []
+  required_parameters:
+  - default: null
+    description: Time points of the ABR recording in milliseconds
+    name: time_ms
+    type: array-like
+  - default: null
+    description: Amplitude values of the ABR recording in microvolts
+    name: amplitude_uv
+    type: array-like
+- description: Analyze ciliary beat frequency from high-speed video microscopy data
+    using FFT analysis.
+  name: analyze_ciliary_beat_frequency
+  optional_parameters:
+  - default: 5
+    description: Number of regions of interest to analyze
+    name: roi_count
+    type: int
+  - default: 0
+    description: Minimum frequency to consider in Hz
+    name: min_freq
+    type: float
+  - default: 30
+    description: Maximum frequency to consider in Hz
+    name: max_freq
+    type: float
+  - default: ./
+    description: Directory to save output files
+    name: output_dir
+    type: str
+  required_parameters:
+  - default: null
+    description: Path to the high-speed video microscopy file of ciliary beating
+    name: video_path
+    type: str
+- description: Analyze colocalization between two fluorescently labeled proteins in
+    microscopy images.
+  name: analyze_protein_colocalization
+  optional_parameters:
+  - default: ./output
+    description: Directory to save output files
+    name: output_dir
+    type: str
+  - default: otsu
+    description: Method for thresholding images ('otsu', 'li', or 'yen')
+    name: threshold_method
+    type: str
+  required_parameters:
+  - default: null
+    description: Path to the first channel image file (fluorescent protein 1)
+    name: channel1_path
+    type: str
+  - default: null
+    description: Path to the second channel image file (fluorescent protein 2)
+    name: channel2_path
+    type: str
+- description: Performs cosinor analysis on physiological time series data to characterize
+    circadian rhythms.
+  name: perform_cosinor_analysis
+  optional_parameters:
+  - default: 24.0
+    description: Period of the rhythm in hours, default is 24 hours for circadian
+      rhythms
+    name: period
+    type: float
+  required_parameters:
+  - default: null
+    description: Time points of the measurements in hours
+    name: time_data
+    type: array-like
+  - default: null
+    description: Physiological measurements corresponding to each time point
+    name: physiological_data
+    type: array-like
+- description: Calculate Apparent Diffusion Coefficient (ADC) map from diffusion-weighted
+    MRI data using monoexponential diffusion model.
+  name: calculate_brain_adc_map
+  optional_parameters:
+  - default: adc_map.nii.gz
+    description: Path where the output ADC map will be saved
+    name: output_path
+    type: str
+  - default: null
+    description: Path to a binary mask file to limit ADC calculation to brain regions
+    name: mask_file_path
+    type: str
+  required_parameters:
+  - default: null
+    description: Path to the 4D NIfTI file containing diffusion-weighted MRI data
+    name: dwi_file_path
+    type: str
+  - default: null
+    description: List of b-values corresponding to each volume in the 4D DWI data
+    name: b_values
+    type: List[float]
+- description: Analyze calcium dynamics in endo-lysosomal compartments using ELGA/ELGA1
+    probe data.
+  name: analyze_endolysosomal_calcium_dynamics
+  optional_parameters:
+  - default: null
+    description: Time point (in seconds) when treatment/stimulus was applied
+    name: treatment_time
+    type: float
+  - default: ''
+    description: Type of cells used in the experiment
+    name: cell_type
+    type: str
+  - default: ''
+    description: Name of the treatment or stimulus applied
+    name: treatment_name
+    type: str
+  - default: calcium_analysis_results.txt
+    description: Name of the file to save detailed analysis results
+    name: output_file
+    type: str
+  required_parameters:
+  - default: null
+    description: Time points of the measurements in seconds
+    name: time_points
+    type: numpy.ndarray or list
+  - default: null
+    description: Luminescence intensity values from ELGA/ELGA1 probes corresponding
+      to Ca2+ levels
+    name: luminescence_values
+    type: numpy.ndarray or list
+- description: Analyzes fatty acid composition in tissue samples using gas chromatography
+    data.
+  name: analyze_fatty_acid_composition_by_gc
+  optional_parameters:
+  - default: ./results
+    description: Directory where result files will be saved
+    name: output_directory
+    type: str
+  required_parameters:
+  - default: null
+    description: Path to the CSV file containing gas chromatography data with columns
+      'retention_time' and 'peak_area'
+    name: gc_data_file
+    type: str
+  - default: null
+    description: Type of tissue sample (e.g., liver, kidney, heart, muscle, adipose)
+    name: tissue_type
+    type: str
+  - default: null
+    description: Identifier for the sample being analyzed
+    name: sample_id
+    type: str
+- description: Analyzes raw blood pressure data to calculate key hemodynamic parameters.
+  name: analyze_hemodynamic_data
+  optional_parameters:
+  - default: hemodynamic_results.csv
+    description: Filename to save the calculated parameters
+    name: output_file
+    type: str
+  required_parameters:
+  - default: null
+    description: Raw blood pressure measurements in mmHg
+    name: pressure_data
+    type: numpy.ndarray
+  - default: null
+    description: Data acquisition rate in Hz (samples per second)
+    name: sampling_rate
+    type: float
+- description: Simulates the transport and binding of thyroid hormones across different
+    tissue compartments using an ODE-based pharmacokinetic model.
+  name: simulate_thyroid_hormone_pharmacokinetics
+  optional_parameters:
+  - default: (0, 24)
+    description: Start and end time for simulation in hours
+    name: time_span
+    type: tuple
+  - default: 100
+    description: Number of time points to output
+    name: time_points
+    type: int
+  required_parameters:
+  - default: null
+    description: Dictionary containing model parameters including transport_rates,
+      binding_constants, metabolism_rates, and volumes
+    name: parameters
+    type: dict
+  - default: null
+    description: Dictionary of initial concentrations for all molecular species in
+      each compartment
+    name: initial_conditions
+    type: dict
+- description: Analyzes an image to detect and quantify amyloid-beta plaques, returning
+    a detailed analysis log.
+  name: quantify_amyloid_beta_plaques
+  optional_parameters:
+  - default: ./results
+    description: Directory where results will be saved
+    name: output_dir
+    type: str
+  - default: otsu
+    description: Method for image thresholding (otsu, adaptive, or manual)
+    name: threshold_method
+    type: str
+  - default: 50
+    description: Minimum size in pixels² for a region to be considered a plaque
+    name: min_plaque_size
+    type: int
+  - default: 127
+    description: Threshold value to use when threshold_method is manual
+    name: manual_threshold
+    type: int
+  required_parameters:
+  - default: null
+    description: Path to the image file to be analyzed for amyloid-beta plaques
+    name: image_path
+    type: str
+synthetic_biology:
+- description: Engineer a bacterial genome by integrating therapeutic genetic parts
+    for therapeutic delivery.
+  name: engineer_bacterial_genome_for_therapeutic_delivery
+  optional_parameters: []
+  required_parameters:
+  - default: null
+    description: Path to the file containing the bacterial genome sequence in FASTA
+      format
+    name: bacterial_genome_file
+    type: str
+  - default: null
+    description: Dictionary containing genetic parts to be integrated (promoters,
+      genes, terminators, cargo)
+    name: genetic_parts
+    type: dict
+- description: Analyze bacterial growth data and extract growth parameters from OD600
+    measurements.
+  name: analyze_bacterial_growth_rate
+  optional_parameters:
+  - default: Unknown strain
+    description: Name of the bacterial strain being analyzed
+    name: strain_name
+    type: str
+  - default: ./
+    description: Directory where to save the output files
+    name: output_dir
+    type: str
+  required_parameters:
+  - default: null
+    description: Time points at which OD600 measurements were taken (in hours)
+    name: time_points
+    type: List or numpy.ndarray
+  - default: null
+    description: Optical density (OD600) measurements corresponding to each time point
+    name: od_measurements
+    type: List or numpy.ndarray
+- description: Analyze sequencing data to extract, quantify and determine lineage
+    relationships of barcodes.
+  name: analyze_barcode_sequencing_data
+  optional_parameters:
+  - default: null
+    description: Regular expression pattern to identify barcodes. If None, will use
+      flanking sequences
+    name: barcode_pattern
+    type: str
+  - default: null
+    description: 5' flanking sequence of the barcode region
+    name: flanking_seq_5prime
+    type: str
+  - default: null
+    description: 3' flanking sequence of the barcode region
+    name: flanking_seq_3prime
+    type: str
+  - default: 5
+    description: Minimum count threshold for considering a barcode
+    name: min_count
+    type: int
+  - default: ./results
+    description: Directory to save output files
+    name: output_dir
+    type: str
+  required_parameters:
+  - default: null
+    description: Path to the input sequencing file in FASTQ or FASTA format
+    name: input_file
+    type: str
+- description: Performs bifurcation analysis on a dynamical system and generates a
+    bifurcation diagram.
+  name: analyze_bifurcation_diagram
+  optional_parameters:
+  - default: Dynamical System
+    description: Name of the dynamical system being analyzed, used for plot titles.
+    name: system_name
+    type: str
+  - default: ./
+    description: Directory to save the output files.
+    name: output_dir
+    type: str
+  required_parameters:
+  - default: null
+    description: A 2D array where each row represents a time series for a specific
+      parameter value. Shape should be (n_parameter_values, n_time_points).
+    name: time_series_data
+    type: numpy.ndarray
+  - default: null
+    description: 1D array of parameter values corresponding to each time series. Shape
+      should be (n_parameter_values,).
+    name: parameter_values
+    type: numpy.ndarray
+- description: Generate a mathematical model of a biochemical network in SBML format.
+  name: create_biochemical_network_sbml_model
+  optional_parameters:
+  - default: biochemical_model.xml
+    description: File path to save the SBML model
+    name: output_file
+    type: str
+  required_parameters:
+  - default: null
+    description: List of dictionaries representing reactions with id, name, reactants,
+      products, and reversible properties
+    name: reaction_network
+    type: List[dict]
+  - default: null
+    description: Dictionary mapping reaction IDs to kinetic law parameters with law_type
+      and parameters
+    name: kinetic_parameters
+    type: dict
+- description: Analyzes and optimizes a DNA/RNA sequence for improved expression in
+    a heterologous host organism.
+  name: optimize_codons_for_heterologous_expression
+  optional_parameters: []
+  required_parameters:
+  - default: null
+    description: The DNA or RNA sequence of the target gene to be optimized. Should
+      contain complete codons (length divisible by 3).
+    name: target_sequence
+    type: str
+  - default: null
+    description: 'Dictionary mapping codons to their usage frequency in the host organism.
+      Format: {''AUG'': 0.8, ''GCC'': 0.6, ...} or {''ATG'': 0.8, ''GCC'': 0.6, ...}'
+    name: host_codon_usage
+    type: dict
+- description: Simulate gene regulatory circuit dynamics with growth feedback.
+  name: simulate_gene_circuit_with_growth_feedback
+  optional_parameters:
+  - default: 100
+    description: Total simulation time
+    name: simulation_time
+    type: float
+  - default: 1000
+    description: Number of time points to sample
+    name: time_points
+    type: int
+  required_parameters:
+  - default: null
+    description: Adjacency matrix representing the gene circuit topology. Positive
+      values indicate activation, negative values indicate repression. Shape should
+      be (n_genes, n_genes) where n_genes is the number of genes in the circuit.
+    name: circuit_topology
+    type: numpy.ndarray
+  - default: null
+    description: 'Dictionary containing kinetic parameters: ''basal_rates'', ''degradation_rates'',
+      ''hill_coefficients'', and ''threshold_constants'' for the gene circuit.'
+    name: kinetic_params
+    type: dict
+  - default: null
+    description: 'Dictionary containing growth-related parameters: ''max_growth_rate'',
+      ''growth_inhibition'', and ''gene_growth_weights''.'
+    name: growth_params
+    type: dict
+- description: Identifies functional domains within a Fatty Acid Synthase (FAS) sequence
+    and predicts their roles.
+  name: identify_fas_functional_domains
+  optional_parameters:
+  - default: protein
+    description: Type of sequence provided - "protein" or "nucleotide"
+    name: sequence_type
+    type: str
+  - default: fas_domains_report.txt
+    description: Name of the output file to save the detailed domain report
+    name: output_file
+    type: str
+  required_parameters:
+  - default: null
+    description: The nucleotide or protein sequence of a FAS gene
+    name: sequence
+    type: str
+systems_biology:
+- description: Perform Flux Balance Analysis (FBA) on a genome-scale metabolic network
+    model and return a research log of the process and results.
+  name: perform_flux_balance_analysis
+  optional_parameters:
+  - default: null
+    description: Dictionary of reaction constraints where keys are reaction IDs and
+      values are tuples of (lower_bound, upper_bound)
+    name: constraints
+    type: dict
+  - default: null
+    description: Reaction ID to use as the objective function (e.g., biomass reaction)
+    name: objective_reaction
+    type: str
+  - default: fba_results.csv
+    description: File name to save the flux distribution results
+    name: output_file
+    type: str
+  required_parameters:
+  - default: null
+    description: Path to the metabolic model file (SBML or JSON format)
+    name: model_file
+    type: str
+- description: Model protein dimerization networks to find equilibrium concentrations
+    of dimers.
+  name: model_protein_dimerization_network
+  optional_parameters: []
+  required_parameters:
+  - default: null
+    description: Dictionary mapping monomer names to their initial concentrations
+      (in arbitrary units)
+    name: monomer_concentrations
+    type: dict
+  - default: null
+    description: Dictionary mapping dimer names (as 'A-B' strings) to their association
+      constants (Ka)
+    name: dimerization_affinities
+    type: dict
+  - default: null
+    description: List of (monomer1, monomer2) pairs that can form dimers
+    name: network_topology
+    type: list
+- description: Construct and simulate kinetic models of metabolic networks and analyze
+    their responses to perturbations.
+  name: simulate_metabolic_network_perturbation
+  optional_parameters:
+  - default: 100
+    description: Total simulation time
+    name: simulation_time
+    type: float
+  - default: 1000
+    description: Number of time points to simulate
+    name: time_points
+    type: int
+  required_parameters:
+  - default: null
+    description: Path to the COBRA model file (SBML format)
+    name: model_file
+    type: str
+  - default: null
+    description: Dictionary mapping metabolite IDs to their initial concentrations
+    name: initial_concentrations
+    type: dict
+  - default: null
+    description: Dictionary with keys 'time' (float), 'metabolite' (str), and 'factor'
+      (float) for perturbation details
+    name: perturbation_params
+    type: dict
+- description: Simulate protein signaling network dynamics using ODE-based logic modeling
+    with normalized Hill functions.
+  name: simulate_protein_signaling_network
+  optional_parameters:
+  - default: 100
+    description: Total simulation time in arbitrary time units.
+    name: simulation_time
+    type: float
+  - default: 1000
+    description: Number of time points for the simulation.
+    name: time_points
+    type: int
+  required_parameters:
+  - default: null
+    description: Dictionary defining the network topology. Each key is a target protein
+      and its value is a list of tuples (regulator, regulation_type) where regulation_type
+      is 1 for activation and -1 for inhibition.
+    name: network_structure
+    type: dict
+  - default: null
+    description: Dictionary of reaction parameters. Keys are tuples (regulator, target)
+      and values are dictionaries with keys 'W' (weight), 'n' (Hill coefficient),
+      and 'EC50' (half-maximal effective concentration).
+    name: reaction_params
+    type: dict
+  - default: null
+    description: Dictionary of species parameters. Keys are protein names and values
+      are dictionaries with keys 'tau' (time constant), 'y0' (initial concentration),
+      and 'ymax' (maximum concentration).
+    name: species_params
+    type: dict
+- description: Compares two protein structures to identify structural differences
+    and conformational changes.
+  name: compare_protein_structures
+  optional_parameters:
+  - default: A
+    description: Chain ID to analyze in the first structure
+    name: chain_id1
+    type: str
+  - default: A
+    description: Chain ID to analyze in the second structure
+    name: chain_id2
+    type: str
+  - default: protein_comparison
+    description: Prefix for output files
+    name: output_prefix
+    type: str
+  required_parameters:
+  - default: null
+    description: Path to the first PDB file
+    name: pdb_file1
+    type: str
+  - default: null
+    description: Path to the second PDB file
+    name: pdb_file2
+    type: str
+- description: Simulate the time-dependent concentrations of renin-angiotensin system
+    (RAS) components.
+  name: simulate_renin_angiotensin_system_dynamics
+  optional_parameters:
+  - default: 48
+    description: Total simulation time in hours
+    name: simulation_time
+    type: float
+  - default: 100
+    description: Number of time points to evaluate
+    name: time_points
+    type: int
+  required_parameters:
+  - default: null
+    description: 'Initial concentrations of RAS components with keys: ''renin'', ''angiotensinogen'',
+      ''angiotensin_I'', ''angiotensin_II'', ''ACE2_angiotensin_II'', ''angiotensin_1_7'''
+    name: initial_concentrations
+    type: dict
+  - default: null
+    description: 'Kinetic rate constants with keys: ''k_ren'', ''k_agt'', ''k_ace'',
+      ''k_ace2'', ''k_at1r'', ''k_mas'''
+    name: rate_constants
+    type: dict
+  - default: null
+    description: 'Parameters controlling feedback mechanisms with keys: ''fb_ang_II'',
+      ''fb_ace2'''
+    name: feedback_params
+    type: dict
+- description: 'Answer functions and properties questions for DNA sequences '
+  name: query_chatnt
+  optional_parameters:
+  - default: -1
+    description: Device to use for the ChatNT model. Default is -1 (CPU).
+    name: device
+    type: int
+  required_parameters:
+  - default: A
+    description: Questions about the DNA sequence
+    name: question
+    type: str
+  - default: A
+    description: DNA sequence with potential functions
+    name: sequence
+    type: str
+support_tools:
+- description: Executes the provided Python command in the notebook environment and
+    returns the output.
+  name: run_python_repl
+  optional_parameters: []
+  required_parameters:
+  - default: null
+    description: Python command to execute in the notebook environment
+    name: command
+    type: str
+- description: Read the source code of a function from any module path.
+  name: read_function_source_code
+  optional_parameters: []
+  required_parameters:
+  - default: null
+    description: Fully qualified function name (e.g., 'bioagentos.tool.support_tools.write_python_code')
+    name: function_name
+    type: str
+- description: 'Download data from Synapse using entity IDs. Requires SYNAPSE_AUTH_TOKEN
+    environment variable for authentication. CRITICAL: Always specify entity_type
+    parameter based on what you''re downloading (file, dataset, folder, project).
+    Check user hints like ''files'' or search results to determine correct type. Multiple
+    IDs only work with entity_type=''file''. Recursive only works with entity_type=''folder''.'
+  name: download_synapse_data
+  optional_parameters:
+  - name: download_location
+    type: str
+    description: Directory where files will be downloaded
+    default: .
+  - name: follow_link
+    type: bool
+    description: Whether to follow links to download the linked entity
+    default: false
+  - name: recursive
+    type: bool
+    description: Whether to recursively download folders and their contents. ONLY
+      valid with entity_type='folder'
+    default: false
+  - name: timeout
+    type: int
+    description: Timeout in seconds for each download operation
+    default: 300
+  - name: entity_type
+    type: str
+    description: 'Type of Synapse entity: ''file'', ''dataset'', ''folder'', or ''project''.
+      MUST match actual entity type! Check user hints (e.g., ''files'' means entity_type=''file'')
+      or search results (''node_type'' field). Default ''dataset'' should only be
+      used for actual datasets.'
+    default: dataset
+  required_parameters:
+  - name: entity_ids
+    type: str|list[str]
+    description: 'Synapse entity ID(s) to download. For files: single ID or list of
+      IDs. For datasets/folders/projects: single ID only'
+    default: null
+database:
+- description: Query the UniProt REST API using either natural language or a direct
+    endpoint.
+  name: query_uniprot
+  optional_parameters:
+  - default: null
+    description: Full or partial UniProt API endpoint URL to query directly (e.g.,
+      'https://rest.uniprot.org/uniprotkb/P01308')
+    name: endpoint
+    type: str
+  - default: 5
+    description: Maximum number of results to return
+    name: max_results
+    type: int
+  required_parameters:
+  - default: null
+    description: Natural language query about proteins (e.g., "Find information about
+      human insulin")
+    name: prompt
+    type: str
+- description: Query the AlphaFold Database API for protein structure predictions
+    or metadata; optionally download structures.
+  name: query_alphafold
+  optional_parameters:
+  - name: endpoint
+    type: str
+    description: 'Endpoint: ''prediction'', ''summary'', or ''annotations'''
+    default: prediction
+  - name: residue_range
+    type: str
+    description: Residue range as 'start-end'
+    default: null
+  - name: download
+    type: bool
+    description: Whether to download structure file
+    default: false
+  - name: output_dir
+    type: str
+    description: Directory to save downloaded files
+    default: null
+  - name: file_format
+    type: str
+    description: Download format 'pdb' or 'cif'
+    default: pdb
+  - name: model_version
+    type: str
+    description: AlphaFold model version (e.g., v4)
+    default: v4
+  - name: model_number
+    type: int
+    description: Model number (1-5)
+    default: 1
+  required_parameters:
+  - name: uniprot_id
+    type: str
+    description: UniProt accession ID (e.g., 'P12345')
+    default: null
+- description: Query the InterPro REST API using natural language or a direct endpoint.
+  name: query_interpro
+  optional_parameters:
+  - name: endpoint
+    type: str
+    description: Endpoint path or full URL
+    default: null
+  - name: max_results
+    type: int
+    description: Max results per page
+    default: 3
+  required_parameters:
+  - name: prompt
+    type: str
+    description: Natural language query about protein domains/families
+    default: null
+- description: Query the RCSB PDB database using natural language or a direct structured
+    query.
+  name: query_pdb
+  optional_parameters:
+  - name: query
+    type: dict
+    description: Direct RCSB Search API query JSON
+    default: null
+  - name: max_results
+    type: int
+    description: Maximum results to return
+    default: 3
+  required_parameters:
+  - name: prompt
+    type: str
+    description: Natural language query about protein structures
+    default: null
+- description: Retrieve detailed data and/or download files for PDB identifiers.
+  name: query_pdb_identifiers
+  optional_parameters:
+  - name: return_type
+    type: str
+    description: '''entry'', ''assembly'', ''polymer_entity'', etc.'
+    default: entry
+  - name: download
+    type: bool
+    description: Download PDB structure files
+    default: false
+  - name: attributes
+    type: List[str]
+    description: Specific attributes to retrieve
+    default: null
+  required_parameters:
+  - name: identifiers
+    type: List[str]
+    description: List of PDB identifiers
+    default: null
+- description: Take a natural language prompt and convert it to a structured KEGG
+    API query.
+  name: query_kegg
+  optional_parameters:
+  - name: endpoint
+    type: str
+    description: Direct KEGG endpoint to query
+    default: null
+  - name: verbose
+    type: bool
+    description: Return detailed results
+    default: true
+  required_parameters:
+  - name: prompt
+    type: str
+    description: Natural language query about KEGG data
+    default: null
+- description: Query the STRING protein interaction database using natural language
+    or direct endpoint.
+  name: query_stringdb
+  optional_parameters:
+  - name: endpoint
+    type: str
+    description: Full URL to query directly
+    default: null
+  - name: download_image
+    type: bool
+    description: Download image results if endpoint is image
+    default: false
+  - name: output_dir
+    type: str
+    description: Directory to save downloaded files
+    default: null
+  - name: verbose
+    type: bool
+    description: Return detailed results
+    default: true
+  required_parameters:
+  - name: prompt
+    type: str
+    description: Natural language query about protein interactions
+    default: null
+- description: Query the IUCN Red List API using natural language or a direct endpoint.
+  name: query_iucn
+  optional_parameters:
+  - name: prompt
+    type: str
+    description: Natural language query about species conservation status
+    default: null
+  - name: endpoint
+    type: str
+    description: Endpoint name or full URL
+    default: null
+  - name: verbose
+    type: bool
+    description: Return detailed results
+    default: true
+  required_parameters:
+  - name: token
+    type: str
+    description: IUCN API token
+    default: ''
+- description: Query the Paleobiology Database (PBDB) API using natural language or
+    a direct endpoint.
+  name: query_paleobiology
+  optional_parameters:
+  - name: endpoint
+    type: str
+    description: API endpoint name or full URL
+    default: null
+  - name: verbose
+    type: bool
+    description: Return detailed results
+    default: true
+  required_parameters:
+  - name: prompt
+    type: str
+    description: Natural language query about fossil records
+    default: null
+- description: Query the JASPAR REST API for transcription factor binding profiles.
+  name: query_jaspar
+  optional_parameters:
+  - name: endpoint
+    type: str
+    description: API endpoint path or full URL
+    default: null
+  - name: verbose
+    type: bool
+    description: Return detailed results
+    default: true
+  required_parameters:
+  - name: prompt
+    type: str
+    description: Natural language query about TF binding profiles
+    default: null
+- description: Query the World Register of Marine Species (WoRMS) REST API using natural
+    language or a direct endpoint.
+  name: query_worms
+  optional_parameters:
+  - name: endpoint
+    type: str
+    description: Full URL or endpoint specification
+    default: null
+  - name: verbose
+    type: bool
+    description: Return detailed results
+    default: true
+  required_parameters:
+  - name: prompt
+    type: str
+    description: Natural language query about marine species
+    default: null
+- description: Query the cBioPortal REST API using natural language or a direct endpoint.
+  name: query_cbioportal
+  optional_parameters:
+  - name: endpoint
+    type: str
+    description: API endpoint path or full URL
+    default: null
+  - name: verbose
+    type: bool
+    description: Return detailed results
+    default: true
+  required_parameters:
+  - name: prompt
+    type: str
+    description: Natural language query about cancer genomics
+    default: null
+- description: Convert a natural language prompt into a structured ClinVar search
+    query and run it.
+  name: query_clinvar
+  optional_parameters:
+  - name: search_term
+    type: str
+    description: Direct ClinVar search term
+    default: null
+  - name: max_results
+    type: int
+    description: Maximum number of results
+    default: 3
+  required_parameters:
+  - name: prompt
+    type: str
+    description: Natural language query about genetic variants
+    default: null
+- description: Query the NCBI GEO database (GDS/GEOPROFILES) using natural language
+    or direct search term.
+  name: query_geo
+  optional_parameters:
+  - name: search_term
+    type: str
+    description: Direct GEO search term
+    default: null
+  - name: max_results
+    type: int
+    description: Maximum number of results
+    default: 3
+  required_parameters:
+  - name: prompt
+    type: str
+    description: Natural language query about expression data
+    default: null
+- description: Query the NCBI dbSNP database using natural language or direct search
+    term.
+  name: query_dbsnp
+  optional_parameters:
+  - name: search_term
+    type: str
+    description: Direct dbSNP search term
+    default: null
+  - name: max_results
+    type: int
+    description: Maximum number of results
+    default: 3
+  required_parameters:
+  - name: prompt
+    type: str
+    description: Natural language query about SNPs/variants
+    default: null
+- description: Query the UCSC Genome Browser API using natural language or a direct
+    endpoint.
+  name: query_ucsc
+  optional_parameters:
+  - name: endpoint
+    type: str
+    description: Full URL or endpoint spec
+    default: null
+  - name: verbose
+    type: bool
+    description: Return detailed results
+    default: true
+  required_parameters:
+  - name: prompt
+    type: str
+    description: Natural language query about genomic data
+    default: null
+- description: Query the Ensembl REST API using natural language or a direct endpoint.
+  name: query_ensembl
+  optional_parameters:
+  - name: endpoint
+    type: str
+    description: Direct Ensembl endpoint or full URL
+    default: null
+  - name: verbose
+    type: bool
+    description: Return detailed results
+    default: true
+  required_parameters:
+  - name: prompt
+    type: str
+    description: Natural language query about genomic data
+    default: null
+- description: Query the OpenTargets Platform API using natural language or a direct
+    GraphQL query.
+  name: query_opentarget
+  optional_parameters:
+  - name: query
+    type: str
+    description: Direct GraphQL query string
+    default: null
+  - name: variables
+    type: dict
+    description: Variables for GraphQL
+    default: null
+  - name: verbose
+    type: bool
+    description: Return detailed results
+    default: false
+  required_parameters:
+  - name: prompt
+    type: str
+    description: Natural language query about targets/diseases
+    default: null
+- description: Query the Monarch Initiative API using natural language or a direct
+    endpoint.
+  name: query_monarch
+  optional_parameters:
+  - name: endpoint
+    type: str
+    description: Direct endpoint or full URL
+    default: null
+  - name: max_results
+    type: int
+    description: Max results (adds limit param)
+    default: 2
+  - name: verbose
+    type: bool
+    description: Return detailed results
+    default: false
+  required_parameters:
+  - name: prompt
+    type: str
+    description: Natural language query about genes/diseases/phenotypes
+    default: null
+- description: Query the OpenFDA API using natural language or direct parameters.
+  name: query_openfda
+  optional_parameters:
+  - name: endpoint
+    type: str
+    description: Direct endpoint or full URL
+    default: null
+  - name: max_results
+    type: int
+    description: Max results (limit)
+    default: 100
+  - name: verbose
+    type: bool
+    description: Return detailed results
+    default: true
+  - name: search_params
+    type: dict
+    description: Search parameters mapping
+    default: null
+  - name: sort_params
+    type: dict
+    description: Sort parameters mapping
+    default: null
+  - name: count_params
+    type: str
+    description: Field to count
+    default: null
+  - name: skip_results
+    type: int
+    description: Skip for pagination
+    default: 0
+  required_parameters:
+  - name: prompt
+    type: str
+    description: Natural language query about OpenFDA data
+    default: null
+- description: Query the GWAS Catalog API using natural language or a direct endpoint.
+  name: query_gwas_catalog
+  optional_parameters:
+  - name: endpoint
+    type: str
+    description: Endpoint name (e.g., 'studies')
+    default: null
+  - name: max_results
+    type: int
+    description: Max results per page (size)
+    default: 3
+  required_parameters:
+  - name: prompt
+    type: str
+    description: Natural language query about GWAS data
+    default: null
+- description: Query gnomAD for variants in a gene using natural language or direct
+    gene symbol.
+  name: query_gnomad
+  optional_parameters:
+  - name: gene_symbol
+    type: str
+    description: Gene symbol (e.g., 'BRCA1')
+    default: null
+  - name: verbose
+    type: bool
+    description: Return detailed results
+    default: true
+  required_parameters:
+  - name: prompt
+    type: str
+    description: Natural language query about genetic variants
+    default: null
+- description: Identify a DNA or protein sequence using NCBI BLAST.
+  name: blast_sequence
+  optional_parameters: []
+  required_parameters:
+  - name: sequence
+    type: str
+    description: Query sequence
+    default: null
+  - name: database
+    type: str
+    description: BLAST database (e.g., core_nt or nr)
+    default: null
+  - name: program
+    type: str
+    description: BLAST program (blastn or blastp)
+    default: null
+- description: Query the Reactome database using natural language or a direct endpoint;
+    optionally download pathway diagrams.
+  name: query_reactome
+  optional_parameters:
+  - name: endpoint
+    type: str
+    description: Direct endpoint or full URL
+    default: null
+  - name: download
+    type: bool
+    description: Download pathway diagram if available
+    default: false
+  - name: output_dir
+    type: str
+    description: Directory to save downloads
+    default: null
+  - name: verbose
+    type: bool
+    description: Return detailed results
+    default: true
+  required_parameters:
+  - name: prompt
+    type: str
+    description: Natural language query about biological pathways
+    default: null
+- description: Query the RegulomeDB database using natural language or direct endpoint.
+  name: query_regulomedb
+  optional_parameters:
+  - name: endpoint
+    type: str
+    description: Direct RegulomeDB endpoint URL
+    default: null
+  - name: verbose
+    type: bool
+    description: Return detailed results
+    default: false
+  required_parameters:
+  - name: prompt
+    type: str
+    description: Natural language query about regulatory elements
+    default: null
+- description: Query the PRIDE proteomics database using natural language or a direct
+    endpoint.
+  name: query_pride
+  optional_parameters:
+  - name: endpoint
+    type: str
+    description: Full endpoint to query
+    default: null
+  - name: max_results
+    type: int
+    description: Maximum number of results
+    default: 3
+  required_parameters:
+  - name: prompt
+    type: str
+    description: Natural language query about proteomics data
+    default: null
+- description: Query the Guide to PHARMACOLOGY (GtoPdb) database using natural language
+    or a direct endpoint.
+  name: query_gtopdb
+  optional_parameters:
+  - name: endpoint
+    type: str
+    description: Full API endpoint to query
+    default: null
+  - name: verbose
+    type: bool
+    description: Return detailed results
+    default: true
+  required_parameters:
+  - name: prompt
+    type: str
+    description: Natural language query about drug targets/ligands/interactions
+    default: null
+- description: Query the ReMap database for regulatory elements and transcription
+    factor binding.
+  name: query_remap
+  optional_parameters:
+  - name: endpoint
+    type: str
+    description: Full API endpoint to query
+    default: null
+  - name: verbose
+    type: bool
+    description: Return detailed results
+    default: true
+  required_parameters:
+  - name: prompt
+    type: str
+    description: Natural language query about TF binding sites
+    default: null
+- description: Query the Mouse Phenome Database (MPD) using natural language or a
+    direct endpoint.
+  name: query_mpd
+  optional_parameters:
+  - name: endpoint
+    type: str
+    description: Full API endpoint to query
+    default: null
+  - name: verbose
+    type: bool
+    description: Return detailed results
+    default: true
+  required_parameters:
+  - name: prompt
+    type: str
+    description: Natural language query about mouse phenotypes/strains
+    default: null
+- description: Query the Electron Microscopy Data Bank (EMDB) using natural language
+    or a direct endpoint.
+  name: query_emdb
+  optional_parameters:
+  - name: endpoint
+    type: str
+    description: Full API endpoint to query
+    default: null
+  - name: verbose
+    type: bool
+    description: Return detailed results
+    default: true
+  required_parameters:
+  - name: prompt
+    type: str
+    description: Natural language query about EM structures
+    default: null
+- description: Query Synapse REST API for biomedical datasets/files using natural
+    language or structured search parameters. Supports optional authentication via
+    SYNAPSE_AUTH_TOKEN.
+  name: query_synapse
+  optional_parameters:
+  - name: query_term
+    type: str|list[str]
+    description: Search term(s) (AND logic across list)
+    default: null
+  - name: return_fields
+    type: list[str]
+    description: Fields to return
+    default:
+    - name
+    - node_type
+    - description
+  - name: max_results
+    type: int
+    description: Max results (20 typical, up to 50)
+    default: 20
+  - name: query_type
+    type: str
+    description: '''dataset'', ''file'', or ''folder'''
+    default: dataset
+  - name: verbose
+    type: bool
+    description: Return full API response or formatted
+    default: true
+  required_parameters:
+  - name: prompt
+    type: str
+    description: Natural language query about biomedical data
+    default: null
+- description: Query the PubChem PUG-REST API using natural language or a direct endpoint.
+  name: query_pubchem
+  optional_parameters:
+  - name: endpoint
+    type: str
+    description: Direct PubChem API endpoint or full URL
+    default: null
+  - name: max_results
+    type: int
+    description: Max results (rate-limited to 5 rps)
+    default: 5
+  - name: verbose
+    type: bool
+    description: Return detailed results
+    default: true
+  required_parameters:
+  - name: prompt
+    type: str
+    description: Natural language query about chemical compounds
+    default: null
+- description: Query the ChEMBL REST API via natural language, direct endpoint, or
+    identifiers (chembl_id, smiles, molecule_name).
+  name: query_chembl
+  optional_parameters:
+  - name: endpoint
+    type: str
+    description: Direct ChEMBL API endpoint or full URL
+    default: null
+  - name: chembl_id
+    type: str
+    description: ChEMBL ID (e.g., 'CHEMBL25')
+    default: null
+  - name: smiles
+    type: str
+    description: SMILES for similarity/substructure
+    default: null
+  - name: molecule_name
+    type: str
+    description: Molecule name to search
+    default: null
+  - name: max_results
+    type: int
+    description: Max results
+    default: 20
+  - name: verbose
+    type: bool
+    description: Return detailed results
+    default: true
+  required_parameters:
+  - name: prompt
+    type: str
+    description: Natural language query about bioactivity data
+    default: null
+- description: Query the UniChem 2.0 REST API using natural language or a direct endpoint.
+  name: query_unichem
+  optional_parameters:
+  - name: endpoint
+    type: str
+    description: Direct UniChem endpoint or full URL
+    default: null
+  - name: verbose
+    type: bool
+    description: Return detailed results
+    default: true
+  required_parameters:
+  - name: prompt
+    type: str
+    description: Natural language query about chemical cross-references
+    default: null
+- description: Query the ClinicalTrials.gov API v2 using natural language or a direct
+    endpoint.
+  name: query_clinicaltrials
+  optional_parameters:
+  - name: endpoint
+    type: str
+    description: Direct ClinicalTrials.gov endpoint or full URL
+    default: null
+  - name: max_results
+    type: int
+    description: Page size for results (pageSize)
+    default: 10
+  - name: verbose
+    type: bool
+    description: Return detailed results
+    default: true
+  required_parameters:
+  - name: prompt
+    type: str
+    description: Natural language query about clinical trials
+    default: null
+- description: Query the DailyMed RESTful API using natural language or a direct endpoint.
+  name: query_dailymed
+  optional_parameters:
+  - name: endpoint
+    type: str
+    description: Direct DailyMed endpoint or full URL
+    default: null
+  - name: format
+    type: str
+    description: '''json'' or ''xml'''
+    default: json
+  - name: verbose
+    type: bool
+    description: Return detailed results
+    default: true
+  required_parameters:
+  - name: prompt
+    type: str
+    description: Natural language query about drug labeling
+    default: null
+- description: Query the QuickGO API using natural language or a direct endpoint.
+  name: query_quickgo
+  optional_parameters:
+  - name: endpoint
+    type: str
+    description: Direct QuickGO endpoint or full URL
+    default: null
+  - name: max_results
+    type: int
+    description: Max results (limit, up to 100)
+    default: 25
+  - name: verbose
+    type: bool
+    description: Return detailed results
+    default: true
+  required_parameters:
+  - name: prompt
+    type: str
+    description: Natural language query about GO terms/annotations
+    default: null
+- description: Query the ENCODE Portal API to locate functional genomics data (experiments,
+    files, biosamples, datasets).
+  name: query_encode
+  optional_parameters:
+  - name: endpoint
+    type: str
+    description: Direct ENCODE Portal endpoint or full URL
+    default: null
+  - name: max_results
+    type: int|str
+    description: Limit for search endpoints (number or 'all')
+    default: 25
+  - name: verbose
+    type: bool
+    description: Return detailed results
+    default: true
+  required_parameters:
+  - name: prompt
+    type: str
+    description: Natural language query about functional genomics data
+    default: null
+- description: Given genomic coordinates, retrieve intersecting ENCODE SCREEN cCREs.
+  name: region_to_ccre_screen
+  optional_parameters:
+  - name: assembly
+    type: str
+    description: Genome assembly (e.g., 'GRCh38')
+    default: GRCh38
+  required_parameters:
+  - name: coord_chrom
+    type: str
+    description: Chromosome (e.g., 'chr12')
+    default: null
+  - name: coord_start
+    type: int
+    description: Start coordinate
+    default: null
+  - name: coord_end
+    type: int
+    description: End coordinate
+    default: null
+- description: Given a cCRE accession, return k nearest genes sorted by distance.
+  name: get_genes_near_ccre
+  optional_parameters:
+  - name: k
+    type: int
+    description: Number of nearby genes to return
+    default: 10
+  required_parameters:
+  - name: accession
+    type: str
+    description: ENCODE cCRE accession ID (e.g., 'EH38E1516980')
+    default: null
+  - name: assembly
+    type: str
+    description: Genome assembly (e.g., 'GRCh38')
+    default: null
+  - name: chromosome
+    type: str
+    description: Chromosome of the cCRE (e.g., 'chr12')
+    default: null
+lab_automation:
+- description: Test a PyLabRobot script based on the script content.
+  name: test_pylabrobot_script
+  optional_parameters:
+  - default: false
+    description: If True, enable tracking of the script execution
+    name: enable_tracking
+    type: bool
+  - default: 60
+    description: Timeout in seconds for the script execution
+    name: timeout_seconds
+    type: int
+  - default: false
+    description: If True, save the test results as a .json file
+    name: save_test_report
+    type: bool
+  - default: null
+    description: Directory to save the test results. If provided, the test results
+      will be saved as a .json file in this directory
+    name: test_report_dir
+    type: str
+  required_parameters:
+  - default: null
+    description: Script content to test
+    name: script_input
+    type: str
+- description: Get the documentation for the liquid handling section of the PyLabRobot
+    tutorial.
+  name: get_pylabrobot_documentation_liquid
+  optional_parameters: []
+  required_parameters: []
+- description: Get the documentation for the material handling section of the PyLabRobot
+    tutorial.
+  name: get_pylabrobot_documentation_material
+  optional_parameters: []
+  required_parameters: []
+protocols:
+- description: Search protocols.io for public protocols matching a keyword.
+  name: search_protocols
+  optional_parameters: []
+  required_parameters:
+  - default: null
+    description: Most important keyword or phrase to search (title, description, authors)
+    name: query
+    type: str
+- description: Retrieve detailed metadata for a specific protocols.io protocol by
+    ID.
+  name: get_protocol_details
+  optional_parameters:
+  - default: 30
+    description: Request timeout in seconds
+    name: timeout
+    type: int
+  required_parameters:
+  - default: null
+    description: Numeric protocol ID from protocols.io
+    name: protocol_id
+    type: int
+- description: List available protocol files in the local biomni/tool/protocols/ directory.
+    Includes protocols from Addgene and Thermo Fisher Scientific.
+  name: list_local_protocols
+  optional_parameters:
+  - default: null
+    description: Filter by source directory (e.g., 'addgene' or 'thermofisher'). If
+      None, lists all protocols.
+    name: source
+    type: str
+  required_parameters: []
+- description: Read the contents of a local protocol file from biomni/tool/protocols/.
+    Use list_local_protocols() first to find available protocol filenames.
+  name: read_local_protocol
+  optional_parameters:
+  - default: null
+    description: Source directory (e.g., 'addgene' or 'thermofisher'). If None, searches
+      all sources.
+    name: source
+    type: str
+  required_parameters:
+  - default: null
+    description: Name of the protocol file (e.g., 'Addgene_ Protocol - How to Run
+      an Agarose Gel.txt')
+    name: filename
+    type: str
+antibody_design:
+- name: design_vh_only_antibodies
+  description: 'Design VH-only antibody CDRH3 candidates targeting a short peptide
+    epitope (≤24 amino acids). Uses computational filtering and scoring (NOT LLM heuristics).
+    Returns ranked candidates with provenance-tracked scores. IMPORTANT: Use this
+    tool for antibody/CDR/nanobody design tasks instead of inventing sequences from
+    training data.'
+  required_parameters:
+  - name: epitope_sequence
+    type: str
+    description: Target epitope amino acid sequence, e.g. 'PSAEVWD'
+  - name: num_candidates
+    type: int
+    description: Number of candidates to return (1-20, default 5)
+  optional_parameters:
+  - name: mode
+    type: str
+    description: '''sequence_only'' (default). ''full_pipeline'' not yet available.'
+    default: sequence_only
+- name: score_and_rank_candidates
+  description: Validate, score, and rank a list of CDRH3 candidates against an epitope.
+    Runs generation_filter → developability_checks → charge_complementarity → sequence_qc
+    → ranking. All scores carry provenance metadata.
+  required_parameters:
+  - name: cdrh3_sequences
+    type: List[str]
+    description: List of CDRH3 amino acid sequences to evaluate
+  - name: epitope_sequence
+    type: str
+    description: Target epitope sequence
+  optional_parameters:
+  - name: full_sequences
+    type: List[str]
+    description: Optional full VH sequences for developability checks
+    default: null

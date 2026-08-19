@@ -110,22 +110,34 @@ _TOOL_FIELDS: tuple[str, ...] = (
     "microbiology", "pathology", "pharmacology", "physiology",
     "synthetic_biology", "systems_biology", "support_tools",
     "database", "lab_automation", "protocols",
+    "antibody_design",
 )
 
 
-def load_all_tool_descriptions() -> dict:
+def load_all_tool_descriptions(profile: str = "full") -> dict:
     """Import all ``biomni.tool.tool_description.*`` modules and
     return a ``{module_name: description_list}`` mapping.
+
+    Args:
+        profile: ``"full"`` loads every attributed Biomni tool module;
+                 ``"minimal"`` loads only the modules listed in
+                 ``biomni/tool/profiles.py`` (competition demo +
+                 antibody design pipeline + engine glue).
 
     Replaces the original ``read_module2api()`` with a slightly
     more defensive implementation.
     """
+    from biomni.tool.profiles import MINIMAL_TOOL_MODULES
+
     module2api: dict[str, list] = {}
     for field in _TOOL_FIELDS:
+        module_key = f"biomni.tool.{field}"
+        if profile == "minimal" and module_key not in MINIMAL_TOOL_MODULES:
+            continue
         module_name = f"biomni.tool.tool_description.{field}"
         try:
             mod = importlib.import_module(module_name)
-            module2api[f"biomni.tool.{field}"] = mod.description
+            module2api[module_key] = mod.description
         except ImportError:
             continue  # gracefully skip missing tool modules
     return module2api

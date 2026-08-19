@@ -29,10 +29,10 @@ from langchain_core.messages import AIMessage, BaseMessage, HumanMessage
 from langchain_core.prompts import ChatPromptTemplate
 from biomni.agent.agent_state import AgentState  # noqa: F401 — re-exported for external use
 from biomni.config import default_config
-from biomni.know_how import KnowHowLoader
+from biomni.knowledge import KnowledgeRegistry
 from biomni.llm import SourceType, get_llm
-from biomni.model.retriever import ToolRetriever
-from biomni.tool.tool_registry import ToolRegistry
+from biomni.model.resource_selector import ResourceSelector
+from biomni.tool.registry import ToolRegistry
 from biomni.utils import (
     check_and_download_s3_files,
     format_execute_tags_in_content,
@@ -75,6 +75,7 @@ class A1:
         base_url: str | None = None,
         api_key: str | None = None,
         commercial_mode: bool | None = None,
+        tool_profile: str | None = None,
         expected_data_lake_files: list | None = None,
     ):
         # ── Resolve parameters from default_config ─────────────
@@ -91,6 +92,10 @@ class A1:
         commercial_mode = (
             default_config.commercial_mode if commercial_mode is None
             else commercial_mode
+        )
+        tool_profile = (
+            default_config.tool_profile if tool_profile is None
+            else tool_profile
         )
 
         # ── Load environment descriptors ───────────────────────
@@ -127,7 +132,8 @@ class A1:
         self.path = os.path.join(path, "biomni_data")
 
         # ── LLM ────────────────────────────────────────────────
-        self.module2api = read_module2api()
+        self.tool_profile = tool_profile
+        self.module2api = read_module2api(profile=self.tool_profile)
         self.llm = get_llm(
             llm, stop_sequences=["</execute>", "</solution>"],
             source=source, base_url=base_url, api_key=api_key,
@@ -136,11 +142,12 @@ class A1:
         self.use_tool_retriever = use_tool_retriever
 
         if self.use_tool_retriever:
-            self.tool_registry = ToolRegistry(self.module2api)
-            self.retriever = ToolRetriever()
+            self.tool_registry = ToolRegistry(self.module2api,
+                                              profile=self.tool_profile)
+            self.retriever = ResourceSelector()
 
         # ── Know-how ───────────────────────────────────────────
-        self.know_how_loader = KnowHowLoader()
+        self.know_how_loader = KnowledgeRegistry()
         if commercial_mode:
             self._filter_know_how_for_commercial_mode()
 
@@ -242,24 +249,69 @@ class A1:
         return self.log, message.content
 
     def go_stream(self, prompt) -> Generator[dict, None, None]:
-        """Execute the agent with streaming yields."""
+        """Execute the agent with token-level streaming yields.
+
+        Yields dicts:
+          - ``{"type": "token", "content": str, "chunk_position": ...}``
+            LLM token chunks, emitted live as the model generates
+            (``chunk_position`` is ``"last"`` on the final chunk of each
+            generation).
+          - ``{"type": "message", "output": <pretty-printed text>}``
+            Completed conversation messages (AI responses, retry prompts,
+            observations) — same text shape as the legacy event stream.
+        """
         self.critic_count = 0
         self.user_task = prompt
 
         if self.use_tool_retriever:
             self._run_retrieval(prompt)
 
+        # Best-effort: enable token streaming on the underlying chat model.
+        # ``invoke()`` still returns the full message, so models that do not
+        # support streaming degrade gracefully (message events only).
+        try:
+            if hasattr(self.llm, "streaming"):
+                self.llm.streaming = True
+        except Exception:
+            pass
+
         inputs = {"messages": [HumanMessage(content=prompt)], "next_step": None}
         config = {"recursion_limit": 500, "configurable": {"thread_id": 42}}
         self.log = []
         final_state = None
 
-        for s in self.app.stream(inputs, stream_mode="values", config=config):
-            message = s["messages"][-1]
-            out = pretty_print(message)
-            self.log.append(out)
-            final_state = s
-            yield {"output": out}
+        for mode, payload in self.app.stream(
+            inputs, stream_mode=["messages", "values"], config=config
+        ):
+            if mode == "messages":
+                chunk, _meta = (
+                    payload
+                    if isinstance(payload, (tuple, list)) and len(payload) == 2
+                    else (payload, {})
+                )
+                if not hasattr(chunk, "content"):
+                    continue
+                content = chunk.content
+                if not isinstance(content, str):
+                    # Normalise list-of-blocks content to plain text
+                    if isinstance(content, list):
+                        content = "".join(
+                            str(b.get("text", "")) if isinstance(b, dict) else str(b)
+                            for b in content
+                        )
+                    else:
+                        content = str(content)
+                yield {
+                    "type": "token",
+                    "content": content,
+                    "chunk_position": getattr(chunk, "chunk_position", None),
+                }
+            else:  # "values" — full state snapshot after each node
+                message = payload["messages"][-1]
+                out = pretty_print(message)
+                self.log.append(out)
+                final_state = payload
+                yield {"type": "message", "output": out}
 
         self._conversation_state = final_state
 
@@ -595,15 +647,8 @@ class A1:
         return run_with_timeout(run_bash_script, [code], timeout=timeout)
 
     def _filter_know_how_for_commercial_mode(self) -> None:
-        to_remove = []
-        for doc_id, doc in self.know_how_loader.documents.items():
-            cu = doc.get("metadata", {}).get("commercial_use", "")
-            if any(m in cu for m in ("❌", "Not Allowed", "Non-Commercial")):
-                to_remove.append(doc_id)
-        for doc_id in to_remove:
-            name = self.know_how_loader.documents[doc_id]["name"]
-            self.know_how_loader.remove_document(doc_id)
-            print(f"  ⚠️  Excluded know-how '{name}' (non-commercial license)")
+        for doc_id in self.know_how_loader.exclude_non_commercial():
+            print(f"  ⚠️  Excluded know-how '{doc_id}' (non-commercial license)")
 
     def _collect_custom_items(self, attr: str) -> list[dict] | None:
         storage = getattr(self, attr, None)
