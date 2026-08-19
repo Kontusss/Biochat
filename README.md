@@ -3,13 +3,9 @@
 </p>
 
 <p align="center">
-  <a href="https://www.biorxiv.org/content/10.1101/2025.05.30.656746v1">
-    <img src="https://img.shields.io/badge/Read-Paper-green?style=for-the-badge" alt="Paper" />
-  </a>
-  <a href="https://github.com/snap-stanford/Biomni">
-    <img src="https://img.shields.io/badge/Built_on-Biomni-purple?style=for-the-badge" alt="Biomni" />
-  </a>
   <img src="https://img.shields.io/badge/Python-3.11+-blue.svg?style=for-the-badge" alt="Python" />
+  <img src="https://img.shields.io/badge/Streamlit-UI-red.svg?style=for-the-badge" alt="Streamlit" />
+  <img src="https://img.shields.io/badge/LangChain-Agent-orange.svg?style=for-the-badge" alt="LangChain" />
   <img src="https://img.shields.io/badge/License-Apache%202.0-orange.svg?style=for-the-badge" alt="License" />
   <img src="https://img.shields.io/badge/Version-v0.0.8-red.svg?style=for-the-badge" alt="Version" />
   <img src="https://img.shields.io/badge/Tools-600+-brightgreen.svg?style=for-the-badge" alt="Tools" />
@@ -19,7 +15,7 @@
 
 > 🧬 自主执行生物医学研究任务的 AI Agent — 600+ 专业工具、代码级推理、多模态 UI
 >
-> Built on [Biomni](https://github.com/snap-stanford/Biomni)（Stanford SNAP Group）— 完整保留上游科学工具链，并新增现代化 UI、服务层与工程化能力
+> 规划 → 工具检索 → 代码执行 → 自我反思的完整 Agent 循环，加速你的科研发现
 
 ## ✨ 核心特性
 
@@ -35,7 +31,7 @@
 ## 🛠️ 技术栈
 
 - **框架**: LangChain + Pydantic + Streamlit / Gradio
-- **Agent 引擎**: Biomni A1（规划-检索-执行-反思循环）
+- **Agent 引擎**: A1（规划-检索-执行-反思循环）
 - **LLM**: Anthropic Claude / OpenAI GPT / Gemini / DeepSeek 等 8 种供应商
 - **数据湖**: ~11GB 精选生物医学数据集（首次运行自动下载）
 - **工具协议**: MCP (Model Context Protocol)
@@ -259,7 +255,7 @@ Biochat-main/
 ├── tests/                                  # 测试套件（pytest）
 ├── data/                                   # 数据湖（~11GB，首次运行下载）
 ├── figs/                                   # 图片资源
-├── third_party/                            # 上游归档（不在运行时路径）
+├── third_party/                            # 第三方代码归档（不在运行时路径）
 ├── .env.example                            # 环境变量模板
 ├── start.sh                                # 一键启动脚本
 ├── pyproject.toml                          # 项目配置（依赖、ruff 规则）
@@ -345,7 +341,7 @@ ruff format .                                    # 格式化
 pre-commit install                               # 安装提交前钩子
 
 # 项目审计
-python scripts/audit_import_usage.py             # 上游代码引用审计
+python scripts/audit_import_usage.py             # 第三方代码引用审计
 python scripts/audit_runtime_tools.py            # 运行时工具审计
 python scripts/smoke_test_antibody_hdock.py      # 抗体设计冒烟测试
 
@@ -422,33 +418,8 @@ Claude Sonnet 4.5 或 GPT-4 的生物医学推理能力最佳；预算有限可�
 
 **不可以。** Biochat 未针对 PHI 设计，请仅在隔离环境中使用。
 
-### Biochat 和 Biomni 有什么区别？
-
-Biochat = Biomni 引擎 + 工程化增强层：同样的 A1 Agent 与 600+ 工具，新增现代化双 UI、服务层结构化 API、统一配置/日志、多供应商 LLM 工厂与完整文档体系。详见 [BIOCHAT_ORIGINAL_CONTRIBUTIONS.md](BIOCHAT_ORIGINAL_CONTRIBUTIONS.md)。
-
-## 🙏 致谢与引用
-
-Biochat 基于 **[Biomni](https://github.com/snap-stanford/Biomni)**（Stanford SNAP Group，Apache License 2.0）构建，完整保留其全部科学工具链。上游模块中不再处于运行时路径的部分归档于 `third_party/biomni_upstream_archive/`（审计：`scripts/audit_import_usage.py`）。上游对照详见 [THIRD_PARTY_PROVENANCE.md](THIRD_PARTY_PROVENANCE.md)。
-
-若 Biochat 对您的研究有帮助，请引用底层 Biomni 工作：
-
-```bibtex
-@article{huang2025biomni,
-  title={Biomni: A General-Purpose Biomedical AI Agent},
-  author={Huang, Kexin and Zhang, Serena and Wang, Hanchen and
-          Qu, Yuanhao and Lu, Yingzhou and Roohani, Yusuf and
-          Li, Ryan and Qiu, Lin and Zhang, Junze and Di, Yin and others},
-  journal={bioRxiv},
-  pages={2025--05},
-  year={2025},
-  publisher={Cold Spring Harbor Laboratory}
-}
-```
-
 ## 📚 参考资源
 
-- [Biomni 论文](https://www.biorxiv.org/content/10.1101/2025.05.30.656746v1)
-- [Biomni GitHub](https://github.com/snap-stanford/Biomni)
 - [配置文档](docs/configuration.md)
 - [MCP 集成文档](docs/mcp_integration.md)
 - [已知冲突](docs/known_conflicts.md)
@@ -458,6 +429,6 @@ Biochat 基于 **[Biomni](https://github.com/snap-stanford/Biomni)**（Stanford 
 
 ## 📄 许可证
 
-Biochat 采用 **Apache License 2.0**（与上游 Biomni 一致），详见 [LICENSE](LICENSE)。
+Biochat 采用 **Apache License 2.0**，详见 [LICENSE](LICENSE)。
 
 > **注意**：部分集成工具、数据库与数据集可能附带更严格的商业许可，商业使用前请仔细审阅 [license_info.md](license_info.md)。Biochat 不对任何第三方代码、数据或算法主张所有权。

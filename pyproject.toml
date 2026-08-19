@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "biomni"
 dynamic = ["version"]
-description = "Biochat - A General-Purpose Biomedical AI Agent (built on Biomni)"
+description = "Biochat - A General-Purpose Biomedical AI Agent"
 readme = "README.md"
 license = "Apache-2.0"
 license-files = ["LICENSE"]
