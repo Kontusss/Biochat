@@ -149,7 +149,8 @@ The system is organized into modular layers and components:
 │   ├── setup.sh
 │   └── setup_path.sh
 ├── figs/
-│   └── biomni_logo.png
+│   ├── biochat_logo.png
+│   └── biochat_logo.svg
 ├── tutorials/
 │   ├── examples/
 │   │   └── cloning.ipynb

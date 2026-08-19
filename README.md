@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="./figs/biomni_logo.png" alt="Biochat Logo" width="600px" />
+  <img src="./figs/biochat_logo.png" alt="Biochat Logo" width="600px" />
 </p>
 
 <p align="center">
