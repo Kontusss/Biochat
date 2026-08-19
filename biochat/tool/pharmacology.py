@@ -3472,7 +3472,7 @@ class OpenFDAClient:
         self.requests = requests
         self.time = time
         self.session = requests.Session()
-        self.session.headers.update({"User-Agent": "Biochat-Agent/1.0 (https://biochat.stanford.edu)"})
+        self.session.headers.update({"User-Agent": "Biochat-Agent/1.0 (https://github.com/Kontusss/Biochat)"})
         self.retry_attempts = 3
         self.timeout = 30
         self.rate_limit_delay = 0.2  # 5 requests/second

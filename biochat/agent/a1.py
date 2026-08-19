@@ -111,25 +111,25 @@ class A1:
         # ── Data lake ──────────────────────────────────────────
         self.path = path
         os.makedirs(path, exist_ok=True)
-        data_lake_dir = os.path.join(path, "biochat_data", "data_lake")
-        benchmark_dir = os.path.join(path, "biochat_data", "benchmark")
+        data_lake_dir = os.path.join(path, "biomni_data", "data_lake")
+        benchmark_dir = os.path.join(path, "biomni_data", "benchmark")
         os.makedirs(data_lake_dir, exist_ok=True)
         os.makedirs(benchmark_dir, exist_ok=True)
 
         if expected_data_lake_files is None:
             expected_data_lake_files = list(self.data_lake_dict.keys())
             check_and_download_s3_files(
-                "https://biochat-release.s3.amazonaws.com",
+                "https://biomni-release.s3.amazonaws.com",
                 data_lake_dir, expected_data_lake_files, folder="data_lake",
             )
             if not (os.path.isdir(benchmark_dir) and
                     os.path.isdir(os.path.join(benchmark_dir, "hle"))):
                 check_and_download_s3_files(
-                    "https://biochat-release.s3.amazonaws.com",
+                    "https://biomni-release.s3.amazonaws.com",
                     benchmark_dir, [], folder="benchmark",
                 )
 
-        self.path = os.path.join(path, "biochat_data")
+        self.path = os.path.join(path, "biomni_data")
 
         # ── LLM ────────────────────────────────────────────────
         self.tool_profile = tool_profile
