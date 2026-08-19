@@ -3,7 +3,7 @@
 
 Verifies the guardrails that protect Biochat's runtime output:
 
-1. The P0 sanitizer (``biomni/ui/sanitize.py``) strips internal reasoning
+1. The P0 sanitizer (``biochat/ui/sanitize.py``) strips internal reasoning
    blocks, XML tags, and self-talk from UI-visible text.
 2. The system prompt carries the output-format requirements (six-section
    XunZi format) and the anti-fabrication requirements (no invented
@@ -36,7 +36,7 @@ def check(condition: bool, label: str) -> None:
 # ═══════════════════════════════════════════════════════════════════
 
 def check_sanitizer() -> None:
-    from biomni.ui.sanitize import FALLBACK_MESSAGE, sanitize_visible_text
+    from biochat.ui.sanitize import FALLBACK_MESSAGE, sanitize_visible_text
 
     cleaned = sanitize_visible_text(
         "前置内容\n<thinking>隐藏的推理过程</thinking>\n"
@@ -55,7 +55,7 @@ def check_sanitizer() -> None:
 # ═══════════════════════════════════════════════════════════════════
 
 def check_system_prompt() -> None:
-    from biomni.prompts.system_prompt_v2 import SystemPromptBuilder
+    from biochat.prompts.system_prompt_v2 import SystemPromptBuilder
 
     builder = SystemPromptBuilder(
         tool_desc={}, data_lake_content=[], library_content_list=[],

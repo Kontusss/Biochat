@@ -57,8 +57,8 @@ if [ "$UI_MODE" = "gradio" ]; then
     echo "  地址: http://localhost:7860"
     echo "=========================================="
     python -c "
-from biomni.config import default_config
-from biomni.agent import A1
+from biochat.config import default_config
+from biochat.agent import A1
 agent = A1(path='${DATA}')
 agent.launch_biochat_ui()
 "
@@ -66,5 +66,5 @@ else
     echo "  UI: Streamlit (ChatGPT 风格)"
     echo "  地址: http://localhost:8501"
     echo "=========================================="
-    streamlit run biomni/ui/biochat_streamlit.py
+    streamlit run biochat/ui/biochat_streamlit.py
 fi

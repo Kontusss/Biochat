@@ -30,7 +30,7 @@ WORKDIR /work
 ### Check availability
 
 ```python
-from biomni.tool.antibody_design.hdock_docker import check_hdock_docker_available
+from biochat.tool.antibody_design.hdock_docker import check_hdock_docker_available
 result = check_hdock_docker_available()
 # {"available": true, "runtime": "docker", "platform": "linux/amd64"}
 ```
@@ -38,7 +38,7 @@ result = check_hdock_docker_available()
 ### Run docking via Docker
 
 ```python
-from biomni.tool.antibody_design.hdock_docker import run_hdock_docker
+from biochat.tool.antibody_design.hdock_docker import run_hdock_docker
 result = run_hdock_docker(
     receptor_pdb="receptor.pdb",
     ligand_pdb="ligand.pdb",
@@ -51,14 +51,14 @@ result = run_hdock_docker(
 ### Use the unified runner
 
 ```python
-from biomni.tool.antibody_design.docking_runner import run_docking_jobs
+from biochat.tool.antibody_design.docking_runner import run_docking_jobs
 result = run_docking_jobs(manifest, output_dir, runtime="docker")
 ```
 
 ### Inspect HDOCK output
 
 ```python
-from biomni.tool.antibody_design.hdock_output import inspect_hdock_output
+from biochat.tool.antibody_design.hdock_output import inspect_hdock_output
 result = inspect_hdock_output("output/hdock.out")
 # {"format_detected": true, "score_parsed": false, "ranking_performed": false}
 ```
@@ -66,7 +66,7 @@ result = inspect_hdock_output("output/hdock.out")
 ### Plan createpl extraction (does NOT execute)
 
 ```python
-from biomni.tool.antibody_design.hdock_output import plan_createpl_extraction
+from biochat.tool.antibody_design.hdock_output import plan_createpl_extraction
 result = plan_createpl_extraction("hdock.out", "model_001.pdb", runtime="docker")
 # {"planned": true, "extraction_performed": false}
 ```

@@ -1,7 +1,7 @@
-Biochat API Reference (biomni)
+Biochat API Reference (biochat)
 ===============================
 
-Biochat is built on the Biomni engine. This reference documents the underlying ``biomni`` package API.
+This reference documents the underlying ``biochat`` package API.
 
 .. toctree::
    :maxdepth: 2

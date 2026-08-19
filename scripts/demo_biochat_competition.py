@@ -35,7 +35,7 @@ def demo_quick() -> int:
     print("🧬 Biochat competition demo (quick, offline)\n" + "=" * 56)
 
     # 1. Knowledge registry
-    from biomni.knowledge import KnowledgeRegistry
+    from biochat.knowledge import KnowledgeRegistry
 
     registry = KnowledgeRegistry()
     docs = registry.get_document_summaries()
@@ -46,7 +46,7 @@ def demo_quick() -> int:
     print(f"   license policy: {len(excluded)} non-commercial excluded")
 
     # 2. Environment catalog
-    from biomni.environment import EnvironmentCatalog
+    from biochat.environment import EnvironmentCatalog
 
     catalog = EnvironmentCatalog()
     print(f"✅ Environment catalog: {len(catalog.data_lake)} datasets, "
@@ -56,9 +56,9 @@ def demo_quick() -> int:
     print(f"   commercial view drops {nc} non-commercial resources")
 
     # 3. Tool catalog — active profile (minimal by default for the demo)
-    from biomni.core.settings import biochat_settings
-    from biomni.tool.registry import ToolRegistry
-    from biomni.utils.io_utils import load_all_tool_descriptions
+    from biochat.core.settings import biochat_settings
+    from biochat.tool.registry import ToolRegistry
+    from biochat.utils.io_utils import load_all_tool_descriptions
 
     full = load_all_tool_descriptions(profile="full")
     minimal = load_all_tool_descriptions(profile="minimal")
@@ -74,8 +74,8 @@ def demo_quick() -> int:
           f"(registry holds {len(registry.tools)} tools)")
 
     # 4. P0 sanitizer + streaming card
-    from biomni.ui.biochat_streamlit import render_assistant_card_streaming
-    from biomni.ui.sanitize import sanitize_visible_text
+    from biochat.ui.biochat_streamlit import render_assistant_card_streaming
+    from biochat.ui.sanitize import sanitize_visible_text
 
     raw = ("<thinking>internal reasoning must never leak</thinking>\n"
            "结论：EGFR 是受体酪氨酸激酶。")
@@ -89,7 +89,7 @@ def demo_quick() -> int:
     print("✅ Sanitizer + streaming card: reasoning blocked, cursor renders")
 
     # 5. XunZi response-format evaluation
-    from biomni.eval import evaluate_response_quality
+    from biochat.eval import evaluate_response_quality
 
     sample = (
         "## 结论\nEGFR 参与肿瘤生长。\n\n"

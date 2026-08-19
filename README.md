@@ -56,7 +56,7 @@ git clone <repository_url>
 cd Biochat-main
 
 # 2. 安装 Conda 环境（首次运行，含 R/CLI 工具，耗时较长）
-cd biomni_env && bash setup.sh && cd ..
+cd biochat_env && bash setup.sh && cd ..
 conda activate biomni_e1
 
 # 3. 安装 Biochat
@@ -92,7 +92,7 @@ bash start.sh
 conda activate biomni_e1
 
 # Streamlit UI（推荐）
-streamlit run biomni/ui/biochat_streamlit.py    # → http://localhost:8501
+streamlit run biochat/ui/biochat_streamlit.py    # → http://localhost:8501
 
 # Gradio UI（旧版）
 python scripts/biochat_demo.py                  # → http://localhost:7860
@@ -100,7 +100,7 @@ python scripts/biochat_demo.py                  # → http://localhost:7860
 
 #### Windows 环境
 
-项目未提供原生 Windows 启动脚本（`start.sh` 为 Bash），推荐使用 **WSL2**，在 WSL 内按上述 macOS/Linux 步骤操作即可。若需原生运行，请手动执行：安装依赖 → 复制 `.env` → 运行 `streamlit run biomni/ui/biochat_streamlit.py`。
+项目未提供原生 Windows 启动脚本（`start.sh` 为 Bash），推荐使用 **WSL2**，在 WSL 内按上述 macOS/Linux 步骤操作即可。若需原生运行，请手动执行：安装依赖 → 复制 `.env` → 运行 `streamlit run biochat/ui/biochat_streamlit.py`。
 
 ### 访问服务
 
@@ -123,8 +123,8 @@ python scripts/biochat_demo.py                  # → http://localhost:7860
 | 资源释放 | `svc.shutdown()` | 关闭 Agent、释放资源 |
 
 ```python
-from biomni.services.agent_service import get_agent_service
-from biomni.schemas.chat import ChatRequest
+from biochat.services.agent_service import get_agent_service
+from biochat.schemas.chat import ChatRequest
 
 svc = get_agent_service()
 svc.ensure_initialized()
@@ -138,7 +138,7 @@ print(response.status)        # AgentStatus.COMPLETED
 ### A1 Agent 直接使用
 
 ```python
-from biomni.agent import A1
+from biochat.agent import A1
 
 # 初始化（首次运行自动下载 ~11GB 数据湖）
 agent = A1(path='./data', llm='claude-sonnet-4-5')
@@ -207,7 +207,7 @@ agent.go("Find FDA active ingredient information for ibuprofen")
 
 ```
 Biochat-main/
-├── biomni/                                 # 核心包
+├── biochat/                                 # 核心包
 │   ├── agent/                              # Agent 引擎
 │   │   ├── a1.py                           # A1 Agent 主类（推理循环）
 │   │   ├── workflow.py                     # 任务工作流编排
@@ -248,7 +248,7 @@ Biochat-main/
 │   │   ├── biochat_ui.py                   # Gradio UI
 │   │   └── biochat_theme.py                # 设计系统
 │   └── utils/                              # 工具函数（代码执行/PDF 导出/文本清洗）
-├── biomni_env/                             # Conda 环境搭建（setup.sh / yml）
+├── biochat_env/                             # Conda 环境搭建（setup.sh / yml）
 ├── scripts/                                # 脚本（demo / 审计 / 冒烟测试）
 ├── docs/                                   # 文档（配置 / MCP / 构建）
 ├── tutorials/                              # 示例 Notebook

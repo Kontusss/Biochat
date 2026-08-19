@@ -21,22 +21,22 @@ def _load_reference_module(name: str):
 class TestAdapterEquivalence:
     def test_full_view_matches_upstream_env_desc(self):
         ref = _load_reference_module("env_desc.py")
-        from biomni.env_desc import data_lake_dict, library_content_dict
+        from biochat.env_desc import data_lake_dict, library_content_dict
 
         assert data_lake_dict == ref.data_lake_dict
         assert library_content_dict == ref.library_content_dict
 
     def test_commercial_view_matches_upstream_env_desc_cm(self):
         ref = _load_reference_module("env_desc_cm.py")
-        from biomni.env_desc_cm import data_lake_dict, library_content_dict
+        from biochat.env_desc_cm import data_lake_dict, library_content_dict
 
         assert data_lake_dict == ref.data_lake_dict
         assert library_content_dict == ref.library_content_dict
 
     def test_cm_is_subset_of_full(self):
-        from biomni.env_desc import data_lake_dict, library_content_dict
-        from biomni.env_desc_cm import data_lake_dict as dl_cm
-        from biomni.env_desc_cm import library_content_dict as lib_cm
+        from biochat.env_desc import data_lake_dict, library_content_dict
+        from biochat.env_desc_cm import data_lake_dict as dl_cm
+        from biochat.env_desc_cm import library_content_dict as lib_cm
 
         assert set(dl_cm) <= set(data_lake_dict)
         assert set(lib_cm) <= set(library_content_dict)
@@ -44,7 +44,7 @@ class TestAdapterEquivalence:
 
 class TestCatalogMetadata:
     def test_catalog_loads_and_filters(self):
-        from biomni.environment import EnvironmentCatalog
+        from biochat.environment import EnvironmentCatalog
 
         catalog = EnvironmentCatalog()
         assert len(catalog.data_lake) == 76
@@ -56,7 +56,7 @@ class TestCatalogMetadata:
         }
 
     def test_license_metadata_present(self):
-        from biomni.environment import EnvironmentCatalog
+        from biochat.environment import EnvironmentCatalog
 
         catalog = EnvironmentCatalog()
         assert catalog.commercial_allowed("BindingDB_All_202409.tsv") is False
@@ -65,7 +65,7 @@ class TestCatalogMetadata:
         assert catalog.commercial_allowed("gene_info.parquet") is True
 
     def test_schema_fields(self):
-        from biomni.environment import EnvironmentCatalog
+        from biochat.environment import EnvironmentCatalog
 
         catalog = EnvironmentCatalog()
         entry = catalog.data_lake[0]

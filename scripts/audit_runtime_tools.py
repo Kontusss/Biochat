@@ -6,7 +6,7 @@ Classifies every registered tool (from ``load_all_tool_descriptions``):
 - ``used_by_demo`` — the tool name appears in Biochat-original code
   (scripts / examples / UI / prompts / services / tests);
 - ``used_by_antibody_pipeline`` — the tool belongs to (or is statically
-  imported by) ``biomni.tool.antibody_design``;
+  imported by) ``biochat.tool.antibody_design``;
 - ``used_by_registry`` — the tool's function module is statically imported
   by Biochat runtime code (beyond the dynamic registry itself);
 - ``requires_external_dependency`` — the function module imports heavy
@@ -20,7 +20,7 @@ Recommendations:
     optional_full_profile   upstream scientific tool, full profile only
     archive_unused          registered nowhere (should be empty)
 
-Also regenerates ``biomni/tool/profiles.py`` (the manifest consumed by
+Also regenerates ``biochat/tool/profiles.py`` (the manifest consumed by
 ``ToolRegistry`` / ``load_all_tool_descriptions``).
 """
 
@@ -35,12 +35,12 @@ PROJECT_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(PROJECT_ROOT))
 
 OUT_CSV = PROJECT_ROOT / "reports" / "runtime_tool_usage.csv"
-MANIFEST = PROJECT_ROOT / "biomni" / "tool" / "profiles.py"
+MANIFEST = PROJECT_ROOT / "biochat" / "tool" / "profiles.py"
 
 # Biochat-original dirs whose mention of a tool name counts as demo usage.
 # (tests/ is excluded — incidental name mentions there are not demo usage.)
-DEMO_DIRS = ("scripts", "examples", "biomni/ui", "biomni/prompts",
-             "biomni/services")
+DEMO_DIRS = ("scripts", "examples", "biochat/ui", "biochat/prompts",
+             "biochat/services")
 
 # Heavy optional dependencies (module-level import detection)
 HEAVY_DEPS = ("torch", "ImmuneBuilder", "docker", "rdkit", "scanpy",
@@ -48,12 +48,12 @@ HEAVY_DEPS = ("torch", "ImmuneBuilder", "docker", "rdkit", "scanpy",
 
 
 def module_key_to_field(module_key: str) -> str:
-    return module_key.removeprefix("biomni.tool.")
+    return module_key.removeprefix("biochat.tool.")
 
 
 def function_module_files(field: str) -> list[Path]:
     """Candidate function-module files for one tool field."""
-    base = PROJECT_ROOT / "biomni" / "tool" / field
+    base = PROJECT_ROOT / "biochat" / "tool" / field
     if base.is_dir():
         return sorted(base.rglob("*.py"))
     file = base.with_suffix(".py")
@@ -76,7 +76,7 @@ def static_importers_of(module_key: str, scope: Path) -> list[str]:
 
 
 def audit() -> tuple[list[dict], dict]:
-    from biomni.utils.io_utils import load_all_tool_descriptions
+    from biochat.utils.io_utils import load_all_tool_descriptions
 
     module2api = load_all_tool_descriptions()
 
@@ -97,15 +97,15 @@ def audit() -> tuple[list[dict], dict]:
                         demo_names.add(name)
 
     # Antibody pipeline modules
-    pipeline_modules = {"biomni.tool.antibody_design"}
-    ab_dir = PROJECT_ROOT / "biomni" / "tool" / "antibody_design"
+    pipeline_modules = {"biochat.tool.antibody_design"}
+    ab_dir = PROJECT_ROOT / "biochat" / "tool" / "antibody_design"
     for field in module2api:
         for importer in static_importers_of(field, ab_dir):
-            if importer.startswith("biomni/tool/antibody_design/"):
+            if importer.startswith("biochat/tool/antibody_design/"):
                 pipeline_modules.add(field)
 
-    # Statically imported by Biochat runtime (excluding biomni/tool itself)
-    runtime_scope = PROJECT_ROOT / "biomni"
+    # Statically imported by Biochat runtime (excluding biochat/tool itself)
+    runtime_scope = PROJECT_ROOT / "biochat"
     rows: list[dict] = []
     for module_key, tools in module2api.items():
         field = module_key_to_field(module_key)
@@ -115,12 +115,12 @@ def audit() -> tuple[list[dict], dict]:
                  if re.search(rf"^\s*(?:import\s+{re.escape(dep)}\b|from\s+{re.escape(dep)}\b)",
                               sources, re.MULTILINE)]
 
-        if module_key == "biomni.tool.antibody_design":
+        if module_key == "biochat.tool.antibody_design":
             runtime_importers = []
         else:
             runtime_importers = [
                 p for p in static_importers_of(module_key, runtime_scope)
-                if not p.startswith("biomni/tool/")
+                if not p.startswith("biochat/tool/")
             ]
 
         for tool in tools:
@@ -163,7 +163,7 @@ def write_manifest(manifest: dict) -> None:
         f'\n'
         f'MINIMAL_TOOL_MODULES lists the modules loaded by the minimal runtime\n'
         f'profile (competition demo + antibody design pipeline + engine glue).\n'
-        f'The full profile loads every attributed Biomni tool module.\n'
+        f'The full profile loads every attributed Biochat tool module.\n'
         f'Regenerate with: python scripts/audit_runtime_tools.py\n'
         f'"""\n\n'
         f'MINIMAL_TOOL_MODULES: frozenset[str] = frozenset({{\n'

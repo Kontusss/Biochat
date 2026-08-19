@@ -8,7 +8,7 @@ def generate_api_docs(base_path, output_dir, package_name, exclude_list=None):
     Automatically generates .rst files for Sphinx API documentation.
 
     Args:
-        base_path (str): The root directory of the Python package (e.g., 'biomni').
+        base_path (str): The root directory of the Python package (e.g., 'biochat').
         output_dir (str): The directory where the .rst files will be generated (e.g., 'source/api').
         package_name (str): The name of the Python package.
         exclude_list (list): A list of paths (directories or files) to exclude from documentation.
@@ -34,7 +34,7 @@ def generate_api_docs(base_path, output_dir, package_name, exclude_list=None):
                 continue
 
             if file.endswith(".py") and file != "__init__.py":
-                # Construct the full module name (e.g., biomni.agent.a1)
+                # Construct the full module name (e.g., biochat.agent.a1)
                 rel_path = os.path.relpath(root, base_path)
                 module_name = f"{package_name}.{rel_path.replace(os.path.sep, '.')}.{os.path.splitext(file)[0]}"
 
@@ -103,9 +103,9 @@ def create_index_rst(output_dir, package_name):
 
 
 if __name__ == "__main__":
-    package_to_document = "../biomni"
+    package_to_document = "../biochat"
     api_docs_path = "./source/api"
-    package_name = "biomni"
+    package_name = "biochat"
 
     os.makedirs(api_docs_path, exist_ok=True)
 

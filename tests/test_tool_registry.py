@@ -13,7 +13,7 @@ def _schema(name: str) -> dict:
 
 class TestToolRegistry:
     def test_registration_assigns_ids(self):
-        from biomni.tool.registry import ToolRegistry
+        from biochat.tool.registry import ToolRegistry
 
         reg = ToolRegistry({"mod": [_schema("a"), _schema("b")]})
         assert reg.get_id_by_name("a") == 0
@@ -22,7 +22,7 @@ class TestToolRegistry:
         assert [t["id"] for t in reg.tools] == [0, 1]
 
     def test_lookups(self):
-        from biomni.tool.registry import ToolRegistry
+        from biochat.tool.registry import ToolRegistry
 
         reg = ToolRegistry({"mod": [_schema("x")]})
         assert reg.get_tool_by_name("x")["name"] == "x"
@@ -33,7 +33,7 @@ class TestToolRegistry:
     def test_invalid_schema_raises(self):
         import pytest
 
-        from biomni.tool.registry import ToolRegistry
+        from biochat.tool.registry import ToolRegistry
 
         reg = ToolRegistry()
         with pytest.raises(ValueError):
@@ -42,14 +42,14 @@ class TestToolRegistry:
     def test_duplicate_name_raises(self):
         import pytest
 
-        from biomni.tool.registry import ToolRegistry
+        from biochat.tool.registry import ToolRegistry
 
         reg = ToolRegistry({"mod": [_schema("dup")]})
         with pytest.raises(ValueError):
             reg.register_tool(_schema("dup"))
 
     def test_removal_updates_indexes(self):
-        from biomni.tool.registry import ToolRegistry
+        from biochat.tool.registry import ToolRegistry
 
         reg = ToolRegistry({"mod": [_schema("a"), _schema("b")]})
         assert reg.remove_tool_by_name("a") is True
@@ -59,7 +59,7 @@ class TestToolRegistry:
         assert reg.remove_tool_by_id(42) is False
 
     def test_document_df(self):
-        from biomni.tool.registry import ToolRegistry
+        from biochat.tool.registry import ToolRegistry
 
         reg = ToolRegistry({"mod": [_schema("a"), _schema("b")]})
         df = reg.document_df
@@ -72,7 +72,7 @@ class TestToolRegistry:
     def test_pickle_roundtrip(self, tmp_path):
         import pickle
 
-        from biomni.tool.registry import ToolRegistry
+        from biochat.tool.registry import ToolRegistry
 
         reg = ToolRegistry({"mod": [_schema("a")]})
         path = tmp_path / "registry.pkl"
@@ -83,14 +83,14 @@ class TestToolRegistry:
 
 class TestLegacyAdapter:
     def test_old_path_imports_new_class(self):
-        from biomni.tool.registry import ToolRegistry as NewRegistry
-        from biomni.tool.tool_registry import ToolRegistry as OldImport
+        from biochat.tool.registry import ToolRegistry as NewRegistry
+        from biochat.tool.tool_registry import ToolRegistry as OldImport
 
         assert OldImport is NewRegistry
 
     def test_old_path_works_with_module2api_shape(self):
-        from biomni.tool.tool_registry import ToolRegistry
-        from biomni.utils.io_utils import load_all_tool_descriptions
+        from biochat.tool.tool_registry import ToolRegistry
+        from biochat.utils.io_utils import load_all_tool_descriptions
 
         module2api = load_all_tool_descriptions()
         reg = ToolRegistry(module2api)

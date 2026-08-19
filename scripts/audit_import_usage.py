@@ -4,7 +4,7 @@
 Scans every Python file in the repository for imports of the audited
 upstream modules and classifies each usage:
 
-- ``runtime``         — imported from the biomni package (the live agent path)
+- ``runtime``         — imported from the biochat package (the live agent path)
 - ``test``            — imported from tests/
 - ``demo``            — imported from scripts/ / examples/ / tutorials/
 - ``legacy_internal`` — imported by another audited module (self-referencing
@@ -46,7 +46,7 @@ AUDIT_TARGETS: list[str] = [
 # Targets slated for architectural replacement instead of archiving.
 # ``react.py`` was archived directly (audit found zero importers, so no
 # adapter was required); ``know_how/loader.py`` now delegates to
-# ``biomni/knowledge`` — the legacy path is an active adapter.
+# ``biochat/knowledge`` — the legacy path is an active adapter.
 REPLACE_TARGETS: set[str] = {
     "biomni/know_how/loader.py",
 }
@@ -55,7 +55,7 @@ EXCLUDE_DIRS = {"__pycache__", ".git", "third_party", ".venv", "venv", "node_mod
 
 
 def module_name(path: str) -> str:
-    """'biomni/agent/react.py' -> 'biomni.agent.react'"""
+    """'biochat/agent/react.py' -> 'biochat.agent.react'"""
     return path.replace("/", ".").removesuffix(".py")
 
 
@@ -63,10 +63,10 @@ def target_patterns(target: str, same_dir: bool) -> list[re.Pattern]:
     """Regexes matching any import statement that pulls in the target.
 
     Covers absolute imports and, when the importer lives in the same
-    package, relative imports (e.g. ``from .biomni_eval1 import ...``).
+    package, relative imports (e.g. ``from .biochat_eval1 import ...``).
     """
     if target.endswith("/"):
-        base = "biomni." + target.strip("/").replace("/", ".")
+        base = "biochat." + target.strip("/").replace("/", ".")
         return [
             re.compile(rf"^\s*(from|import)\s+{re.escape(base)}(\.|$|\s)", re.MULTILINE),
         ]
@@ -81,7 +81,7 @@ def target_patterns(target: str, same_dir: bool) -> list[re.Pattern]:
             re.compile(rf"^\s*from\s+\.\s*{re.escape(stem)}\s+import", re.MULTILINE),
             re.compile(rf"^\s*from\s+\.\s+import\s+[^\n]*\b{re.escape(stem)}\b", re.MULTILINE),
         ]
-    # 'from biomni.know_how import KnowHowLoader' hits know_how/__init__,
+    # 'from biochat.know_how import KnowHowLoader' hits know_how/__init__,
     # which re-exports loader — count the package import too.
     if target.endswith("loader.py"):
         patterns.append(

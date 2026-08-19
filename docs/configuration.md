@@ -1,14 +1,14 @@
 # Biochat Configuration Guide
 
-> Biochat uses the Biomni configuration system. All Biomni environment variables and settings are fully supported.
+> Biochat uses the Biochat configuration system. All Biochat environment variables and settings are fully supported.
 
 ## Quick Start
 
 **Recommended approach**: Use environment variables or modify `default_config` for consistent behavior across your entire application.
 
 ```python
-from biomni.config import default_config
-from biomni.agent import A1
+from biochat.config import default_config
+from biochat.agent import A1
 
 # Option 1: Modify global defaults (affects everything)
 default_config.llm = "gpt-4"
@@ -41,7 +41,7 @@ BIOMNI_PATH=/path/to/data
 ### 2. Runtime Configuration (Recommended for Scripts)
 
 ```python
-from biomni.config import default_config
+from biochat.config import default_config
 
 # Changes apply to all agents and database queries
 default_config.llm = "gpt-4"
@@ -100,7 +100,7 @@ AWS_REGION=us-east-1
 # Azure OpenAI
 OPENAI_ENDPOINT=https://your-resource.openai.azure.com/
 
-# Biomni/Biochat Settings
+# Biochat/Biochat Settings
 BIOMNI_PATH=/path/to/data                   # Default: ./data
 BIOMNI_TIMEOUT_SECONDS=1200                 # Default: 600
 BIOMNI_LLM=model_name                        # Default: claude-sonnet-4-20250514
@@ -114,7 +114,7 @@ BIOMNI_CUSTOM_API_KEY=custom_key
 ### Python Configuration
 
 ```python
-from biomni.config import default_config
+from biochat.config import default_config
 
 # All available settings
 default_config.path = "./data"

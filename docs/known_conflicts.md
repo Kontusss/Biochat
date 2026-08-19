@@ -1,6 +1,6 @@
-# Known Package Conflicts in Biochat (Biomni engine)
+# Known Package Conflicts in Biochat (Biochat engine)
 
-This file lists Python packages that are known to have dependency conflicts with the default Biomni/Biochat environment. These packages are not installed by default. If you require their functionality, you must install them manually and may need to uncomment relevant code in the codebase.
+This file lists Python packages that are known to have dependency conflicts with the default Biochat/Biochat environment. These packages are not installed by default. If you require their functionality, you must install them manually and may need to uncomment relevant code in the codebase.
 
 ## Packages
 
@@ -16,7 +16,7 @@ This file lists Python packages that are known to have dependency conflicts with
 ### 3. cnvkit
 - **Environment Requirement**: Requires Python 3.10 environment (`bio_env_py310.yml`)
 - **Function**: Supports the `analyze_copy_number_purity_ploidy_and_focal_events` function
-- **Why Separate Environment**: cnvkit has strict dependency requirements that conflict with newer Python versions and other packages in the main Biomni environment. Python 3.10 provides the optimal compatibility for cnvkit and its dependencies, ensuring reliable copy number variation analysis, purity estimation, ploidy detection, and focal event identification.
+- **Why Separate Environment**: cnvkit has strict dependency requirements that conflict with newer Python versions and other packages in the main Biochat environment. Python 3.10 provides the optimal compatibility for cnvkit and its dependencies, ensuring reliable copy number variation analysis, purity estimation, ploidy detection, and focal event identification.
 - **Installation**: Use `conda env create -f bio_env_py310.yml` to create the dedicated environment
 
 ### 4. panhumanpy
@@ -26,7 +26,7 @@ This file lists Python packages that are known to have dependency conflicts with
   - TensorFlow 2.17 (specific version)
   - scikit-learn 1.6.0 (specific version)
   - Python >=3.9 but optimized for Python 3.12
-  - These version constraints conflict with the main Biomni environment and other packages
+  - These version constraints conflict with the main Biochat environment and other packages
 - **Installation**: Install in a separate conda environment with the exact versions specified in the package requirements
 
 ---

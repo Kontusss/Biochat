@@ -2,8 +2,6 @@
 
 Thank you for your interest in contributing to Biochat! We're building the infrastructure layer for biomedical AI agents, and we welcome contributions from the community. Contributors with significant contributions will be invited to co-author publications in top-tier journals and conferences.
 
-Biochat is built on top of [Biomni](https://github.com/snap-stanford/Biomni) and contributions to the core engine should be directed upstream.
-
 ## Getting Started
 
 Before contributing, please ensure you:
@@ -15,19 +13,19 @@ Before contributing, please ensure you:
 
 ### 🛠️ Adding a New Tool
 
-Tools are implemented as Python functions in `biomni/tool/XXX.py`, organized by subject area.
+Tools are implemented as Python functions in `biochat/tool/XXX.py`, organized by subject area.
 
 **Steps:**
-1. **Implement and test** your function locally. If it requires additional software, create installation script and append it into `biomni_env/new_software_{VERSION}.sh`
+1. **Implement and test** your function locally. If it requires additional software, create installation script and append it into `biochat_env/new_software_{VERSION}.sh`
 
 2. **Choose the appropriate subject** category (e.g. database, biochemistry, etc.)
 
-3. **Create a tool description** in `biomni/tool/tool_description/XXX.py` following the existing format
+3. **Create a tool description** in `biochat/tool/tool_description/XXX.py` following the existing format
 
    *Tip: Use this helper to auto-generate descriptions:*
    ```python
-   from biomni.utils import function_to_api_schema
-   from biomni.llm import get_llm
+   from biochat.utils import function_to_api_schema
+   from biochat.llm import get_llm
 
    llm = get_llm('claude-sonnet-4-20250514')
    desc = function_to_api_schema(function_code, llm)
@@ -41,15 +39,15 @@ If the data source has web API, follow this process:
 
 **Steps:**
 1. **Verify uniqueness** - ensure no overlap with existing data
-2. **Add a new query_XX function** to `biomni/tool/database.py`, follow the format from the other functions.
-3. **Create a tool description** in `biomni/tool/tool_description/database.py` following the existing format
+2. **Add a new query_XX function** to `biochat/tool/database.py`, follow the format from the other functions.
+3. **Create a tool description** in `biochat/tool/tool_description/database.py` following the existing format
 
 If the data source has no API access, follow the process below:
 
 **Steps:**
 1. **Verify uniqueness** - ensure no overlap with existing data
 2. **Prepare download link** with verified redistribution rights
-3. **Add entry** to `data_lake_dict` in `biomni/env_desc.py`
+3. **Add entry** to `data_lake_dict` in `biochat/env_desc.py`
 4. **Submit a pull request** with the download link
 
 Then, make a PR.
@@ -58,15 +56,15 @@ Then, make a PR.
 
 **Steps:**
 1. **Test locally** to ensure no conflicts with existing environments
-2. **Create installation script** and append it into `biomni_env/new_software_{VERSION}.sh`
-3. **Add entry** to `library_content_dict` in `biomni/env_desc.py`
+2. **Create installation script** and append it into `biochat_env/new_software_{VERSION}.sh`
+3. **Add entry** to `library_content_dict` in `biochat/env_desc.py`
 4. **Submit a pull request** including:
    - Installation bash script
    - Screenshot demonstrating no environment conflicts
 
 ### 🎯 Adding a New Benchmark
 
-Create benchmarks in the `biomni/task/` folder.
+Create benchmarks in the `biochat/task/` folder.
 
 **Required implementation:**
 ```python
@@ -93,7 +91,7 @@ class YourBenchmark:
 ```
 
 **Steps:**
-1. **Create benchmark file** in `biomni/task/[benchmark_name].py`
+1. **Create benchmark file** in `biochat/task/[benchmark_name].py`
 2. **Implement required methods** as shown above
 3. **Provide data download link** for associated datasets
 4. **Submit a pull request**

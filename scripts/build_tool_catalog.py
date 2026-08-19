@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
-"""Generate biomni/tool/tool_description/catalog.yaml + adapter modules.
+"""Generate biochat/tool/tool_description/catalog.yaml + adapter modules.
 
-Imports every ``biomni.tool.tool_description.<field>`` module (the field
-list comes from ``biomni.utils.io_utils._TOOL_FIELDS``), dumps the
+Imports every ``biochat.tool.tool_description.<field>`` module (the field
+list comes from ``biochat.utils.io_utils._TOOL_FIELDS``), dumps the
 ``description`` lists into one YAML catalog, then rewrites each field
 module as a thin adapter that loads its section from the catalog.
 
@@ -23,18 +23,18 @@ import yaml
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(PROJECT_ROOT))
 
-DESC_DIR = PROJECT_ROOT / "biomni" / "tool" / "tool_description"
+DESC_DIR = PROJECT_ROOT / "biochat" / "tool" / "tool_description"
 OUT_PATH = DESC_DIR / "catalog.yaml"
 
 ADAPTER_TEMPLATE = '''"""Adapter — {field} tool descriptions now live in catalog.yaml.
 
 The original Python literals were migrated to
-``biomni/tool/tool_description/catalog.yaml`` by
+``biochat/tool/tool_description/catalog.yaml`` by
 ``scripts/build_tool_catalog.py``; the upstream data is preserved there
 verbatim (Apache-2.0, snap-stanford/Biomni).
 """
 
-from biomni.tool.tool_description._catalog_loader import load_tool_description
+from biochat.tool.tool_description._catalog_loader import load_tool_description
 
 description = load_tool_description("{field}")
 '''
@@ -47,7 +47,7 @@ def collect_descriptions(fields: tuple[str, ...]) -> dict:
         "fields": list(fields),
     }}
     for field in fields:
-        module = importlib.import_module(f"biomni.tool.tool_description.{field}")
+        module = importlib.import_module(f"biochat.tool.tool_description.{field}")
         catalog[field] = module.description
     return catalog
 
@@ -59,7 +59,7 @@ def write_adapters(fields: tuple[str, ...]) -> None:
 
 
 def main() -> int:
-    from biomni.utils.io_utils import _TOOL_FIELDS
+    from biochat.utils.io_utils import _TOOL_FIELDS
 
     fields = tuple(_TOOL_FIELDS)
     catalog = collect_descriptions(fields)

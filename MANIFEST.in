@@ -1,17 +1,17 @@
 # MANIFEST.in
 
-# Include all python files from the biomni package
-recursive-include biomni *.py
+# Include all python files from the biochat package
+recursive-include biochat *.py
 
 # Include the .pkl database files
-recursive-include biomni/tool/schema_db *.pkl
+recursive-include biochat/tool/schema_db *.pkl
 
-# Include specific files from biomni_env, but not the biomni_tools subdirectory
-recursive-include biomni_env *.py *.sh *.yml *.yaml *.txt *.md *.json *.R
+# Include specific files from biochat_env, but not the biochat_tools subdirectory
+recursive-include biochat_env *.py *.sh *.yml *.yaml *.txt *.md *.json *.R
 
 # Exclude specific directories that are not part of the package
 prune tutorials/data
-prune biomni_env/biomni_tools
+prune biochat_env/biochat_tools
 
 # Exclude build artifacts and caches
 global-exclude *.py[co]

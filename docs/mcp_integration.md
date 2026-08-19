@@ -1,15 +1,15 @@
 # MCP (Model Context Protocol) Integration in Biochat
 
-Biochat (via the Biomni engine) provides comprehensive support for the Model Context Protocol (MCP), allowing you to both integrate external MCP servers and expose Biomni tools as MCP servers. This enables seamless interoperability with a wide ecosystem of AI tools and services.
+Biochat (via the Biochat engine) provides comprehensive support for the Model Context Protocol (MCP), allowing you to both integrate external MCP servers and expose Biochat tools as MCP servers. This enables seamless interoperability with a wide ecosystem of AI tools and services.
 
 ## Overview
 
-MCP (Model Context Protocol) is a standard protocol for AI applications to communicate with external tools and services. Biomni supports two main MCP integration patterns:
+MCP (Model Context Protocol) is a standard protocol for AI applications to communicate with external tools and services. Biochat supports two main MCP integration patterns:
 
-1. **Adding External MCP Servers**: Import tools from external MCP servers into Biomni
-2. **Exposing Biomni as MCP Server**: Make Biomni tools available to other MCP clients
+1. **Adding External MCP Servers**: Import tools from external MCP servers into Biochat
+2. **Exposing Biochat as MCP Server**: Make Biochat tools available to other MCP clients
 
-## Adding External MCP Servers to Biomni
+## Adding External MCP Servers to Biochat
 
 ### Configuration File Format
 
@@ -47,15 +47,15 @@ mcp_servers:
 
   # Custom Local MCP Server - Only add tools necessary
   pubmed:
-    command: ["python", "-m", "biomni.tool.mcp_tools.pubmed_mcp"]
+    command: ["python", "-m", "biochat.tool.mcp_tools.pubmed_mcp"]
     enabled: true
     tools:
-      - biomni_name: search_pubmed
+      - biochat_name: search_pubmed
         description: "Search PubMed"
         parameters:
           query: {type: str, required: true,  description: "PubMed search term"}
           max_results:  {type: int, required: false, default: 10, description: "Maximum number of hits"}
-      - biomni_name: get_article_abstract
+      - biochat_name: get_article_abstract
         description: "Fetch PubMed abstract"
         parameters:
           pmid: {type: str, required: true, description: "PubMed ID"}
@@ -67,9 +67,9 @@ You can also create custom MCP servers and define your own tools by implementing
 ### Using the `add_mcp` Method
 
 ```python
-from biomni.agent import A1
+from biochat.agent import A1
 
-# Initialize Biomni agent
+# Initialize Biochat agent
 agent = A1()
 
 # Optional: Set email for PubMed
@@ -85,14 +85,14 @@ result = agent.go("Please list all repositories in the github account of the use
 
 ### How It Works
 
-1. **Tool Discovery**: Biomni automatically discovers available tools from each MCP server
-2. **Async-to-Sync Wrapping**: MCP tools are wrapped to work with Biomni's synchronous execution model
-3. **Integration**: Tools are registered in Biomni's tool registry and made available for retrieval
+1. **Tool Discovery**: Biochat automatically discovers available tools from each MCP server
+2. **Async-to-Sync Wrapping**: MCP tools are wrapped to work with Biochat's synchronous execution model
+3. **Integration**: Tools are registered in Biochat's tool registry and made available for retrieval
 4. **Module Organization**: Each MCP server gets its own module namespace (e.g., `mcp_servers.github`)
 
 ### Tool Registration Process
 
-When you call `add_mcp()`, Biomni:
+When you call `add_mcp()`, Biochat:
 
 1. Loads the configuration file
 2. For each enabled server:
@@ -118,24 +118,24 @@ mcp_servers:
 
 You will need to properly set your environment variables (e.g., `GITHUB_TOKEN`) using a `.env` file or shell exports before running the agent.
 
-## Exposing Biomni Tools as MCP Server
+## Exposing Biochat Tools as MCP Server
 
 ### Using the `create_mcp_server` Method
 
-Biomni can expose its internal tools as an MCP server, making them available to other MCP clients:
+Biochat can expose its internal tools as an MCP server, making them available to other MCP clients:
 
 ```python
-from biomni.agent.a1 import A1
+from biochat.agent.a1 import A1
 
 # Create the agent
 agent = A1()
 
 # Create the MCP server with specific modules
-mcp = agent.create_mcp_server(tool_modules=["biomni.tool.database"])
+mcp = agent.create_mcp_server(tool_modules=["biochat.tool.database"])
 
 if __name__ == "__main__":
     # Run the server using stdio transport
-    print("Starting Biomni MCP server...")
+    print("Starting Biochat MCP server...")
     mcp.run(transport="stdio")
 ```
 
@@ -146,9 +146,9 @@ The MCP server can be configured with various options:
 ```python
 # Create server with specific modules
 mcp = agent.create_mcp_server(tool_modules=[
-    "biomni.tool.genetics",
-    "biomni.tool.database",
-    "biomni.tool.cell_biology"
+    "biochat.tool.genetics",
+    "biochat.tool.database",
+    "biochat.tool.cell_biology"
 ])
 
 # The server will expose all tools from these modules
@@ -207,7 +207,7 @@ agent.remove_mcp_tools("server_name")
 Use the provided test script to verify your MCP server is working:
 
 ```bash
-cd tutorials/examples/expose_biomni_server
+cd tutorials/examples/expose_biochat_server
 python test_mcp_server.py
 ```
 
@@ -222,31 +222,31 @@ The test script allows you to:
 ### Adding External MCP Servers
 
 ```python
-from biomni.agent import A1
+from biochat.agent import A1
 
 # Initialize agent and add MCP servers
 agent = A1()
 agent.add_mcp(config_path="./mcp_config.yaml")
 
-# Use GitHub tools alongside Biomni tools
+# Use GitHub tools alongside Biochat tools
 result = agent.go("""
 Please list all repositories in the github account of the user.
-Then use Biomni's genetics tools to analyze any bioinformatics repositories found.
+Then use Biochat's genetics tools to analyze any bioinformatics repositories found.
 """)
 ```
 
-### Exposing Biomni as MCP Server
+### Exposing Biochat as MCP Server
 
 ```python
-from biomni.agent.a1 import A1
+from biochat.agent.a1 import A1
 
 # Create agent and MCP server
 agent = A1()
-mcp = agent.create_mcp_server(tool_modules=["biomni.tool.database"])
+mcp = agent.create_mcp_server(tool_modules=["biochat.tool.database"])
 
 # Run the server
 if __name__ == "__main__":
-    print("Starting Biomni MCP server...")
+    print("Starting Biochat MCP server...")
     mcp.run(transport="stdio")
 ```
 
@@ -254,7 +254,7 @@ if __name__ == "__main__":
 
 ### Available Examples
 
-The Biomni repository includes complete examples in the `tutorials/examples/` directory:
+The Biochat repository includes complete examples in the `tutorials/examples/` directory:
 
 #### Adding MCP Servers
 - **Location**: `tutorials/examples/add_mcp_server/`
@@ -262,10 +262,10 @@ The Biomni repository includes complete examples in the `tutorials/examples/` di
   - `mcp_config.yaml` - Example configuration file
   - `mcp_example.ipynb` - Jupyter notebook demonstrating usage
 
-#### Exposing Biomni as MCP Server
-- **Location**: `tutorials/examples/expose_biomni_server/`
+#### Exposing Biochat as MCP Server
+- **Location**: `tutorials/examples/expose_biochat_server/`
 - **Files**:
-  - `run_mcp_server.py` - Script to run Biomni MCP server
+  - `run_mcp_server.py` - Script to run Biochat MCP server
   - `test_mcp_server.py` - Comprehensive test script for MCP tools
 
 To run the examples:
@@ -275,8 +275,8 @@ To run the examples:
 cd tutorials/examples/add_mcp_server
 jupyter notebook mcp_example.ipynb
 
-# Expose Biomni as MCP server
-cd tutorials/examples/expose_biomni_server
+# Expose Biochat as MCP server
+cd tutorials/examples/expose_biochat_server
 python run_mcp_server.py
 
 # Test the server
@@ -285,12 +285,12 @@ python test_mcp_server.py
 
 ### Testing MCP Server
 
-You can test the Biomni MCP server using the provided test script:
+You can test the Biochat MCP server using the provided test script:
 
 ```python
 #!/usr/bin/env python3
 """
-Simple test script for testing a single Biomni MCP tool.
+Simple test script for testing a single Biochat MCP tool.
 """
 
 import asyncio
@@ -305,7 +305,7 @@ TOOL_TO_TEST = "query_uniprot"  # Change this to the tool you want to test
 TEST_ARGS = {"prompt": "Find information about human insulin protein"}
 
 async def test_single_tool():
-    """Test a single tool in the Biomni MCP server."""
+    """Test a single tool in the Biochat MCP server."""
 
     # Set up the server parameters
     import os
@@ -344,4 +344,4 @@ if __name__ == "__main__":
 
 ## Conclusion
 
-Biomni's MCP integration provides a powerful way to extend its capabilities with external tools and services, while also making Biomni tools available to the broader MCP ecosystem. This enables seamless interoperability and allows you to build sophisticated AI workflows that combine the best of multiple tool ecosystems.
+Biochat's MCP integration provides a powerful way to extend its capabilities with external tools and services, while also making Biochat tools available to the broader MCP ecosystem. This enables seamless interoperability and allows you to build sophisticated AI workflows that combine the best of multiple tool ecosystems.

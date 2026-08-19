@@ -5,7 +5,7 @@ from __future__ import annotations
 
 class TestRegistry:
     def test_default_registry_loads_bundled_docs(self):
-        from biomni.knowledge import KnowledgeRegistry
+        from biochat.knowledge import KnowledgeRegistry
 
         reg = KnowledgeRegistry()
         assert "sgRNA_design_guide" in reg.documents
@@ -13,7 +13,7 @@ class TestRegistry:
 
     def test_document_shape_for_agent(self):
         """A1 relies on these exact keys."""
-        from biomni.knowledge import KnowledgeRegistry
+        from biochat.knowledge import KnowledgeRegistry
 
         reg = KnowledgeRegistry()
         doc = reg.documents["single_cell_annotation"]
@@ -22,7 +22,7 @@ class TestRegistry:
             assert key in doc, f"missing key: {key}"
 
     def test_metadata_parsing(self):
-        from biomni.knowledge import KnowledgeRegistry
+        from biochat.knowledge import KnowledgeRegistry
 
         reg = KnowledgeRegistry()
         metadata = reg.documents["single_cell_annotation"]["metadata"]
@@ -31,7 +31,7 @@ class TestRegistry:
         assert "✅" in metadata["commercial_use"]
 
     def test_content_without_metadata_excludes_block(self):
-        from biomni.knowledge import KnowledgeRegistry
+        from biochat.knowledge import KnowledgeRegistry
 
         reg = KnowledgeRegistry()
         body = reg.documents["single_cell_annotation"]["content_without_metadata"]
@@ -40,7 +40,7 @@ class TestRegistry:
         assert "## Overview" in body
 
     def test_custom_document_roundtrip(self):
-        from biomni.knowledge import KnowledgeRegistry
+        from biochat.knowledge import KnowledgeRegistry
 
         reg = KnowledgeRegistry()
         reg.add_custom_document("custom_1", "My Doc", "desc", "content", {"license": "MIT"})
@@ -53,7 +53,7 @@ class TestRegistry:
         assert reg.get_document_by_id("custom_1") is None
 
     def test_summaries(self):
-        from biomni.knowledge import KnowledgeRegistry
+        from biochat.knowledge import KnowledgeRegistry
 
         reg = KnowledgeRegistry()
         summaries = reg.get_document_summaries()
@@ -61,7 +61,7 @@ class TestRegistry:
         assert all("content" not in s for s in summaries)
 
     def test_exclude_non_commercial(self):
-        from biomni.knowledge import KnowledgeRegistry
+        from biochat.knowledge import KnowledgeRegistry
 
         reg = KnowledgeRegistry()
         reg.add_custom_document(
@@ -76,7 +76,7 @@ class TestRegistry:
         assert "free_doc" in reg.documents
 
     def test_reload(self):
-        from biomni.knowledge import KnowledgeRegistry
+        from biochat.knowledge import KnowledgeRegistry
 
         reg = KnowledgeRegistry()
         reg.add_custom_document("temp", "Temp", "d", "c")
@@ -87,8 +87,8 @@ class TestRegistry:
 
 class TestLegacyAdapter:
     def test_old_import_path_still_works(self):
-        from biomni.know_how import KnowHowLoader
-        from biomni.knowledge import KnowledgeRegistry
+        from biochat.know_how import KnowHowLoader
+        from biochat.knowledge import KnowledgeRegistry
 
         loader = KnowHowLoader()
         assert isinstance(loader, KnowledgeRegistry)
@@ -99,17 +99,17 @@ class TestLegacyAdapter:
         import os
         from pathlib import Path
 
-        from biomni.know_how import KnowHowLoader
+        from biochat.know_how import KnowHowLoader
 
-        docs_dir = Path(__file__).resolve().parents[1] / "biomni" / "knowledge" / "docs"
+        docs_dir = Path(__file__).resolve().parents[1] / "biochat" / "knowledge" / "docs"
         loader = KnowHowLoader(know_how_dir=str(docs_dir))
         assert os.path.isdir(docs_dir)
         assert loader.documents
 
     def test_document_dicts_match_between_paths(self):
         """Adapter and registry expose identical document data."""
-        from biomni.know_how import KnowHowLoader
-        from biomni.knowledge import KnowledgeRegistry
+        from biochat.know_how import KnowHowLoader
+        from biochat.knowledge import KnowledgeRegistry
 
         old = KnowHowLoader().documents
         new = KnowledgeRegistry().documents

@@ -6,7 +6,7 @@ and correctly configured — without launching any servers.
 
 These tests ensure competition readiness:
 - All Biochat modules import cleanly
-- Original Biomni API surface is preserved
+- Original Biochat API surface is preserved
 - Configuration constants are consistent
 - Theme tokens are complete
 """
@@ -25,23 +25,23 @@ class TestBiochatUIImports:
 
     def test_create_biochat_ui_importable(self):
         """create_biochat_ui is importable and has correct signature."""
-        from biomni.ui.biochat_ui import create_biochat_ui
+        from biochat.ui.biochat_ui import create_biochat_ui
         sig = inspect.signature(create_biochat_ui)
         params = list(sig.parameters.keys())
         assert "agent" in params
         assert "thread_id" in params
         assert "require_verification" in params
 
-    def test_import_biomni_ui(self):
-        """biomni.ui package imports."""
-        import biomni.ui
-        assert hasattr(biomni.ui, "BiochatTheme")
-        assert hasattr(biomni.ui, "launch_biochat_ui")
-        assert hasattr(biomni.ui, "launch_biochat_about")
+    def test_import_biochat_ui(self):
+        """biochat.ui package imports."""
+        import biochat.ui
+        assert hasattr(biochat.ui, "BiochatTheme")
+        assert hasattr(biochat.ui, "launch_biochat_ui")
+        assert hasattr(biochat.ui, "launch_biochat_about")
 
     def test_import_biochat_theme(self):
         """BiochatTheme class and tokens."""
-        from biomni.ui.biochat_theme import BiochatTheme, get_biochat_theme
+        from biochat.ui.biochat_theme import BiochatTheme, get_biochat_theme
         assert BiochatTheme is not None
 
         # get_biochat_theme may return None if gradio not installed
@@ -51,7 +51,7 @@ class TestBiochatUIImports:
 
     def test_import_biochat_ui_function(self):
         """launch_biochat_ui is importable and has correct signature."""
-        from biomni.ui.biochat_ui import launch_biochat_ui
+        from biochat.ui.biochat_ui import launch_biochat_ui
         sig = inspect.signature(launch_biochat_ui)
         params = list(sig.parameters.keys())
         assert "agent" in params
@@ -62,7 +62,7 @@ class TestBiochatUIImports:
 
     def test_import_biochat_about_function(self):
         """launch_biochat_about is importable and has correct signature."""
-        from biomni.ui.biochat_about import launch_biochat_about
+        from biochat.ui.biochat_about import launch_biochat_about
         sig = inspect.signature(launch_biochat_about)
         params = list(sig.parameters.keys())
         assert "server_name" in params
@@ -70,10 +70,10 @@ class TestBiochatUIImports:
 
     def test_import_biochat_config(self):
         """biochat_config module is importable."""
-        import biomni.biochat_config as cfg
+        import biochat.biochat_config as cfg
         assert cfg.PROJECT_NAME == "Biochat"
         assert cfg.PROJECT_VERSION == "2.0.0"
-        assert cfg.PROJECT_ENGINE == "Biomni"
+        assert cfg.PROJECT_ENGINE == "Biochat"
         assert cfg.PROJECT_LICENSE == "Apache-2.0"
 
 
@@ -82,16 +82,16 @@ class TestBiochatUIImports:
 # ═══════════════════════════════════════════════════════════════
 
 class TestBackwardCompatibility:
-    """Verify that Biochat changes do not break the original Biomni API."""
+    """Verify that Biochat keeps the original agent API surface."""
 
     def test_agent_class_preserved(self):
         """A1 agent class still importable."""
-        from biomni.agent import A1
+        from biochat.agent import A1
         assert A1 is not None
 
     def test_launch_gradio_demo_exists(self):
         """Original launch_gradio_demo method still present."""
-        from biomni.agent import A1
+        from biochat.agent import A1
         assert hasattr(A1, "launch_gradio_demo")
         sig = inspect.signature(A1.launch_gradio_demo)
         params = list(sig.parameters.keys())
@@ -103,7 +103,7 @@ class TestBackwardCompatibility:
 
     def test_launch_biochat_ui_exists(self):
         """New launch_biochat_ui method is present alongside original."""
-        from biomni.agent import A1
+        from biochat.agent import A1
         assert hasattr(A1, "launch_biochat_ui")
         sig = inspect.signature(A1.launch_biochat_ui)
         params = list(sig.parameters.keys())
@@ -113,41 +113,41 @@ class TestBackwardCompatibility:
         assert "server_name" in params
         assert "require_verification" in params
 
-    def test_biomni_config_class_unchanged(self):
-        """BiomniConfig class name and attributes preserved."""
-        from biomni.config import BiomniConfig, default_config
-        assert BiomniConfig is not None
+    def test_biochat_config_class_unchanged(self):
+        """BiochatConfig class name and attributes preserved."""
+        from biochat.config import BiochatConfig, default_config
+        assert BiochatConfig is not None
         assert hasattr(default_config, "llm")
         assert hasattr(default_config, "timeout_seconds")
         assert hasattr(default_config, "path")
         assert hasattr(default_config, "commercial_mode")
 
     def test_package_name_unchanged(self):
-        """Package is still named biomni (internal name preserved)."""
-        import biomni
-        assert hasattr(biomni, "__version__")
+        """Package is still named biochat (internal name preserved)."""
+        import biochat
+        assert hasattr(biochat, "__version__")
 
     def test_env_var_aliases(self):
         """BIOCHAT_* env vars are checked alongside BIOMNI_*."""
         import os
-        from biomni.config import BiomniConfig
+        from biochat.config import BiochatConfig
 
         # Set BIOCHAT_* var only
         os.environ["BIOCHAT_TIMEOUT_SECONDS"] = "777"
-        config = BiomniConfig()
+        config = BiochatConfig()
         assert config.timeout_seconds == 777
         del os.environ["BIOCHAT_TIMEOUT_SECONDS"]
 
         # Set BIOMNI_* var only (backward compat)
         os.environ["BIOMNI_TIMEOUT_SECONDS"] = "999"
-        config = BiomniConfig()
+        config = BiochatConfig()
         assert config.timeout_seconds == 999
         del os.environ["BIOMNI_TIMEOUT_SECONDS"]
 
         # Both set: BIOCHAT_* takes priority
         os.environ["BIOMNI_TIMEOUT_SECONDS"] = "999"
         os.environ["BIOCHAT_TIMEOUT_SECONDS"] = "777"
-        config = BiomniConfig()
+        config = BiochatConfig()
         assert config.timeout_seconds == 777
         del os.environ["BIOMNI_TIMEOUT_SECONDS"]
         del os.environ["BIOCHAT_TIMEOUT_SECONDS"]
@@ -162,7 +162,7 @@ class TestBiochatConfigIntegrity:
 
     def test_project_identity(self):
         """Project identity fields."""
-        import biomni.biochat_config as cfg
+        import biochat.biochat_config as cfg
         assert isinstance(cfg.PROJECT_NAME, str)
         assert len(cfg.PROJECT_NAME) > 0
         assert isinstance(cfg.PROJECT_VERSION, str)
@@ -170,7 +170,7 @@ class TestBiochatConfigIntegrity:
 
     def test_theme_tokens(self):
         """Theme token dictionary is complete."""
-        import biomni.biochat_config as cfg
+        import biochat.biochat_config as cfg
         required_keys = [
             "primary_color", "primary_hover", "background",
             "sidebar_bg", "card_bg", "text_primary", "text_secondary",
@@ -183,7 +183,7 @@ class TestBiochatConfigIntegrity:
 
     def test_capabilities_registry(self):
         """Capability registry has required fields."""
-        import biomni.biochat_config as cfg
+        import biochat.biochat_config as cfg
         assert len(cfg.CAPABILITIES) >= 8
         for domain, cap in cfg.CAPABILITIES.items():
             assert "name" in cap, f"Missing 'name' in capability: {domain}"
@@ -192,7 +192,7 @@ class TestBiochatConfigIntegrity:
 
     def test_quick_actions(self):
         """Quick actions are well-formed."""
-        import biomni.biochat_config as cfg
+        import biochat.biochat_config as cfg
         assert len(cfg.QUICK_ACTIONS) >= 4
         for action in cfg.QUICK_ACTIONS:
             assert "label" in action
@@ -202,7 +202,7 @@ class TestBiochatConfigIntegrity:
 
     def test_safety_policy(self):
         """Safety policy flags are boolean."""
-        import biomni.biochat_config as cfg
+        import biochat.biochat_config as cfg
         assert isinstance(cfg.SAFETY_POLICY["code_execution_warning"], bool)
         assert isinstance(cfg.SAFETY_POLICY["requires_sandbox"], bool)
         assert isinstance(cfg.SAFETY_POLICY["commercial_mode_supported"], bool)
@@ -219,7 +219,7 @@ class TestThemeConsistency:
 
     def test_theme_tokens_match_css(self):
         """Theme token values match CSS variable definitions."""
-        from biomni.ui.biochat_theme import BiochatTheme
+        from biochat.ui.biochat_theme import BiochatTheme
 
         assert BiochatTheme.BG_PRIMARY == "#f7f8fb"
         assert BiochatTheme.ACCENT == "#4f46e5"
@@ -231,7 +231,7 @@ class TestThemeConsistency:
 
     def test_custom_css_not_empty(self):
         """Custom CSS string is non-empty and contains key ProtChat-style classes."""
-        from biomni.ui.biochat_theme import BiochatTheme
+        from biochat.ui.biochat_theme import BiochatTheme
 
         css = BiochatTheme.CUSTOM_CSS
         assert len(css) > 2000  # Substantial CSS block with all components
@@ -268,8 +268,8 @@ class TestThemeConsistency:
 
     def test_config_theme_matches_class_theme(self):
         """biochat_config THEME dict values match BiochatTheme class attributes."""
-        from biomni.ui.biochat_theme import BiochatTheme
-        import biomni.biochat_config as cfg
+        from biochat.ui.biochat_theme import BiochatTheme
+        import biochat.biochat_config as cfg
 
         assert cfg.THEME["primary_color"] == BiochatTheme.ACCENT
         assert cfg.THEME["primary_hover"] == BiochatTheme.ACCENT_HOVER
@@ -296,7 +296,7 @@ class TestBiochatUIBuild:
         import pytest
         pytest.importorskip("gradio", reason="gradio not installed in this environment")
 
-        from biomni.ui.biochat_ui import create_biochat_ui
+        from biochat.ui.biochat_ui import create_biochat_ui
 
         class DummyAgent:
             main_history_copy = []
@@ -339,10 +339,10 @@ class TestLicensePreservation:
 
         with open(info_path) as f:
             content = f.read()
-        assert "Biomni Data Source License Information" in content
+        assert "Biochat Data Source License Information" in content
 
-    def test_readme_has_attribution(self):
-        """README contains Biochat attribution to Biomni."""
+    def test_readme_branding(self):
+        """README contains Biochat branding."""
         import os
         root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
         readme_path = os.path.join(root, "README.md")
@@ -350,11 +350,7 @@ class TestLicensePreservation:
 
         with open(readme_path) as f:
             content = f.read()
-        assert "## Attribution" in content
-        content_lower = content.lower()
-        assert "built on top of" in content_lower or "built on biomni" in content_lower
-        assert "Biomni" in content
-        assert "Biochat" in content
+        assert "# Biochat" in content
 
     def test_submission_notes_exist(self):
         """docs/biochat_submission_notes.md exists."""

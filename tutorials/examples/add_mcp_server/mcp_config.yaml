@@ -1,4 +1,4 @@
-# MCP Server Config for Biomni
+# MCP Server Config for Biochat
 
 mcp_servers:
   # GitHub MCP Server (Docker approach - adding all tools)
@@ -11,15 +11,15 @@ mcp_servers:
 
   # Custom Local MCP Server - Only add tools necessary
   pubmed:
-    command: ["python", "-m", "biomni.tool.example_mcp_tools.pubmed_mcp"]
+    command: ["python", "-m", "biochat.tool.example_mcp_tools.pubmed_mcp"]
     enabled: true
     tools:
-      - biomni_name: search_pubmed
+      - biochat_name: search_pubmed
         description: "Search PubMed"
         parameters:
           query:        {type: str, required: true,  description: "PubMed search term"}
           max_results:  {type: int, required: false, default: 10, description: "Maximum number of hits"}
-      - biomni_name: get_article_abstract
+      - biochat_name: get_article_abstract
         description: "Fetch PubMed abstract"
         parameters:
           pmid: {type: str, required: true, description: "PubMed ID"}

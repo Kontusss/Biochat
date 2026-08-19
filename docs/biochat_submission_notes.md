@@ -8,16 +8,16 @@
 
 ## What Biochat Adds on Top of Biomni
 
-### 1. Modern User Interface (`biomni/ui/`)
+### 1. Modern User Interface (`biochat/ui/`)
 
 Biochat provides a **ProtChat-inspired Gradio interface** that transforms the original dual-pane
 Biomni layout into a modern, chat-centered design:
 
 | Component | File | Description |
 |:---|:---|:---|
-| Theme engine | `biomni/ui/biochat_theme.py` | CSS design tokens, custom styles, status badges |
-| Chat interface | `biomni/ui/biochat_ui.py` | Sidebar + chat layout, quick actions, execution log, safety bar |
-| About page | `biomni/ui/biochat_about.py` | Landing page with capabilities, safety policy, workflow, attribution |
+| Theme engine | `biochat/ui/biochat_theme.py` | CSS design tokens, custom styles, status badges |
+| Chat interface | `biochat/ui/biochat_ui.py` | Sidebar + chat layout, quick actions, execution log, safety bar |
+| About page | `biochat/ui/biochat_about.py` | Landing page with capabilities, safety policy, workflow, attribution |
 
 **Key UI features:**
 - Left sidebar with tool capabilities and quick-action buttons
@@ -27,14 +27,14 @@ Biomni layout into a modern, chat-centered design:
 - Attribution footer with upstream links
 - Access code verification layer
 
-**Streamlit UI** (`biomni/ui/biochat_streamlit.py`) — **Recommended competition demo frontend:**
+**Streamlit UI** (`biochat/ui/biochat_streamlit.py`) — **Recommended competition demo frontend:**
 - Reliable, polished Streamlit interface with ProtChat-inspired design
 - Custom CSS with rounded cards, indigo accent, soft shadows, status badges
 - Cached agent resource for efficient reruns
 - Example prompt pills, configurable sidebar settings, safety indicators
 - Full Biomni engine integration via `agent.go()`
 
-### 2. Project Configuration (`biomni/biochat_config.py`)
+### 2. Project Configuration (`biochat/biochat_config.py`)
 
 Biochat-specific identity, theme tokens, capability registry, safety policy constants, and
 quick-action definitions — all without modifying Biomni's core config.
@@ -57,7 +57,7 @@ defaults and clear error messages.
 ### 5. Environment Variable Compatibility
 
 Both `BIOMNI_*` (original) and `BIOCHAT_*` (new) environment variable prefixes are supported.
-`BIOCHAT_*` takes priority when both are set. See `biomni/config.py` for details.
+`BIOCHAT_*` takes priority when both are set. See `biochat/config.py` for details.
 
 ---
 
@@ -65,7 +65,7 @@ Both `BIOMNI_*` (original) and `BIOCHAT_*` (new) environment variable prefixes a
 
 | Layer | Preservation Strategy |
 |:---|:---|
-| **Package name** | `biomni` unchanged — all imports, PyPI references intact |
+| **Package name** | `biochat` unchanged — all imports, PyPI references intact |
 | **Scientific algorithms** | No modifications to any tool, agent, or evaluation code |
 | **Data processing** | Unchanged — data lake, database queries, protocol execution identical |
 | **CLI behavior** | Unchanged — all existing scripts work as before |
@@ -76,13 +76,13 @@ Both `BIOMNI_*` (original) and `BIOCHAT_*` (new) environment variable prefixes a
 ### Files We Did NOT Touch
 
 All core scientific modules are untouched:
-- `biomni/agent/react.py`, `qa_llm.py`, `env_collection.py`, `function_generator.py`
-- `biomni/task/base_task.py`, `hle.py`, `lab_bench.py`
-- `biomni/tool/*.py` (all 20+ tool implementations)
-- `biomni/model/retriever.py`
-- `biomni/eval/biomni_eval1.py`
-- `biomni/llm.py`, `biomni/utils.py`, `biomni/version.py`
-- `biomni_env/*` (environment provisioning)
+- `biochat/agent/react.py`, `qa_llm.py`, `env_collection.py`, `function_generator.py`
+- `biochat/task/base_task.py`, `hle.py`, `lab_bench.py`
+- `biochat/tool/*.py` (all 20+ tool implementations)
+- `biochat/model/retriever.py`
+- `biochat/eval/biochat_eval1.py`
+- `biochat/llm.py`, `biochat/utils.py`, `biochat/version.py`
+- `biochat_env/*` (environment provisioning)
 - `data/*` (data lake and benchmarks)
 - `tutorials/*` (Jupyter notebooks and examples)
 
@@ -95,7 +95,7 @@ All core scientific modules are untouched:
 Biochat is built on **Biomni**, developed by the Stanford SNAP Group:
 
 ```bibtex
-@article{huang2025biomni,
+@article{huang2025biochat,
   title={Biomni: A General-Purpose Biomedical AI Agent},
   author={Huang, Kexin and Zhang, Serena and Wang, Hanchen and
           Qu, Yuanhao and Lu, Yingzhou and Roohani, Yusuf and
@@ -146,21 +146,21 @@ python scripts/biochat_demo.py
 
 # Option B: New Biochat UI (programmatic)
 python -c "
-from biomni.agent import A1
+from biochat.agent import A1
 agent = A1(path='./data', llm='claude-sonnet-4-20250514')
 agent.launch_biochat_ui()
 "
 
 # Option C: Original Biomni UI (still available)
 python -c "
-from biomni.agent import A1
+from biochat.agent import A1
 agent = A1(path='./data', llm='claude-sonnet-4-20250514')
 agent.launch_gradio_demo()
 "
 
 # Option D: Biochat About page (no agent required)
 python -c "
-from biomni.ui import launch_biochat_about
+from biochat.ui import launch_biochat_about
 launch_biochat_about()
 "
 ```
@@ -174,7 +174,7 @@ Open **http://localhost:7860** in your browser.
 ### 1. Pre-existing Async Test Failure
 
 ```
-FAILED tutorials/examples/expose_biomni_server/test_mcp_server.py::test_single_tool
+FAILED tutorials/examples/expose_biochat_server/test_mcp_server.py::test_single_tool
 Reason: async def functions are not natively supported
         (requires pytest-asyncio)
 ```
@@ -192,8 +192,8 @@ Reason: async def functions are not natively supported
 ### 2. Optional Dependency Import Warnings
 
 Some tool modules depend on optional packages not installed in the default environment:
-- `biomni/tool/genomics.py` — requires `esm` (Evolutionary Scale Modeling)
-- `biomni/agent/env_collection.py` — references `base_agent` module
+- `biochat/tool/genomics.py` — requires `esm` (Evolutionary Scale Modeling)
+- `biochat/agent/env_collection.py` — references `base_agent` module
 
 These are **pre-existing** and do not affect core Biochat functionality. The agent
 gracefully handles missing optional dependencies at runtime.
@@ -217,7 +217,7 @@ Use in isolated/sandboxed environments for production use.
 ```
 $ python -m pytest -q
 
-FAILED tutorials/examples/expose_biomni_server/test_mcp_server.py::test_single_tool
+FAILED tutorials/examples/expose_biochat_server/test_mcp_server.py::test_single_tool
 1 failed in 0.34s
 ```
 
@@ -228,13 +228,13 @@ FAILED tutorials/examples/expose_biomni_server/test_mcp_server.py::test_single_t
 ### Biochat Import Verification
 
 ```
-$ python -c "import biomni.ui; import biomni.biochat_config"
+$ python -c "import biochat.ui; import biochat.biochat_config"
 
-✅ biomni          ✅ biomni.config      ✅ biomni.agent.a1
-✅ biomni.tool     ✅ biomni.eval        ✅ biomni.know_how
-✅ biomni.task     ✅ biomni.model       ✅ biomni.ui
-✅ biomni.ui.biochat_theme   ✅ biomni.ui.biochat_ui
-✅ biomni.ui.biochat_about   ✅ biomni.biochat_config
+✅ biochat          ✅ biochat.config      ✅ biochat.agent.a1
+✅ biochat.tool     ✅ biochat.eval        ✅ biochat.know_how
+✅ biochat.task     ✅ biochat.model       ✅ biochat.ui
+✅ biochat.ui.biochat_theme   ✅ biochat.ui.biochat_ui
+✅ biochat.ui.biochat_about   ✅ biochat.biochat_config
 ```
 
 - **28/28 core modules** import successfully

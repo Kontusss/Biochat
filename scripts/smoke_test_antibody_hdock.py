@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Phase 3D Fusion Plan v1 smoke test — antibody HDOCK Docker pipeline.
 
-Verifies: biomni import, Docker availability, HDOCK Docker availability,
+Verifies: biochat import, Docker availability, HDOCK Docker availability,
 hdock.out QC, createpl readiness, extraction planning.
 
 Does NOT: parse scores, rank candidates, execute createpl extraction.
@@ -49,20 +49,20 @@ def main():
 
     os.makedirs(args.output_dir, exist_ok=True)
 
-    # 1. biomni import
+    # 1. biochat import
     try:
-        from biomni.tool.antibody_design.hdock_docker import (
+        from biochat.tool.antibody_design.hdock_docker import (
             check_hdock_docker_available, run_hdock_docker,
         )
-        from biomni.tool.antibody_design.hdock_output import (
+        from biochat.tool.antibody_design.hdock_output import (
             inspect_hdock_output, check_createpl_ready, plan_createpl_extraction,
         )
-        from biomni.tool.antibody_design.docking_runner import run_docking_jobs
-        results["checks"]["biomni_import"] = "ok"
-        print("✅ biomni imports")
+        from biochat.tool.antibody_design.docking_runner import run_docking_jobs
+        results["checks"]["biochat_import"] = "ok"
+        print("✅ biochat imports")
     except Exception as exc:
-        results["checks"]["biomni_import"] = f"FAIL: {exc}"
-        print(f"❌ biomni import: {exc}")
+        results["checks"]["biochat_import"] = f"FAIL: {exc}"
+        print(f"❌ biochat import: {exc}")
         results["status"] = "failed"
         json.dump(results, open(os.path.join(args.output_dir, "smoke_result.json"), "w"), indent=2)
         sys.exit(1)

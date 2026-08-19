@@ -9,11 +9,11 @@ Usage:
     python scripts/biochat_demo.py
 
 Requirements:
-    - Biomni environment activated (conda activate biomni_e1)
+    - Biochat environment activated (conda activate biomni_e1)
     - API keys configured in .env file
     - Gradio 5.x installed (pip install 'gradio>=5.0,<6.0')
 
-Biochat is built on Biomni (https://github.com/snap-stanford/Biomni).
+ford/Biochat).
 """
 
 import os
@@ -27,7 +27,7 @@ def main():
     """Launch the Biochat demo UI."""
     print("=" * 60)
     print("  🧬 Biochat Demo — Biomedical AI Agent")
-    print("  Engine: Biomni")
+    print("  Engine: Biochat")
     print("  UI: ProtChat-inspired Gradio")
     print("=" * 60)
     print()
@@ -36,14 +36,14 @@ def main():
 
     # Import Biochat components
     try:
-        from biomni.config import default_config
-        from biomni.agent import A1
+        from biochat.config import default_config
+        from biochat.agent import A1
     except ImportError as e:
-        print(f"❌ Failed to import Biomni core: {e}")
+        print(f"❌ Failed to import Biochat core: {e}")
         print()
         print("Make sure you have:")
         print("  1. Activated the biomni_e1 environment")
-        print("  2. Installed biomni package (pip install biomni --upgrade)")
+        print("  2. Installed biochat package (pip install biochat --upgrade)")
         print()
         sys.exit(1)
 
@@ -90,7 +90,7 @@ def main():
         # Option 1: Use the new Biochat UI (recommended)
         agent.launch_biochat_ui()
 
-        # Option 2: Use the original Biomni Gradio interface
+        # Option 2: Use the original Biochat Gradio interface
         # agent.launch_gradio_demo()
     except KeyboardInterrupt:
         print()

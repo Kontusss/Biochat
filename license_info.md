@@ -1,8 +1,8 @@
-# Biomni Data Source License Information
+# Biochat Data Source License Information
 
-This document provides an overview of the data sources used by Biomni, their licenses, and suitability for internal hosting and commercial use.
+This document provides an overview of the data sources used by Biochat, their licenses, and suitability for internal hosting and commercial use.
 
-A significant portion of the data used in Biomni requires a commercial license for any commercial application. Several datasets are explicitly licensed for non-commercial use only, which would prohibit their use in a commercial product without a separate agreement. Before proceeding with any commercial use, a thorough legal review of the licenses for each dataset you intend to use is strongly recommended.
+A significant portion of the data used in Biochat requires a commercial license for any commercial application. Several datasets are explicitly licensed for non-commercial use only, which would prohibit their use in a commercial product without a separate agreement. Before proceeding with any commercial use, a thorough legal review of the licenses for each dataset you intend to use is strongly recommended.
 
 ## Data License and Internal Hosting Analysis
 
@@ -35,12 +35,12 @@ A significant portion of the data used in Biomni requires a commercial license f
 
 ## Configuration for Commercial Use
 
-To manage which datasets are used based on licensing, Biomni provides a configuration option. You can set the `commercial_mode` flag to `True` in your configuration to automatically exclude datasets that are not licensed for commercial use.
+To manage which datasets are used based on licensing, Biochat provides a configuration option. You can set the `commercial_mode` flag to `True` in your configuration to automatically exclude datasets that are not licensed for commercial use.
 
 ### Usage
 
 ```python
-from biomni.agent import A1
+from biochat.agent import A1
 
 # For commercial use (excludes non-commercial datasets)
 agent = A1(commercial_mode=True)

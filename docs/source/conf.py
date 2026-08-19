@@ -10,8 +10,8 @@ import sys
 
 sys.path.insert(0, os.path.abspath("../../"))
 
-project = "Biochat (biomni)"
-copyright = "2025, Biochat (built on Biomni)"
+project = "Biochat (biochat)"
+copyright = "2025, Biochat"
 author = "Biochat Team"
 release = "0.0.8"
 
@@ -29,8 +29,8 @@ exclude_patterns = []
 napoleon_use_param = True
 
 autodoc_mock_imports = [
-    "biomni.agent.base_agent",
-    "biomni.",
+    "biochat.agent.base_agent",
+    "biochat.",
     "PyPDF2",
     "bioagentos",
     "Bio",

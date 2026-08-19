@@ -7,10 +7,10 @@
 | Phase | Capability | Status | Backend |
 |-------|-----------|--------|---------|
 | 3A | Sequence scoring + anti-copy + penalty ranking | ✅ | Pure Python |
-| 3B | DiffCDRH3 diffusion model CDRH3 generation | ✅ | PyTorch (nb2_biomni_env) |
+| 3B | DiffCDRH3 diffusion model CDRH3 generation | ✅ | PyTorch (nb2_biochat_env) |
 | 3C-0 | Structure readiness pre-screening | ✅ | Pure Python |
 | 3C-1 | Structure modeling interface (dry-run/mock) | ✅ | Pure Python |
-| 3C-2 | Real NB2 backend detection + PDB validation | ✅ | ImmuneBuilder (nb2_biomni_env) |
+| 3C-2 | Real NB2 backend detection + PDB validation | ✅ | ImmuneBuilder (nb2_biochat_env) |
 | 3C-3 | Real NanoBodyBuilder2 structure prediction | ✅ | ImmuneBuilder.NanoBodyBuilder2 |
 | 3C-4 | Docking input preparation (receptor/ligand/constraints) | ✅ | Pure Python |
 | 3D-0 | Docking adapter scaffold (dry-run command construction) | ✅ | Pure Python |
@@ -23,13 +23,13 @@
 
 | Environment | Python | Torch | ImmuneBuilder | HDOCK | Docker |
 |------------|--------|-------|--------------|-------|--------|
-| nb2_biomni_env | 3.11.13 | 2.2.2 | 1.2 | — | ✅ |
+| nb2_biochat_env | 3.11.13 | 2.2.2 | 1.2 | — | ✅ |
 | openfold_m1 | 3.10.20 | — | ✅ | Linux ELF | — |
 
 ## Key Modules
 
 ```
-biomni/tool/antibody_design/
+biochat/tool/antibody_design/
 ├── __init__.py                  Public API
 ├── api.py                       design_vh_only_antibodies()
 ├── schemas.py                   Constants, penalty table

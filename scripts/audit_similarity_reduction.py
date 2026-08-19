@@ -47,14 +47,14 @@ from audit_import_usage import (  # noqa: E402
 
 def dynamically_registered(rel_path: str) -> bool:
     """True if the module is pulled in at runtime via importlib by the tool
-    registry (``read_module2api`` imports ``biomni.tool.tool_description.*``
-    and ``api_schema_to_langchain_tool`` imports ``biomni.tool.*``)."""
+    registry (``read_module2api`` imports ``biochat.tool.tool_description.*``
+    and ``api_schema_to_langchain_tool`` imports ``biochat.tool.*``)."""
     try:
-        from biomni.utils.io_utils import _TOOL_FIELDS
+        from biochat.utils.io_utils import _TOOL_FIELDS
     except ImportError:
         return False
     parts = Path(rel_path).parts
-    if len(parts) < 3 or parts[0] != "biomni" or parts[1] != "tool":
+    if len(parts) < 3 or parts[0] != "biochat" or parts[1] != "tool":
         return False
     stem = parts[2].removesuffix(".py")
     if parts[2] == "tool_description" and len(parts) >= 4:
@@ -87,8 +87,8 @@ def usage_counts(rel_path: str, all_files: list[Path]) -> dict[str, list[str]]:
     """Return importer rel-paths by class (runtime / test / demo).
 
     Detects direct imports, relative imports from the same package, and
-    package re-exports (``from biomni.pkg import name`` where
-    ``biomni/pkg/__init__.py`` re-exports the module).
+    package re-exports (``from biochat.pkg import name`` where
+    ``biochat/pkg/__init__.py`` re-exports the module).
     """
     importers = {"runtime": [], "test": [], "demo": []}
     target = str(rel_path)
@@ -96,7 +96,7 @@ def usage_counts(rel_path: str, all_files: list[Path]) -> dict[str, list[str]]:
     mod = module_name(target)
     stem = Path(target).stem
 
-    # Package re-export detection: biomni/pkg/__init__.py re-exports stem
+    # Package re-export detection: biochat/pkg/__init__.py re-exports stem
     init_file = same_dir / "__init__.py"
     reexport = False
     if init_file.exists():
@@ -139,7 +139,7 @@ def categorise(rel_path: str, sim: float, counts: dict[str, int]) -> tuple[str, 
     dynamic = dynamically_registered(rel_path)
 
     # Package __init__ / version files are structural — never archived.
-    if name == "__init__.py" or rel_path == "biomni/version.py":
+    if name == "__init__.py" or rel_path == "biochat/version.py":
         return ("runtime_core_dependency", "keep_with_attribution")
     if dynamic:
         # Tool registry modules — always runtime-used.  Descriptions are

@@ -13,15 +13,15 @@ sys.path.insert(0, str(ROOT))
 
 class TestProfileManifest:
     def test_manifest_lists_only_valid_modules(self):
-        from biomni.tool.profiles import MINIMAL_TOOL_MODULES
-        from biomni.utils.io_utils import _TOOL_FIELDS
+        from biochat.tool.profiles import MINIMAL_TOOL_MODULES
+        from biochat.utils.io_utils import _TOOL_FIELDS
 
-        all_modules = {f"biomni.tool.{f}" for f in _TOOL_FIELDS}
+        all_modules = {f"biochat.tool.{f}" for f in _TOOL_FIELDS}
         assert MINIMAL_TOOL_MODULES <= all_modules
-        assert "biomni.tool.antibody_design" in MINIMAL_TOOL_MODULES
+        assert "biochat.tool.antibody_design" in MINIMAL_TOOL_MODULES
 
     def test_minimal_is_proper_subset_of_full(self):
-        from biomni.utils.io_utils import load_all_tool_descriptions
+        from biochat.utils.io_utils import load_all_tool_descriptions
 
         full = load_all_tool_descriptions(profile="full")
         minimal = load_all_tool_descriptions(profile="minimal")
@@ -32,17 +32,17 @@ class TestProfileManifest:
 
 class TestToolRegistryProfiles:
     def test_full_profile_registers_every_tool(self):
-        from biomni.tool.registry import ToolRegistry
-        from biomni.utils.io_utils import load_all_tool_descriptions
+        from biochat.tool.registry import ToolRegistry
+        from biochat.utils.io_utils import load_all_tool_descriptions
 
         registry = ToolRegistry(load_all_tool_descriptions(profile="full"),
                                 profile="full")
         assert len(registry.tools) == 226
 
     def test_minimal_profile_registers_only_manifest_modules(self):
-        from biomni.tool.profiles import MINIMAL_TOOL_MODULES
-        from biomni.tool.registry import ToolRegistry
-        from biomni.utils.io_utils import load_all_tool_descriptions
+        from biochat.tool.profiles import MINIMAL_TOOL_MODULES
+        from biochat.tool.registry import ToolRegistry
+        from biochat.utils.io_utils import load_all_tool_descriptions
 
         module2api = load_all_tool_descriptions(profile="minimal")
         registry = ToolRegistry(module2api, profile="minimal")
@@ -52,7 +52,7 @@ class TestToolRegistryProfiles:
         assert len(registry.tools) < 226
 
     def test_invalid_profile_falls_back_to_full(self):
-        from biomni.tool.registry import ToolRegistry
+        from biochat.tool.registry import ToolRegistry
 
         registry = ToolRegistry({"mod": [
             {"name": "t", "description": "d", "required_parameters": []},
@@ -63,8 +63,8 @@ class TestToolRegistryProfiles:
 
 class TestAntibodyPipelineInMinimal:
     def test_antibody_tools_available_in_minimal(self):
-        from biomni.tool.registry import ToolRegistry
-        from biomni.utils.io_utils import load_all_tool_descriptions
+        from biochat.tool.registry import ToolRegistry
+        from biochat.utils.io_utils import load_all_tool_descriptions
 
         registry = ToolRegistry(load_all_tool_descriptions(profile="minimal"),
                                 profile="minimal")
@@ -72,7 +72,7 @@ class TestAntibodyPipelineInMinimal:
             assert registry.get_tool_by_name(name) is not None, name
 
     def test_antibody_package_imports(self):
-        from biomni.tool.antibody_design import (
+        from biochat.tool.antibody_design import (
             design_vh_only_antibodies,
             score_and_rank_candidates,
         )
@@ -80,8 +80,8 @@ class TestAntibodyPipelineInMinimal:
         assert callable(score_and_rank_candidates)
 
     def test_database_and_protocol_tools_available(self):
-        from biomni.tool.registry import ToolRegistry
-        from biomni.utils.io_utils import load_all_tool_descriptions
+        from biochat.tool.registry import ToolRegistry
+        from biochat.utils.io_utils import load_all_tool_descriptions
 
         registry = ToolRegistry(load_all_tool_descriptions(profile="minimal"),
                                 profile="minimal")
@@ -92,18 +92,18 @@ class TestAntibodyPipelineInMinimal:
 
 class TestSettingsProfile:
     def test_default_is_full(self):
-        from biomni.core.settings import BiochatSettings
+        from biochat.core.settings import BiochatSettings
 
         assert BiochatSettings(tool_profile=None).tool_profile == "full"
 
     def test_minimal_accepted_and_normalised(self):
-        from biomni.core.settings import BiochatSettings
+        from biochat.core.settings import BiochatSettings
 
         assert BiochatSettings(tool_profile="MINIMAL").tool_profile == "minimal"
         assert BiochatSettings(tool_profile="bogus").tool_profile == "full"
 
     def test_env_var_override(self):
-        from biomni.core.settings import BiochatSettings
+        from biochat.core.settings import BiochatSettings
 
         os.environ["BIOCHAT_TOOL_PROFILE"] = "minimal"
         try:

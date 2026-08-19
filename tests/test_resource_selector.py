@@ -25,7 +25,7 @@ RESOURCES = {
 
 class TestParseSelectionResponse:
     def test_plain_string(self):
-        from biomni.model.resource_selector import parse_selection_response
+        from biochat.model.resource_selector import parse_selection_response
 
         reply = "TOOLS: [0, 2]\nDATA_LAKE: [1]\nLIBRARIES: []\nKNOW_HOW: [0, 1]"
         assert parse_selection_response(reply) == {
@@ -36,7 +36,7 @@ class TestParseSelectionResponse:
         }
 
     def test_content_blocks_list(self):
-        from biomni.model.resource_selector import parse_selection_response
+        from biochat.model.resource_selector import parse_selection_response
 
         reply = [
             {"type": "text", "text": "TOOLS: [1]\n"},
@@ -47,26 +47,26 @@ class TestParseSelectionResponse:
         assert parse_selection_response(reply)["data_lake"] == [0, 1]
 
     def test_bad_indices_skipped(self):
-        from biomni.model.resource_selector import parse_selection_response
+        from biochat.model.resource_selector import parse_selection_response
 
         reply = "TOOLS: [0, x, 2]\nDATA_LAKE: [not-a-number]"
         assert parse_selection_response(reply)["tools"] == [0, 2]
         assert parse_selection_response(reply)["data_lake"] == []
 
     def test_missing_categories_empty(self):
-        from biomni.model.resource_selector import parse_selection_response
+        from biochat.model.resource_selector import parse_selection_response
 
         assert parse_selection_response("TOOLS: [0]")["know_how"] == []
 
     def test_know_how_hyphen_variant(self):
-        from biomni.model.resource_selector import parse_selection_response
+        from biochat.model.resource_selector import parse_selection_response
 
         assert parse_selection_response("KNOW-HOW: [1]")["know_how"] == [1]
 
 
 class TestBuildSelectionPrompt:
     def test_prompt_contains_categories_and_format(self):
-        from biomni.model.resource_selector import build_selection_prompt
+        from biochat.model.resource_selector import build_selection_prompt
 
         prompt = build_selection_prompt("Find EGFR pathways", RESOURCES)
         assert "USER QUERY: Find EGFR pathways" in prompt
@@ -76,7 +76,7 @@ class TestBuildSelectionPrompt:
         assert "KNOW_HOW: [list of indices]" in prompt
 
     def test_prompt_without_know_how(self):
-        from biomni.model.resource_selector import build_selection_prompt
+        from biochat.model.resource_selector import build_selection_prompt
 
         prompt = build_selection_prompt("q", {k: v for k, v in RESOURCES.items()
                                              if k != "know_how"})
@@ -84,14 +84,14 @@ class TestBuildSelectionPrompt:
         assert "LIBRARIES: [list of indices]" in prompt
 
     def test_empty_resources_formatted(self):
-        from biomni.model.resource_selector import format_resources
+        from biochat.model.resource_selector import format_resources
 
         assert format_resources([]) == "None available"
 
 
 class TestResourceSelector:
     def test_end_to_end_with_fake_llm(self):
-        from biomni.model.resource_selector import ResourceSelector
+        from biochat.model.resource_selector import ResourceSelector
 
         class FakeLLM:
             def invoke(self, messages):
@@ -110,7 +110,7 @@ class TestResourceSelector:
         assert [k["id"] for k in selected["know_how"]] == ["k2"]
 
     def test_out_of_range_indices_dropped(self):
-        from biomni.model.resource_selector import ResourceSelector
+        from biochat.model.resource_selector import ResourceSelector
 
         class FakeLLM:
             def invoke(self, messages):
@@ -125,7 +125,7 @@ class TestResourceSelector:
         assert selected["tools"] == []
 
     def test_callable_llm_interface(self):
-        from biomni.model.resource_selector import ResourceSelector
+        from biochat.model.resource_selector import ResourceSelector
 
         class PlainLLM:
             def __call__(self, prompt):
@@ -139,13 +139,13 @@ class TestResourceSelector:
 
 class TestLegacyAdapter:
     def test_old_path_imports_new_class(self):
-        from biomni.model.resource_selector import ResourceSelector
-        from biomni.model.retriever import ToolRetriever
+        from biochat.model.resource_selector import ResourceSelector
+        from biochat.model.retriever import ToolRetriever
 
         assert ToolRetriever is ResourceSelector
 
     def test_old_class_name_works(self):
-        from biomni.model.retriever import ToolRetriever
+        from biochat.model.retriever import ToolRetriever
 
         retriever = ToolRetriever()
         assert hasattr(retriever, "prompt_based_retrieval")

@@ -3,21 +3,21 @@ requires = ["setuptools>=61.0", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "biomni"
+name = "biochat"
 dynamic = ["version"]
 description = "Biochat - A General-Purpose Biomedical AI Agent"
 readme = "README.md"
 license = "Apache-2.0"
 license-files = ["LICENSE"]
 authors = [
-    {name = "Biomni Team", email = "kexinh@cs.stanford.edu"}
+    {name = "Kontusss"}
 ]
 requires-python = ">=3.11"
 dependencies = ["pydantic", "langchain", "python-dotenv"]
 
 [project.urls]
-Homepage = "https://github.com/snap-stanford/biomni"
-Repository = "https://github.com/snap-stanford/biomni"
+Homepage = "https://github.com/Kontusss/Biochat"
+Repository = "https://github.com/Kontusss/Biochat"
 
 [project.optional-dependencies]
 gradio = ["gradio>=5.0,<6.0"]
@@ -27,7 +27,7 @@ streamlit = ["streamlit>=1.28"]
 include-package-data = true
 
 [tool.setuptools.dynamic]
-version = {attr = "biomni.version.__version__"}
+version = {attr = "biochat.version.__version__"}
 
 [tool.setuptools.packages.find]
 exclude = ["test*", "tutorials*"]

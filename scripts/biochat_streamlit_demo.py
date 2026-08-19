@@ -2,7 +2,7 @@
 """Biochat Streamlit Demo Launcher.
 
 Launches the ProtChat-inspired Streamlit UI for Biochat.
-Requires the Biomni environment and Streamlit.
+Requires the Biochat environment and Streamlit.
 
 Usage
 -----
@@ -10,7 +10,7 @@ Usage
 
     Or directly:
 
-    streamlit run biomni/ui/biochat_streamlit.py
+    streamlit run biochat/ui/biochat_streamlit.py
 
 The UI will be available at http://localhost:8501
 """
@@ -24,7 +24,7 @@ from pathlib import Path
 
 def main() -> None:
     root = Path(__file__).resolve().parents[1]
-    app = root / "biomni" / "ui" / "biochat_streamlit.py"
+    app = root / "biochat" / "ui" / "biochat_streamlit.py"
 
     if not app.exists():
         print(f"❌ Streamlit app not found: {app}")
@@ -32,7 +32,7 @@ def main() -> None:
 
     print("=" * 60)
     print("  🧬 Biochat Streamlit Demo")
-    print("  Engine: Biomni")
+    print("  Engine: Biochat")
     print("  UI: ProtChat-inspired Streamlit")
     print("=" * 60)
     print()

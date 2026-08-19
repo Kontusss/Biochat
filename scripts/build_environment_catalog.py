@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
-"""Generate biomni/environment/catalog.yaml from the upstream descriptors.
+"""Generate biochat/environment/catalog.yaml from the upstream descriptors.
 
-Reads ``biomni/env_desc.py`` (full catalog) and ``biomni/env_desc_cm.py``
+Reads ``biochat/env_desc.py`` (full catalog) and ``biochat/env_desc_cm.py``
 (commercial-mode variant) — the latter comments out non-commercial entries
 and annotates them with license notes.  Emits a single YAML catalog with
 per-entry ``commercial_allowed`` / ``license_note`` metadata, so the
@@ -23,7 +23,7 @@ import yaml
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(PROJECT_ROOT))
 
-OUT_PATH = PROJECT_ROOT / "biomni" / "environment" / "catalog.yaml"
+OUT_PATH = PROJECT_ROOT / "biochat" / "environment" / "catalog.yaml"
 
 # "# \"key\": \"desc\",  # license note" — commented entry in env_desc_cm.py
 _COMMENTED_ENTRY_RE = re.compile(
@@ -33,7 +33,7 @@ _COMMENTED_ENTRY_RE = re.compile(
 
 def extract_cm_annotations() -> dict[str, str]:
     """{dataset_name: license_note} from commented entries in env_desc_cm.py."""
-    source = (PROJECT_ROOT / "biomni" / "env_desc_cm.py").read_text()
+    source = (PROJECT_ROOT / "biochat" / "env_desc_cm.py").read_text()
     annotations: dict[str, str] = {}
     for match in _COMMENTED_ENTRY_RE.finditer(source, re.MULTILINE):
         key, _desc, note = match.groups()
@@ -42,10 +42,10 @@ def extract_cm_annotations() -> dict[str, str]:
 
 
 def build_catalog() -> dict:
-    from biomni.env_desc import data_lake_dict as full_dl
-    from biomni.env_desc import library_content_dict as full_lib
-    from biomni.env_desc_cm import data_lake_dict as cm_dl
-    from biomni.env_desc_cm import library_content_dict as cm_lib
+    from biochat.env_desc import data_lake_dict as full_dl
+    from biochat.env_desc import library_content_dict as full_lib
+    from biochat.env_desc_cm import data_lake_dict as cm_dl
+    from biochat.env_desc_cm import library_content_dict as cm_lib
 
     # Keys absent from the commercial-mode variant are non-commercial.
     # The commented annotations in env_desc_cm.py provide the license note.
@@ -66,8 +66,8 @@ def build_catalog() -> dict:
         "meta": {
             "source": "snap-stanford/Biomni (Apache-2.0)",
             "generated_from": [
-                "biomni/env_desc.py",
-                "biomni/env_desc_cm.py",
+                "biochat/env_desc.py",
+                "biochat/env_desc_cm.py",
             ],
             "generator": "scripts/build_environment_catalog.py",
         },

@@ -21,9 +21,21 @@ def _reference_description(field: str) -> list:
     return module.description
 
 
+def _normalize_rebrand(obj):
+    """Revert rebrand-only differences (biomni→biochat) so that genuine
+    data drift is still detectable against the upstream reference."""
+    if isinstance(obj, dict):
+        return {k: _normalize_rebrand(v) for k, v in obj.items()}
+    if isinstance(obj, list):
+        return [_normalize_rebrand(v) for v in obj]
+    if isinstance(obj, str):
+        return obj.replace("biochat", "biomni").replace("Biochat", "Biomni")
+    return obj
+
+
 class TestAdapterEquivalence:
     def test_all_fields_match_upstream_reference(self):
-        from biomni.utils.io_utils import _TOOL_FIELDS
+        from biochat.utils.io_utils import _TOOL_FIELDS
 
         mismatches = []
         checked = 0
@@ -34,9 +46,9 @@ class TestAdapterEquivalence:
             checked += 1
             ref = _reference_description(field)
             adapter = importlib.import_module(
-                f"biomni.tool.tool_description.{field}"
+                f"biochat.tool.tool_description.{field}"
             )
-            if adapter.description != ref:
+            if _normalize_rebrand(adapter.description) != ref:
                 mismatches.append(field)
         assert checked >= 20, f"expected >=20 upstream fields, checked {checked}"
         assert not mismatches, f"fields with data drift: {mismatches}"
@@ -44,11 +56,11 @@ class TestAdapterEquivalence:
     def test_dynamic_import_contract_preserved(self):
         """read_module2api imports these modules via importlib — each must
         still expose a ``description`` list attribute."""
-        from biomni.utils.io_utils import load_all_tool_descriptions
+        from biochat.utils.io_utils import load_all_tool_descriptions
 
         module2api = load_all_tool_descriptions()
-        assert "biomni.tool.genomics" in module2api
-        assert isinstance(module2api["biomni.tool.genomics"], list)
+        assert "biochat.tool.genomics" in module2api
+        assert isinstance(module2api["biochat.tool.genomics"], list)
         assert len(module2api) >= 20
         for module_key, entries in module2api.items():
             assert isinstance(entries, list) and entries, module_key
@@ -59,7 +71,7 @@ class TestAdapterEquivalence:
     def test_catalog_loader_raises_on_unknown_field(self):
         import pytest
 
-        from biomni.tool.tool_description._catalog_loader import (
+        from biochat.tool.tool_description._catalog_loader import (
             load_tool_description,
         )
 
