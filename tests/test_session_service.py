@@ -1,4 +1,4 @@
-from biochat.schemas.chat import ChatMessage, MessageRole
+from biochat.schemas.chat import ChatMessage, MessageRole, SessionInfo
 from biochat.services.session_service import SessionService
 
 
@@ -25,6 +25,20 @@ class DictSessionStore:
     def delete_session(self, session_id):
         self.messages.pop(session_id, None)
         self.info.pop(session_id, None)
+
+
+class MetadataReplacingSessionStore(DictSessionStore):
+    """Store whose message save replaces metadata with incomplete values."""
+
+    def save_session(self, session_id, messages):
+        super().save_session(session_id, messages)
+        self.info[session_id] = SessionInfo(
+            session_id=session_id,
+            title="replaced by store",
+            message_count=len(messages),
+            created_at="",
+            updated_at="",
+        )
 
 
 def test_custom_store_does_not_require_private_meta():
@@ -62,3 +76,25 @@ def test_get_session_returns_a_copy():
     leaked.append(ChatMessage(role=MessageRole.USER, content="unsaved"))
 
     assert service.get_session(session_id) == []
+
+
+def test_message_save_preserves_metadata_when_store_replaces_it():
+    """A store's message-save side effect must not erase creation metadata."""
+    service = SessionService(MetadataReplacingSessionStore())
+    session_id = service.create_session("Initial")
+    created_at = service.list_sessions()[0].created_at
+
+    service.add_message(session_id, ChatMessage(role=MessageRole.USER, content="Question"))
+
+    assert service.list_sessions()[0].created_at == created_at
+
+
+def test_clear_preserves_metadata_when_store_replaces_it():
+    """Clearing must retain creation metadata despite store save side effects."""
+    service = SessionService(MetadataReplacingSessionStore())
+    session_id = service.create_session("Initial")
+    created_at = service.list_sessions()[0].created_at
+
+    service.clear_session(session_id)
+
+    assert service.list_sessions()[0].created_at == created_at

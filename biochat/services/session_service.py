@@ -156,8 +156,8 @@ class SessionService:
 
     def _save_session(self, session_id: str, messages: list[ChatMessage]) -> None:
         """Save messages and update their session metadata through the store protocol."""
-        self._store.save_session(session_id, list(messages))
         previous = self._store.get_session_info(session_id)
+        self._store.save_session(session_id, list(messages))
         now = datetime.now(timezone.utc).isoformat()
         self._store.save_session_info(SessionInfo(
             session_id=session_id,
