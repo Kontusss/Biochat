@@ -37,10 +37,14 @@ from time import time
 # HTML SNIPPETS
 # ═══════════════════════════════════════════════════════════════
 
-_HEADER_HTML = """
+def _header_html() -> str:
+    """Header bar with the canonical project version."""
+    from biochat.core.settings import PROJECT_VERSION
+
+    return f"""
 <div class="biochat-header">
     <span class="bc-logo">🧬 Biochat</span>
-    <span class="bc-version">v2.0</span>
+    <span class="bc-version">v{PROJECT_VERSION}</span>
     <span class="bc-engine-badge">Biochat Engine</span>
     <span class="bc-header-status">
         <span class="bc-dot"></span> Safe Mode
@@ -171,7 +175,9 @@ def create_biochat_ui(
 
     SUPPORTED_EXTENSIONS = (".png", ".jpg", ".jpeg", ".gif", ".bmp", ".webp", ".pdf")
     agent.main_history_copy = []
-    available_access_codes = ["Biochat2025", "Biochat2025"]
+    from biochat.core.settings import biochat_settings as _settings
+    from biochat.ui.auth import verify_access_code as _verify_access_code
+    available_access_codes = list(_settings.access_codes)
 
     # ── Helper: footer status bar ─────────────────────────────
 
@@ -201,7 +207,7 @@ def create_biochat_ui(
     # ── Verification ──────────────────────────────────────────
 
     def verify_access_code(code):
-        if code in available_access_codes:
+        if _verify_access_code(code, available_access_codes):
             return gr.update(visible=False), gr.update(visible=True), gr.update(visible=False)
         return gr.update(visible=True), gr.update(visible=False), gr.update(value="Incorrect access code.", visible=True)
 
@@ -580,9 +586,15 @@ def launch_biochat_ui(
     agent,
     thread_id: int = 42,
     share: bool = False,
-    server_name: str = "0.0.0.0",
+    server_name: str = "127.0.0.1",
     require_verification: bool = False,
 ):
+    from biochat.core.settings import biochat_settings as _settings
+    from biochat.ui.auth import validate_remote_exposure
+
+    # Reject unsafe non-loopback binds before launching.
+    validate_remote_exposure(server_name, _settings)
+
     """Launch the polished ProtChat-inspired Biochat Gradio UI.
 
     Convenience wrapper that builds the UI via ``create_biochat_ui()``

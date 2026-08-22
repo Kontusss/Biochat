@@ -650,7 +650,7 @@ class A1:
     # ═══════════════════════════════════════════════════════════
 
     def launch_biochat_ui(
-        self, thread_id=42, share=False, server_name="0.0.0.0", require_verification=False
+        self, thread_id=42, share=False, server_name="127.0.0.1", require_verification=False
     ) -> None:
         from biochat.agent.ui_launcher import launch_biochat_ui_from_agent
         launch_biochat_ui_from_agent(
@@ -659,7 +659,7 @@ class A1:
         )
 
     def launch_gradio_demo(
-        self, thread_id=42, share=False, server_name="0.0.0.0", require_verification=False
+        self, thread_id=42, share=False, server_name="127.0.0.1", require_verification=False
     ) -> None:
         """Legacy Gradio demo — preserved for backward compatibility.
 

@@ -671,18 +671,40 @@ def build_trace_text(status: str = "running") -> str:
 # Sidebar
 # ═══════════════════════════════════════════════════════════════════
 
+def _session_view() -> dict[str, Any]:
+    """Mirror Streamlit session state into the pure-helper dict shape."""
+    return {
+        "active_session_id": st.session_state.get("active_session_id", "default"),
+        "messages": st.session_state.get("messages", []),
+        "sessions": st.session_state.get("ui_sessions", {}),
+    }
+
+
+def _writeback_session_view(view: dict[str, Any]) -> None:
+    """Write the helper-dict results back into Streamlit session state."""
+    st.session_state["ui_sessions"] = view["sessions"]
+    st.session_state["messages"] = view["messages"]
+    st.session_state["active_session_id"] = view["active_session_id"]
+
+
 def render_sidebar() -> dict[str, Any]:
     """Render the sidebar and return settings selected by the user."""
+    from biochat.core.settings import PROJECT_VERSION
 
     st.sidebar.markdown(
         '<div style="font-size:18px;font-weight:700;margin-bottom:2px">🧬 Biochat</div>'
-        '<div style="font-size:11px;color:#9ca3af;margin-bottom:12px">Biomedical AI Agent · v2.0</div>',
+        f'<div style="font-size:11px;color:#9ca3af;margin-bottom:12px">'
+        f'Biomedical AI Agent · v{PROJECT_VERSION}</div>',
         unsafe_allow_html=True,
     )
 
     # ── Session management ──────────────────────────────────
+    from biochat.ui.session_state import create_ui_session, save_ui_session, switch_ui_session
+
     if st.sidebar.button("➕ 新建对话", use_container_width=True, key="sb_new_chat"):
-        st.session_state.messages = []
+        view = _session_view()
+        create_ui_session(view)
+        _writeback_session_view(view)
         st.session_state.pending_prompt = None
         st.rerun()
 
@@ -699,32 +721,33 @@ def render_sidebar() -> dict[str, Any]:
     if "active_session_id" not in st.session_state:
         st.session_state.active_session_id = "default"
 
-    # Auto-track current conversation as a session
-    msgs = st.session_state.get("messages", [])
+    # Auto-track current conversation as a full-message session
+    view = _session_view()
+    msgs = view["messages"]
     if msgs:
         first_user_msg = next((m["content"] for m in msgs if m["role"] == "user"), "新对话")
         title = first_user_msg[:40] + ("..." if len(first_user_msg) > 40 else "")
-        st.session_state.sessions[st.session_state.active_session_id] = {
-            "title": title,
-            "message_count": len(msgs),
-        }
+        save_ui_session(view)
+        view["sessions"][view["active_session_id"]]["title"] = title
 
-    # Render session list
-    if st.session_state.sessions:
+    # Render session list; switching saves current and restores target.
+    if view["sessions"]:
         for sid, sinfo in sorted(
-            st.session_state.sessions.items(),
+            view["sessions"].items(),
             key=lambda x: x[1].get("message_count", 0), reverse=True
         ):
-            is_active = sid == st.session_state.active_session_id
+            is_active = sid == view["active_session_id"]
             prefix = "▸ " if is_active else "  "
-            label = f"{prefix}{sinfo['title']} ({sinfo['message_count']})"
+            label = f"{prefix}{sinfo['title']} ({sinfo.get('message_count', 0)})"
             if st.sidebar.button(
                 label, key=f"session_{sid}",
                 use_container_width=True,
                 help=f"切换到: {sinfo['title']}",
             ):
-                st.session_state.active_session_id = sid
+                switch_ui_session(view, sid)
+                _writeback_session_view(view)
                 st.rerun()
+        _writeback_session_view(view)
     else:
         st.sidebar.caption("  暂无历史会话")
 
@@ -744,18 +767,35 @@ def render_sidebar() -> dict[str, Any]:
             unsafe_allow_html=True,
         )
 
-    # ── Settings ────────────────────────────────────────────
+    # ── Settings (applied only via explicit Apply action) ────
     with st.sidebar.expander("⚙️ 设置"):
-        from biochat.core.settings import biochat_settings as _s
+        from biochat.core.settings import BiochatSettings, biochat_settings as _s
+        from biochat.services.agent_service import reset_agent_service
 
-        data_path = st.text_input(
-            "数据路径", _s.data_path, key="sb_path",
-            help="本地数据湖目录 (~11GB)。",
-        )
-        llm_model = st.text_input(
-            "LLM 模型", _s.llm_model, key="sb_llm",
-            help="模型名称 (如 claude-sonnet-4-5, deepseek-chat, gpt-4)。",
-        )
+        with st.form("sb_settings_form"):
+            data_path = st.text_input(
+                "数据路径", _s.data_path, key="sb_path",
+                help="本地数据湖目录 (~11GB)。",
+            )
+            llm_model = st.text_input(
+                "LLM 模型", _s.llm_model, key="sb_llm",
+                help="模型名称 (如 claude-sonnet-4-5, deepseek-chat, gpt-4)。",
+            )
+            applied = st.form_submit_button("✅ 应用并重启 Agent")
+
+        if applied:
+            try:
+                new_settings = BiochatSettings(
+                    data_path=data_path or None,
+                    llm_model=llm_model or None,
+                )
+            except Exception as exc:
+                st.error(f"配置无效: {exc}")
+            else:
+                reset_agent_service()
+                # The next get_agent_service() call constructs with these.
+                st.session_state["applied_settings"] = new_settings
+                st.success(f"已应用: {new_settings.model_display_name}")
 
     st.sidebar.markdown("---")
     st.sidebar.markdown(
@@ -789,7 +829,7 @@ def render_welcome_card() -> None:
 # Agent interaction (streaming via service layer)
 # ═══════════════════════════════════════════════════════════════════
 
-def stream_agent_response(user_query: str):
+def stream_agent_response(user_query: str, session_id: str = "default"):
     """Stream agent execution with real-time incremental updates.
 
     Uses ``BioAgentService.run_task_stream()`` which calls
@@ -816,7 +856,7 @@ def stream_agent_response(user_query: str):
         }
         return
 
-    request = ChatRequest(message=user_query)
+    request = ChatRequest(message=user_query, session_id=session_id)
     trace_lines: list[str] = []
     answer_so_far: str = ""
     current_step: str = ""
@@ -977,6 +1017,25 @@ def main() -> None:
     # ── Inject CSS ───────────────────────────────────────────
     st.markdown(BIOCHAT_CSS, unsafe_allow_html=True)
 
+    # ── Access gate (before any Agent initialization) ────────
+    from biochat.core.settings import PROJECT_VERSION
+    from biochat.core.settings import biochat_settings as _gate_cfg
+    from biochat.ui.auth import verify_access_code as _verify_access_code
+
+    if _gate_cfg.require_verification and not st.session_state.get("bc_authenticated"):
+        st.markdown('<div class="biochat-main">', unsafe_allow_html=True)
+        st.markdown('<div class="biochat-welcome"><div class="bcw-icon">🔒</div>'
+                    '<h1>Biochat 访问验证</h1>'
+                    '<p class="bcw-subtitle">请输入访问码以继续</p></div>',
+                    unsafe_allow_html=True)
+        candidate = st.text_input("访问码", type="password", key="bc_access_input")
+        if st.button("解锁", key="bc_access_btn", use_container_width=True):
+            if _verify_access_code(candidate, _gate_cfg.access_codes):
+                st.session_state["bc_authenticated"] = True
+                st.rerun()
+            st.error("访问码错误")
+        st.stop()
+
     # ── Sidebar ──────────────────────────────────────────────
     settings = render_sidebar()
 
@@ -1024,7 +1083,7 @@ def main() -> None:
     st.markdown(
         '<div class="biochat-header">'
         '<span class="bc-title">🧬 Biochat</span>'
-        '<span class="bc-version">v2.0</span>'
+        f'<span class="bc-version">v{PROJECT_VERSION}</span>'
         f'<span class="bc-model">{_cfg.llm_model}</span>'
         f'<span class="bc-status">'
         f'<span class="{status_dot_class}"></span> {status_text}'
@@ -1082,7 +1141,10 @@ def main() -> None:
         final_status = "thinking"
         last_stream_render = 0.0  # throttle card updates during token streaming
 
-        for update in stream_agent_response(streaming_prompt):
+        for update in stream_agent_response(
+            streaming_prompt,
+            session_id=st.session_state.get("active_session_id", "default"),
+        ):
             final_status = update["status"]
             # P0: sanitize trace lines — whitelist status events only
             final_trace_lines = [

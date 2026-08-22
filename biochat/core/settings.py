@@ -356,7 +356,7 @@ class BiochatSettings:
             if access_codes is not None
             else [c.strip() for c in access_code_env.split(",") if c.strip()]
             if access_code_env
-            else ["Biochat2025", ]
+            else []
         )
         self.require_verification = (
             require_verification
