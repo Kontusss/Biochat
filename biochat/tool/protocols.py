@@ -10,6 +10,8 @@ from typing import Any
 
 import requests
 
+from biochat.utils.filesystem_safety import resolve_child_path
+
 try:
     # Optional import to read from central config if available
     from biochat.config import default_config  # type: ignore
@@ -275,7 +277,14 @@ def read_local_protocol(filename: str, source: str | None = None) -> dict[str, A
 
     # If source is specified, only search that directory
     if source:
-        file_path = os.path.join(protocols_dir, source, filename)
+        try:
+            source_path = resolve_child_path(protocols_dir, source)
+        except ValueError as exc:
+            raise ValueError(f"Invalid protocol source: {source}") from exc
+        try:
+            file_path = resolve_child_path(source_path, filename)
+        except ValueError as exc:
+            raise ValueError(f"Invalid protocol filename: {filename}") from exc
         if os.path.exists(file_path):
             with open(file_path, encoding="utf-8") as f:
                 content = f.read()
@@ -283,15 +292,18 @@ def read_local_protocol(filename: str, source: str | None = None) -> dict[str, A
                 "content": content,
                 "filename": filename,
                 "source": source,
-                "path": file_path,
+                "path": str(file_path),
             }
         raise FileNotFoundError(f"Protocol file not found: {source}/{filename}")
 
     # Otherwise, search all source directories
     for source_dir in os.listdir(protocols_dir):
-        source_path = os.path.join(protocols_dir, source_dir)
+        try:
+            source_path = resolve_child_path(protocols_dir, source_dir)
+            file_path = resolve_child_path(source_path, filename)
+        except ValueError:
+            continue
         if os.path.isdir(source_path):
-            file_path = os.path.join(source_path, filename)
             if os.path.exists(file_path):
                 with open(file_path, encoding="utf-8") as f:
                     content = f.read()
@@ -299,7 +311,7 @@ def read_local_protocol(filename: str, source: str | None = None) -> dict[str, A
                     "content": content,
                     "filename": filename,
                     "source": source_dir,
-                    "path": file_path,
+                    "path": str(file_path),
                 }
 
     raise FileNotFoundError(f"Protocol file not found in any source directory: {filename}")
