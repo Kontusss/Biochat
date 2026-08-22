@@ -68,6 +68,38 @@ def _validate_archive_members(
     return validated
 
 
+def _make_directory(path: Path, created_directories: list[Path]) -> None:
+    """Create *path* and missing parents while recording only new directories."""
+    missing: list[Path] = []
+    current = path
+    while not current.exists():
+        missing.append(current)
+        current = current.parent
+    if not current.is_dir():
+        raise FileExistsError(f"Cannot create directory over file: {current}")
+    for directory in reversed(missing):
+        directory.mkdir()
+        created_directories.append(directory)
+
+
+def _rollback_publication(
+    new_files: list[Path], backups: list[tuple[Path, Path]], created_directories: list[Path]
+) -> None:
+    """Restore entries touched by a failed publication in reverse order."""
+    for target in reversed(new_files):
+        if target.exists() or target.is_symlink():
+            target.unlink()
+    for target, backup in reversed(backups):
+        if target.exists() or target.is_symlink():
+            target.unlink()
+        backup.replace(target)
+    for directory in reversed(created_directories):
+        try:
+            directory.rmdir()
+        except OSError:
+            pass
+
+
 def safe_extract_zip(
     archive: PathLike, destination: PathLike, limits: ZipSafetyLimits = ZipSafetyLimits()
 ) -> list[Path]:
@@ -101,17 +133,35 @@ def safe_extract_zip(
                             raise ValueError("Archive total uncompressed size exceeds limit")
                         output.write(chunk)
 
-            output_root.mkdir(parents=True, exist_ok=True)
+            created_directories: list[Path] = []
+            _make_directory(output_root, created_directories)
             extracted: list[Path] = []
-            for info, target in validated:
-                staged_target = resolve_child_path(staging_root, target.relative_to(output_root))
-                if info.is_dir():
-                    target.mkdir(parents=True, exist_ok=True)
-                    continue
+            backups: list[tuple[Path, Path]] = []
+            new_files: list[Path] = []
+            backup_root = Path(tempfile.mkdtemp(prefix=".biochat-zip-backup-", dir=output_root.parent))
+            try:
+                for info, target in validated:
+                    staged_target = resolve_child_path(staging_root, target.relative_to(output_root))
+                    if info.is_dir():
+                        _make_directory(target, created_directories)
+                        continue
 
-                target.parent.mkdir(parents=True, exist_ok=True)
-                staged_target.replace(target)
-                extracted.append(target)
-            return extracted
+                    _make_directory(target.parent, created_directories)
+                    if target.exists() or target.is_symlink():
+                        if target.is_dir():
+                            raise IsADirectoryError(f"Cannot replace directory with file: {target}")
+                        backup = resolve_child_path(backup_root, target.relative_to(output_root))
+                        backup.parent.mkdir(parents=True, exist_ok=True)
+                        target.replace(backup)
+                        backups.append((target, backup))
+                    staged_target.replace(target)
+                    new_files.append(target)
+                    extracted.append(target)
+                return extracted
+            except Exception:
+                _rollback_publication(new_files, backups, created_directories)
+                raise
+            finally:
+                shutil.rmtree(backup_root, ignore_errors=True)
         finally:
             shutil.rmtree(staging_root, ignore_errors=True)

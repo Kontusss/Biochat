@@ -308,6 +308,29 @@ def test_safe_extract_leaves_destination_unchanged_after_late_crc_error(tmp_path
     assert not (destination / "late.txt").exists()
 
 
+def test_safe_extract_rolls_back_publish_conflict_after_replacing_files(tmp_path: Path) -> None:
+    """A late publish conflict must restore replaced files and remove earlier new members."""
+    archive = tmp_path / "publish-conflict.zip"
+    with ZipFile(archive, "w") as zf:
+        zf.writestr("replace.txt", "replacement")
+        zf.writestr("new.txt", "new")
+        zf.writestr("blocker/child.txt", "blocked")
+
+    destination = tmp_path / "out"
+    destination.mkdir()
+    replaced = destination / "replace.txt"
+    replaced.write_text("original")
+    blocker = destination / "blocker"
+    blocker.write_text("unrelated blocker")
+
+    with pytest.raises(FileExistsError):
+        safe_extract_zip(archive, destination)
+
+    assert replaced.read_text() == "original"
+    assert not (destination / "new.txt").exists()
+    assert blocker.read_text() == "unrelated blocker"
+
+
 def test_verify_sha256_rejects_mismatch(tmp_path: Path) -> None:
     """Skipping digest comparison would accept a tampered downloaded archive."""
     payload = tmp_path / "payload.bin"
