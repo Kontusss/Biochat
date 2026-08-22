@@ -75,6 +75,8 @@ class A1:
         commercial_mode: bool | None = None,
         tool_profile: str | None = None,
         expected_data_lake_files: list | None = None,
+        *,
+        allow_host_code_execution: bool | None = None,
     ):
         # ── Resolve parameters from default_config ─────────────
         path = path or default_config.path
@@ -162,7 +164,15 @@ class A1:
         # ── Execution policy boundary ──────────────────────────
         # Host execution is only selected when explicitly enabled via
         # settings (BIOCHAT_ALLOW_HOST_CODE_EXECUTION / constructor).
-        self.code_executor: CodeExecutor = create_code_executor(biochat_settings)
+        from biochat.core.settings import BiochatSettings as _BiochatSettings
+
+        if allow_host_code_execution is None:
+            executor_settings = biochat_settings
+        else:
+            executor_settings = _BiochatSettings(
+                allow_host_code_execution=allow_host_code_execution
+            )
+        self.code_executor: CodeExecutor = create_code_executor(executor_settings)
 
         # ── Build workflow ─────────────────────────────────────
         self.configure()

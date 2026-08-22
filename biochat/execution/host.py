@@ -29,10 +29,7 @@ import tempfile
 import threading
 import ctypes
 
-from biochat.execution.base import ExecutionResult
-
-# Default wall-clock budget for legacy zero-argument wrapper calls.
-LEGACY_DEFAULT_TIMEOUT_SECONDS: float = 600
+from biochat.execution.base import LEGACY_DEFAULT_TIMEOUT_SECONDS, ExecutionResult
 
 
 class HostCodeExecutor:
@@ -42,6 +39,11 @@ class HostCodeExecutor:
     module scope): ``_namespaces`` maps a session to its Python globals
     dict and ``_locks`` maps a session to its re-entrant lock.
     """
+
+    # Serialises every in-process Python execution across ALL instances
+    # (the agent's executor plus the two legacy wrappers) because the
+    # in-process capture swaps the process-global ``sys.stdout``.
+    _stdout_gate: threading.Lock = threading.Lock()
 
     def __init__(self) -> None:
         self._namespaces: dict[str, dict] = {}
@@ -85,7 +87,7 @@ class HostCodeExecutor:
         inconsistent state.  Only reached when host execution was
         explicitly enabled.
         """
-        with self._session_lock(session_id):
+        with self._session_lock(session_id), HostCodeExecutor._stdout_gate:
             # The session lock serialises execution, so mutating the live
             # namespace directly preserves the legacy REPL semantics:
             # variables defined in one call persist to the next.
@@ -97,8 +99,9 @@ class HostCodeExecutor:
             # region so a cold matplotlib import cannot eat the budget.
             _apply_plot_capture_patches()
 
+            previous_stdout = sys.stdout
+
             def _worker() -> None:
-                old_stdout = sys.stdout
                 sys.stdout = buffer
                 try:
                     exec(compile(code, "<biochat-host-exec>", "exec"), namespace)  # noqa: S102
@@ -106,13 +109,22 @@ class HostCodeExecutor:
                 except BaseException as exc:  # noqa: BLE001 - boundary reports, never raises
                     done.put(("error", f"{type(exc).__name__}: {exc}"))
                 finally:
-                    sys.stdout = old_stdout
+                    # Only reclaim the global if we still own it — a timed-
+                    # out worker whose kill was swallowed by user code must
+                    # not re-hijack stdout after the parent restored it.
+                    if sys.stdout is buffer:
+                        sys.stdout = previous_stdout
 
             thread = threading.Thread(target=_worker, daemon=True)
             thread.start()
             thread.join(timeout)
 
             if thread.is_alive():
+                # Reclaim the process-global stream immediately so an
+                # immortal worker (user code that swallows BaseException)
+                # cannot keep it deflected to a dead buffer.
+                if sys.stdout is buffer:
+                    sys.stdout = previous_stdout
                 # Legacy in-process termination (unsafe; preserved for compat).
                 tid = thread.ident
                 if tid is not None:
@@ -182,7 +194,13 @@ class HostCodeExecutor:
         if not command:
             return ExecutionResult(status="error", message="Empty command")
 
-        args = shlex.split(command)
+        try:
+            args = shlex.split(command)
+        except ValueError as exc:
+            return ExecutionResult(
+                status="error",
+                message=f"Invalid command: {exc}",
+            )
         return self._run_process(args, timeout=timeout)
 
     def _run_process(self, args: list[str], *, timeout: float) -> ExecutionResult:
@@ -192,6 +210,7 @@ class HostCodeExecutor:
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
             text=True,
+            errors="replace",  # never fail the boundary on non-UTF8 child output
             start_new_session=True,
         )
         try:

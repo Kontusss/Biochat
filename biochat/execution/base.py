@@ -16,6 +16,10 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Protocol, runtime_checkable
 
+# Default wall-clock budget for legacy zero-argument wrapper calls that
+# predate explicit per-call timeouts (SAFETY_POLICY default).
+LEGACY_DEFAULT_TIMEOUT_SECONDS: float = 600
+
 
 # ═══════════════════════════════════════════════════════════════
 # Immutable execution result
@@ -58,10 +62,7 @@ def format_result(result: ExecutionResult) -> str:
     if result.status == "error":
         detail = result.stderr or result.message
         return f"Error: {detail}"
-    output = result.stdout
-    if result.stderr:
-        output += result.stderr
-    return output
+    return result.stdout
 
 
 # ═══════════════════════════════════════════════════════════════
@@ -79,6 +80,8 @@ class CodeExecutor(Protocol):
     def execute_bash(self, code: str, *, timeout: float, session_id: str) -> ExecutionResult: ...
 
     def execute_cli(self, command: str, *, timeout: float, session_id: str) -> ExecutionResult: ...
+
+    def register_function(self, session_id: str, name: str, function: object) -> None: ...
 
     def clear_session(self, session_id: str) -> None: ...
 
@@ -109,6 +112,9 @@ class DisabledCodeExecutor:
 
     def execute_cli(self, command: str, *, timeout: float, session_id: str) -> ExecutionResult:
         return self._refuse("CLI command")
+
+    def register_function(self, session_id: str, name: str, function: object) -> None:
+        """Accepted and ignored: nothing is ever registered or executed."""
 
     def clear_session(self, session_id: str) -> None:
         """No state is ever held, so clearing is a no-op."""

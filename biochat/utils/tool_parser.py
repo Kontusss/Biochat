@@ -99,9 +99,9 @@ def register_custom_functions_in_namespace(custom_functions: dict) -> None:
     if not custom_functions:
         return
 
-    from biochat.tool.support_tools import _legacy_trusted_executor
+    from biochat.tool.support_tools import _get_legacy_trusted_executor
     for name, func in custom_functions.items():
-        _legacy_trusted_executor.register_function("legacy", name, func)
+        _get_legacy_trusted_executor().register_function("legacy", name, func)
 
     import builtins
     if not hasattr(builtins, "_biochat_custom_functions"):

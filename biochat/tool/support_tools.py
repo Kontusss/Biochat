@@ -9,10 +9,20 @@ _captured_plots = []
 # Module-level trusted host executor backing the deprecated REPL wrapper.
 # One instance => one shared "legacy" session namespace, preserving the
 # historical persistent-REPL semantics for direct legacy callers only.
-from biochat.execution import HostCodeExecutor, format_result
-from biochat.execution.host import LEGACY_DEFAULT_TIMEOUT_SECONDS
+# Created lazily so importing this module stays side-effect free.
+from biochat.execution import format_result
+from biochat.execution.base import LEGACY_DEFAULT_TIMEOUT_SECONDS
 
-_legacy_trusted_executor = HostCodeExecutor()
+_legacy_trusted_executor = None
+
+
+def _get_legacy_trusted_executor() -> "HostCodeExecutor":
+    global _legacy_trusted_executor
+    if _legacy_trusted_executor is None:
+        from biochat.execution.host import HostCodeExecutor as _Host
+
+        _legacy_trusted_executor = _Host()
+    return _legacy_trusted_executor
 
 
 def run_python_repl(command: str) -> str:
@@ -24,7 +34,7 @@ def run_python_repl(command: str) -> str:
     existing direct callers keep their persistent-namespace behaviour.
     """
     command = command.strip("```").strip()
-    result = _legacy_trusted_executor.execute_python(
+    result = _get_legacy_trusted_executor().execute_python(
         command,
         timeout=LEGACY_DEFAULT_TIMEOUT_SECONDS,
         session_id="legacy",

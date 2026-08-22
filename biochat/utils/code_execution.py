@@ -21,10 +21,20 @@ import threading
 from typing import Any, Callable
 
 from biochat.execution import format_result
-from biochat.execution.host import HostCodeExecutor, LEGACY_DEFAULT_TIMEOUT_SECONDS
+from biochat.execution.base import LEGACY_DEFAULT_TIMEOUT_SECONDS
 
 # Shared trusted backend for the deprecated wrapper functions below.
-_TRUSTED_HOST_EXECUTOR = HostCodeExecutor()
+# Created lazily so importing this module stays side-effect free.
+_TRUSTED_HOST_EXECUTOR: "HostCodeExecutor | None" = None
+
+
+def _get_trusted_host_executor() -> "HostCodeExecutor":
+    global _TRUSTED_HOST_EXECUTOR
+    if _TRUSTED_HOST_EXECUTOR is None:
+        from biochat.execution.host import HostCodeExecutor as _Host
+
+        _TRUSTED_HOST_EXECUTOR = _Host()
+    return _TRUSTED_HOST_EXECUTOR
 
 
 # ═══════════════════════════════════════════════════════════════
@@ -33,7 +43,7 @@ _TRUSTED_HOST_EXECUTOR = HostCodeExecutor()
 
 def execute_r_script(code: str) -> str:
     """Deprecated: run *code* through ``Rscript`` via the trusted host executor."""
-    result = _TRUSTED_HOST_EXECUTOR.execute_r(
+    result = _get_trusted_host_executor().execute_r(
         code, timeout=LEGACY_DEFAULT_TIMEOUT_SECONDS, session_id="legacy"
     )
     return format_result(result)
@@ -41,7 +51,7 @@ def execute_r_script(code: str) -> str:
 
 def execute_bash_script(script: str) -> str:
     """Deprecated: run *script* as a Bash script via the trusted host executor."""
-    result = _TRUSTED_HOST_EXECUTOR.execute_bash(
+    result = _get_trusted_host_executor().execute_bash(
         script, timeout=LEGACY_DEFAULT_TIMEOUT_SECONDS, session_id="legacy"
     )
     return format_result(result)
@@ -49,7 +59,7 @@ def execute_bash_script(script: str) -> str:
 
 def execute_cli_command(command: str) -> str:
     """Deprecated: run a single CLI command via the trusted host executor."""
-    result = _TRUSTED_HOST_EXECUTOR.execute_cli(
+    result = _get_trusted_host_executor().execute_cli(
         command, timeout=LEGACY_DEFAULT_TIMEOUT_SECONDS, session_id="legacy"
     )
     return format_result(result)

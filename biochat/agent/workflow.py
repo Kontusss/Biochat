@@ -147,16 +147,15 @@ def create_execution_node(agent: "A1") -> Callable[[AgentState], AgentState]:
                 executor.execute_r(r_code, timeout=timeout, session_id=session_id)
             )
         elif code.strip().startswith(("#!BASH", "# Bash script", "#!CLI")):
+            # Legacy parity: CLI blocks ran through the bash-script path
+            # (shell semantics — pipes/redirects keep working).
             if code.strip().startswith("#!CLI"):
-                cli_cmd = re.sub(r"^#!CLI", "", code, count=1).strip().replace("\n", " ")
-                result = format_result(
-                    executor.execute_cli(cli_cmd, timeout=timeout, session_id=session_id)
-                )
+                bash_script = re.sub(r"^#!CLI", "", code, count=1).strip()
             else:
                 bash_script = re.sub(r"^#!BASH|^# Bash script", "", code, count=1).strip()
-                result = format_result(
-                    executor.execute_bash(bash_script, timeout=timeout, session_id=session_id)
-                )
+            result = format_result(
+                executor.execute_bash(bash_script, timeout=timeout, session_id=session_id)
+            )
         else:
             # Python
             agent._clear_execution_plots()

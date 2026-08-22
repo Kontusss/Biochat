@@ -55,6 +55,47 @@ def test_disabled_executor_returns_structured_results_without_raising():
         assert result.stdout == ""
 
 
+def test_disabled_executor_tolerates_custom_function_registration():
+    """Custom-callable registration must never crash the disabled path."""
+
+    def double(value):
+        return value * 2
+
+    executor = DisabledCodeExecutor()
+    executor.register_function("s", "double", double)
+    result = executor.execute_python("print(double(21))", timeout=1, session_id="s")
+    assert result.status == "disabled"
+
+
+def test_service_propagates_allow_host_code_execution_to_agent(
+    monkeypatch,
+):
+    """The settings override must reach A1's executor selection end-to-end."""
+    from biochat.config import default_config
+    from biochat.core.settings import BiochatSettings
+    from biochat.services.agent_service import BioAgentService
+
+    captured: dict = {}
+
+    class FakeA1:
+        def __init__(self, **kwargs):
+            captured.update(kwargs)
+
+    monkeypatch.setattr("biochat.agent.A1", FakeA1)
+    legacy_fields = dict(default_config.to_dict())
+
+    try:
+        service = BioAgentService(
+            BiochatSettings(allow_host_code_execution=True)
+        )
+        service.ensure_initialized()
+    finally:
+        for key, value in legacy_fields.items():
+            setattr(default_config, key, value)
+
+    assert captured.get("allow_host_code_execution") is True
+
+
 def test_executors_satisfy_the_code_executor_protocol():
     assert isinstance(HostCodeExecutor(), CodeExecutor)
     assert isinstance(DisabledCodeExecutor(), CodeExecutor)
@@ -156,6 +197,100 @@ def test_bash_timeout_terminates_process_group():
     while _probe_process_alive(probe) and time.monotonic() < deadline:
         time.sleep(0.2)
     assert not _probe_process_alive(probe), "timed-out bash group left live processes"
+
+
+def test_timed_out_python_cannot_hijack_process_stdout():
+    """A swallowed-BaseException runaway must not own global sys.stdout."""
+    import sys
+
+    executor = HostCodeExecutor()
+    stream_before = sys.stdout
+    runaway = (
+        "import time\n"
+        "while True:\n"
+        "    try:\n"
+        "        time.sleep(0.05)\n"
+        "    except BaseException:\n"
+        "        pass\n"
+    )
+    result = executor.execute_python(runaway, timeout=0.3, session_id="run")
+    assert result.status == "timeout"
+    assert sys.stdout is stream_before, "timed-out worker left sys.stdout hijacked"
+
+    # A later normal execution still captures its own output correctly.
+    followup = executor.execute_python("print('still works')", timeout=2, session_id="ok")
+    assert followup.status == "ok"
+    assert "still works" in followup.stdout
+    assert sys.stdout is stream_before
+
+
+def test_cli_invalid_tokenization_returns_error_result():
+    result = HostCodeExecutor().execute_cli(
+        'echo "unterminated', timeout=2, session_id="a"
+    )
+    assert result.status == "error"
+    assert result.message
+
+
+# ── Workflow dispatch parity ──────────────────────────────────────
+
+
+class _RecordingExecutor:
+    """Records which executor method the workflow node selects."""
+
+    def __init__(self):
+        self.calls: list[tuple[str, str]] = []
+
+    def execute_python(self, code, *, timeout, session_id):
+        self.calls.append(("execute_python", code))
+        return ExecutionResult(status="ok", stdout="py")
+
+    def execute_r(self, code, *, timeout, session_id):
+        self.calls.append(("execute_r", code))
+        return ExecutionResult(status="ok", stdout="r")
+
+    def execute_bash(self, code, *, timeout, session_id):
+        self.calls.append(("execute_bash", code))
+        return ExecutionResult(status="ok", stdout="bash")
+
+    def execute_cli(self, command, *, timeout, session_id):
+        self.calls.append(("execute_cli", command))
+        return ExecutionResult(status="ok", stdout="cli")
+
+    def register_function(self, session_id, name, function):
+        self.calls.append(("register_function", name))
+
+    def clear_session(self, session_id):
+        pass
+
+
+def _run_node_with(code_block: str) -> tuple[_RecordingExecutor, str]:
+    from langchain_core.messages import AIMessage
+
+    from biochat.agent.workflow import create_execution_node
+
+    recorder = _RecordingExecutor()
+
+    class StubAgent:
+        timeout_seconds = 5
+        code_executor = recorder
+
+        def _clear_execution_plots(self):
+            pass
+
+        def _inject_custom_functions_to_repl(self, session_id="default"):
+            pass
+
+    state = {"messages": [AIMessage(content=f"<execute>{code_block}</execute>")]}
+    out = create_execution_node(StubAgent())(state)
+    return recorder, out["messages"][-1].content
+
+
+def test_workflow_routes_cli_blocks_through_bash_script_path():
+    """`#!CLI` blocks keep their legacy shell-script semantics (pipes work)."""
+    recorder, observation = _run_node_with("#!CLI echo a | grep a")
+    assert recorder.calls and recorder.calls[0][0] == "execute_bash"
+    assert "<observation>" in observation
 
 
 def test_cli_timeout_also_reports_timeout_status():

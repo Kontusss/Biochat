@@ -142,6 +142,7 @@ class BioAgentService:
                     base_url=self._settings.base_url,
                     api_key=self._settings.api_key,
                     commercial_mode=self._settings.commercial_mode,
+                    allow_host_code_execution=self._settings.allow_host_code_execution,
                 )
                 self._initialized = True
                 logger.info("BioAgent initialized successfully")
