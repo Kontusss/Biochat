@@ -13,15 +13,63 @@ authors = [
     {name = "Kontusss"}
 ]
 requires-python = ">=3.11"
-dependencies = ["pydantic", "langchain", "python-dotenv"]
+
+# Minimal runtime: everything needed to import the core agent and load
+# its catalogs. Provider SDKs, UIs, and the scientific stack are extras.
+dependencies = [
+    "langchain-core>=1.0,<2.0",
+    "langgraph>=1.0,<2.0",
+    "pydantic>=2.9,<3.0",
+    "python-dotenv>=1.0,<2.0",
+    "PyYAML>=6.0,<7.0",
+    "requests>=2.31,<3.0",
+    "numpy>=2.0,<3.0",
+    "pandas>=2.2,<4.0",
+    "tqdm>=4.66,<5.0",
+]
 
 [project.urls]
 Homepage = "https://github.com/Kontusss/Biochat"
 Repository = "https://github.com/Kontusss/Biochat"
 
 [project.optional-dependencies]
+# UI front-ends
+streamlit = ["streamlit>=1.40,<2.0"]
 gradio = ["gradio>=5.0,<6.0"]
-streamlit = ["streamlit>=1.28"]
+
+# LLM provider SDKs (lazy-imported per source)
+providers = [
+    "langchain-anthropic>=0.3,<1.0",
+    "langchain-openai>=0.3,<1.0",
+    "langchain-google-genai>=2.0,<3.0",
+    "langchain-groq>=0.2,<1.0",
+    "langchain-aws>=0.2,<1.0",
+    "langchain-ollama>=0.2,<1.0",
+]
+
+# Scientific tool stack (lazy-imported by attributed tools)
+full-tools = [
+    "matplotlib>=3.8,<4.0",
+    "scipy>=1.12,<2.0",
+    "scikit-image>=0.22,<1.0",
+    "opencv-python-headless>=4.9,<5.0",
+    "torch>=2.2,<3.0",
+    "biopython>=1.83,<2.0",
+    "scanpy>=1.10,<2.0",
+    "nibabel>=5.0,<6.0",
+    "SimpleITK>=2.3,<3.0",
+    "statsmodels>=0.14,<1.0",
+]
+
+# Development and CI tooling
+dev = [
+    "pytest>=8.0,<9.0",
+    "pytest-asyncio>=0.24,<2.0",
+    "ruff>=0.6",
+    "build>=1.2",
+    "pre-commit>=3.7,<5.0",
+    "mcp>=1.0,<2.0",
+]
 
 [tool.setuptools]
 include-package-data = true
@@ -30,10 +78,21 @@ include-package-data = true
 version = {attr = "biochat.version.__version__"}
 
 [tool.setuptools.packages.find]
-exclude = ["test*", "tutorials*"]
+# Ship only the Biochat package tree — never tests, tutorials, scripts,
+# third_party, or repository archives.
+include = ["biochat", "biochat.*"]
+
+[tool.setuptools.package-data]
+"biochat" = ["*.yaml", "*.yml", "*.json"]
+"biochat.environment" = ["*.yaml"]
+"biochat.tool.tool_description" = ["*.yaml", "*.py"]
+"biochat.knowledge" = ["**/*.md", "**/*.csv", "**/*.txt"]
+"biochat.knowledge.docs" = ["*.md", "*.csv", "*.txt"]
+"biochat.tool.protocols" = ["**/*.txt"]
+"biochat.tool.schema_db" = ["*.pkl"]
+"biochat.tool.antibody_design.models" = ["*.pth"]
 
 [tool.ruff]
-src = ["src"]
 line-length = 120
 
 [tool.ruff.format]
@@ -53,9 +112,6 @@ select = [
     "UP",     # pyupgrade
     "RUF100", # Report unused noqa directives
     "TCH",    # Typing imports
-    #"NPY",    # Numpy specific rules
-    #"PTH",    # Use pathlib
-    #"PL"      # pylint
 ]
 ignore = [
     # line too long -> we accept long comment lines; black gets rid of long code lines
@@ -79,7 +135,7 @@ ignore = [
     # First line should be in imperative mood; try rephrasing
     "D401",
     ## Disable one in each pair of mutually incompatible rules
-    # We don’t want a blank line before a class docstring
+    # We don't want a blank line before a class docstring
     "D203",
     # We want docstrings to start immediately after the opening triple quote
     "D213",
@@ -102,5 +158,24 @@ ignore = [
     # do not catch blind exception
     "BLE001",
     # strip with multi characters
-    "B005"
+    "B005",
+    # ── Legacy-code tolerance (tighten incrementally) ──
+    # PEP-585/604 typing modernization across pre-hardening modules
+    "UP006",
+    "UP007",
+    "UP035",
+    "UP037",
+    "UP045",
+    # import-sorting churn on legacy modules
+    "I001",
+    # one-statement-per-line style in legacy scripts
+    "E701",
+    "E702",
+    "E401",
+    # typing-only import placement rules (TC) in legacy modules
+    "TC001",
+    "TC002",
+    "TC003",
+    # str/Enum replacement is an API change for legacy schemas
+    "UP042",
 ]

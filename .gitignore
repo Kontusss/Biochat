@@ -2,7 +2,21 @@
 .buildplan
 .env
 debug*
-.*
+# ── Dotfiles: explicit entries only (a blanket `.*` rule hides
+#    trackable project config like .github/, .pre-commit-config.yaml,
+#    and .env.example) ─────────────────────────────────────────
+.DS_Store
+.env
+.env.*
+!.env.example
+.buildplan/
+.worktrees/
+.superpowers/
+.test-venv/
+.test-venv-base/
+.idea/
+.vscode/
+
 # Byte-compiled / optimized / DLL files
 biomni_release/biomni_env/biomni_tools/
 open_source_process.ipynb
