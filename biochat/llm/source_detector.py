@@ -64,15 +64,18 @@ def detect_llm_source(
     Detection priority (first match wins):
 
     1. ``LLM_SOURCE`` environment variable (if valid).
-    2. Model name prefix / substring matching against recognized providers.
-    3. If *base_url* is set → ``"Custom"``.
+    2. An explicit *base_url* → ``"Custom"``.  A caller-supplied endpoint
+       selects the OpenAI-compatible custom route before generic
+       model-name matchers such as ``deepseek`` or ``qwen``.
+    3. Model name prefix / substring matching against recognized providers.
     4. If no match → raises ``ValueError``.
 
     Args:
         model: The LLM model identifier (e.g. ``"claude-sonnet-4-20250514"``).
-        base_url: An optional custom base URL.  If the model name doesn't
-                  match any known provider and *base_url* is set, the
-                  source is inferred as ``"Custom"``.
+        base_url: An optional custom base URL.  When set, the source is
+                  resolved as ``"Custom"`` before any model-name heuristic
+                  is consulted; without an endpoint, name-based inference
+                  still applies.
 
     Returns:
         One of ``ALLOWED_SOURCES``.
@@ -85,14 +88,17 @@ def detect_llm_source(
     if env_source and env_source in ALLOWED_SOURCES:
         return env_source
 
-    # 2. Ordered matching against known providers
+    # 2. Explicit custom endpoint → OpenAI-compatible Custom route.
+    #    A supplied base_url outranks generic model-name heuristics so a
+    #    private gateway serving e.g. deepseek/qwen models is not
+    #    misrouted to a public provider client.
+    if base_url is not None:
+        return "Custom"
+
+    # 3. Ordered matching against known providers (no endpoint supplied)
     for source_name, matcher in _SOURCE_MATCHERS:
         if _try_match(model, matcher):
             return source_name
-
-    # 3. Fallback: custom endpoint
-    if base_url is not None:
-        return "Custom"
 
     raise ValueError(
         f"Unable to determine model source for '{model}'. "
