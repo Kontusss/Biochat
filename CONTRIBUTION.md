@@ -28,8 +28,9 @@ python -m build --wheel
 pytest -q tests/test_distribution_contents.py
 
 # Clean-wheel install smoke (fresh environment, repository root not on PYTHONPATH)
-python -m venv .smoke-venv && ./.smoke-venv/bin/pip install dist/biochat-*.whl \
-  && cd / && ../$(basename $OLDPWD)/.smoke-venv/bin/python -c "import biochat; print(biochat.__version__)"
+python -m venv .smoke-venv
+./.smoke-venv/bin/pip install --quiet dist/biochat-*.whl
+(cd / && "$OLDPWD/.smoke-venv/bin/python" -c "import biochat; print(biochat.__version__)")
 ```
 
 ### Test markers

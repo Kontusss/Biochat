@@ -156,7 +156,7 @@ default_config.api_key = None  # For custom models
 | `BIOCHAT_ALLOW_HOST_CODE_EXECUTION` | `false` | Allow generated Python/R/Bash code to execute on this host. Host mode is **not** a sandbox; enable only for fully trusted local workloads. |
 | `BIOCHAT_ALLOW_UNAUTHENTICATED_REMOTE` | `false` | Explicitly acknowledge an unauthenticated non-loopback UI bind. Without this (or configured access codes) startup refuses non-loopback addresses. |
 | `BIOCHAT_ACCESS_CODE` | unset | Comma-separated UI access codes; verified with constant-time comparison. Unset codes allow passwordless loopback use only. |
-| `BIOCHAT_HOST` | `127.0.0.1` | Bind address used by `python -m biochat.ui.cli` / `start.sh`. |
+| `BIOCHAT_HOST` | `127.0.0.1` | Bind address override read by `start.sh`; `python -m biochat.ui.cli` accepts `--host` directly. |
 
 Settings objects convert legacy configuration through
 `BiochatConfig.to_settings()`; UI changes apply only via the explicit
