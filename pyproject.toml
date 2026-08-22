@@ -59,6 +59,17 @@ full-tools = [
     "nibabel>=5.0,<6.0",
     "SimpleITK>=2.3,<3.0",
     "statsmodels>=0.14,<1.0",
+    # genomics tool module
+    "fair-esm>=2.2,<3.0",
+    "gget>=0.28,<1.0",
+    "gseapy>=1.1,<2.0",
+    "pybiomart>=0.2,<1.0",
+    # bioimaging tool module
+    "nnunetv2>=2.2,<3.0",
+    # literature tool module
+    "PyPDF2>=3.0,<4.0",
+    "beautifulsoup4>=4.12,<5.0",
+    "googlesearch-python>=1.2,<2.0",
 ]
 
 # Development and CI tooling
@@ -69,6 +80,7 @@ dev = [
     "build>=1.2",
     "pre-commit>=3.7,<5.0",
     "mcp>=1.0,<2.0",
+    "nest-asyncio>=1.6,<2.0",
 ]
 
 [tool.setuptools]

@@ -3,6 +3,10 @@
 The session fixture builds one wheel via ``python -m build`` and the
 tests assert required runtime resources are present while repository
 archives and development trees stay out.
+
+Run these serially (not under pytest-xdist): the fixture mutates the
+shared ``build/`` cache directory. Build isolation downloads setuptools
+and wheel from PyPI, so offline environments need ``--no-isolation``.
 """
 
 from __future__ import annotations
@@ -83,8 +87,15 @@ def test_wheel_declares_all_documented_dependency_extras(built_wheel):
 
 
 def test_wheel_version_matches_canonical_source(built_wheel):
-    from biochat.version import __version__
+    # Parse the checkout's version file directly so an unrelated installed
+    # copy of biochat can never satisfy this assertion.
+    import re
 
-    assert built_wheel.name.startswith(f"biochat-{__version__}-")
+    source = (_REPO_ROOT / "biochat" / "version.py").read_text(encoding="utf-8")
+    match = re.search(r'__version__\s*=\s*"(.*?)"', source)
+    assert match, "cannot parse canonical version from biochat/version.py"
+    expected = match.group(1)
+
+    assert built_wheel.name.startswith(f"biochat-{expected}-")
     metadata = _wheel_metadata(built_wheel)
-    assert f"Version: {__version__}" in metadata
+    assert f"Version: {expected}" in metadata
