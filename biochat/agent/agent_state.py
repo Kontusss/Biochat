@@ -28,6 +28,10 @@ class AgentState(TypedDict):
                   reducer ensures new messages are appended (not overwritten)
                   when the checkpointer restores previous state.
         next_step: Routing key for the next workflow node.
+        session_id: Validated conversation identifier supplied by
+                    ``A1.go``/``A1.go_stream``; execution nodes forward it
+                    to the code executor so namespaces stay per-session.
     """
     messages: Annotated[list[BaseMessage], add_messages]
     next_step: str | None
+    session_id: str

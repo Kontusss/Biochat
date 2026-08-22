@@ -27,7 +27,11 @@ from biochat.core.errors import (
     AgentTimeoutError,
 )
 from biochat.core.logging import get_logger
-from biochat.core.settings import BiochatSettings, biochat_settings
+from biochat.core.settings import (
+    SAFETY_POLICY,
+    BiochatSettings,
+    biochat_settings,
+)
 from biochat.schemas.chat import (
     AgentResponse,
     AgentStatus,
@@ -39,6 +43,27 @@ logger = get_logger(__name__)
 # ── Type aliases ──────────────────────────────────────────────────
 ProgressCallback = Callable[[AgentStatus, str], None]
 """Called with (status, detail_message) on each state transition."""
+
+# Upper bound for request-scoped timeout overrides.
+_MAX_TIMEOUT_SECONDS: int = int(SAFETY_POLICY.get("max_timeout_seconds", 3600))
+
+
+def _bounded_timeout(value: Any) -> int | None:
+    """Validate a request timeout override.
+
+    Returns the clamped positive integer value, or ``None`` when the
+    override is absent/invalid (in which case the agent keeps its
+    configured timeout).
+    """
+    if value is None:
+        return None
+    try:
+        seconds = int(value)
+    except (TypeError, ValueError):
+        return None
+    if seconds < 1:
+        return None
+    return min(seconds, _MAX_TIMEOUT_SECONDS)
 
 
 # ═══════════════════════════════════════════════════════════════════
@@ -66,17 +91,29 @@ class BioAgentService:
 
     # ── Constructor ──────────────────────────────────────────────
 
-    def __init__(self, settings: BiochatSettings | None = None):
+    def __init__(
+        self,
+        settings: BiochatSettings | None = None,
+        *,
+        agent_factory: Callable[[BiochatSettings], Any] | None = None,
+    ):
         """Initialise the service.
 
         Args:
             settings: Optional settings override.  If None, uses the
                       global ``biochat_settings`` singleton.
+            agent_factory: Optional callable used to construct agent
+                      instances (receives the effective settings).
+                      Defaults to the standard ``A1`` construction path.
         """
         self._settings = settings or biochat_settings
         self._agent: Any = None            # A1 instance (lazy)
         self._agent_lock = threading.Lock()
+        self._task_lock = threading.RLock()
+        # Cache key: effective (llm_model, llm_source, base_url) tuple.
+        self._agent_cache: dict[tuple[str | None, str | None, str | None], Any] = {}
         self._initialized = False
+        self._agent_factory = agent_factory
 
     # ── Public properties ────────────────────────────────────────
 
@@ -118,44 +155,121 @@ class BioAgentService:
             )
 
             try:
-                from biochat.agent import A1
-                from biochat.config import default_config
-
-                # Sync the legacy config for backward compat
-                default_config.llm = self._settings.llm_model
-                default_config.source = self._settings.llm_source
-                default_config.path = self._settings.data_path
-                default_config.timeout_seconds = self._settings.timeout_seconds
-                default_config.use_tool_retriever = self._settings.use_tool_retriever
-                default_config.tool_profile = self._settings.tool_profile
-                default_config.commercial_mode = self._settings.commercial_mode
-                default_config.base_url = self._settings.base_url
-                default_config.api_key = self._settings.api_key
-
-                self._agent = A1(
-                    path=self._settings.data_path,
-                    llm=self._settings.llm_model,
-                    source=self._settings.llm_source,
-                    timeout_seconds=self._settings.timeout_seconds,
-                    use_tool_retriever=self._settings.use_tool_retriever,
-                    tool_profile=self._settings.tool_profile,
-                    base_url=self._settings.base_url,
-                    api_key=self._settings.api_key,
-                    commercial_mode=self._settings.commercial_mode,
-                    allow_host_code_execution=self._settings.allow_host_code_execution,
-                )
+                self._agent = self._construct_agent(self._settings)
                 self._initialized = True
                 logger.info("BioAgent initialized successfully")
+            except AgentInitError:
+                raise
             except Exception as exc:
                 logger.error("Failed to initialize BioAgent: %s", exc)
                 raise AgentInitError(
                     f"Failed to initialize the biomedical AI agent: {exc}"
                 ) from exc
 
+    def _construct_agent(self, settings: BiochatSettings) -> Any:
+        """Build an agent instance for *settings*.
+
+        Uses the injectable factory when supplied; otherwise follows the
+        legacy A1 construction path (syncing the backward-compat config).
+        """
+        if self._agent_factory is not None:
+            return self._agent_factory(settings)
+
+        from biochat.agent import A1
+        from biochat.config import default_config
+
+        # Sync the legacy config for backward compat
+        default_config.llm = settings.llm_model
+        default_config.source = settings.llm_source
+        default_config.path = settings.data_path
+        default_config.timeout_seconds = settings.timeout_seconds
+        default_config.use_tool_retriever = settings.use_tool_retriever
+        default_config.tool_profile = settings.tool_profile
+        default_config.commercial_mode = settings.commercial_mode
+        default_config.base_url = settings.base_url
+        default_config.api_key = settings.api_key
+
+        return A1(
+            path=settings.data_path,
+            llm=settings.llm_model,
+            source=settings.llm_source,
+            timeout_seconds=settings.timeout_seconds,
+            use_tool_retriever=settings.use_tool_retriever,
+            tool_profile=settings.tool_profile,
+            base_url=settings.base_url,
+            api_key=settings.api_key,
+            commercial_mode=settings.commercial_mode,
+            allow_host_code_execution=settings.allow_host_code_execution,
+        )
+
+    def _resolve_agent(self, request: ChatRequest) -> Any:
+        """Return the agent that should serve *request*.
+
+        Requests carrying an ``llm_model`` override are served by a
+        separately cached agent keyed by the effective
+        (model, source, base URL) tuple — the shared default agent is
+        never mutated.  Cache access happens under the task lock.
+        """
+        override_model = getattr(request, "llm_model", None)
+        if not override_model:
+            self.ensure_initialized()
+            return self._agent
+
+        cache_key = (
+            override_model,
+            self._settings.llm_source,
+            self._settings.base_url,
+        )
+        with self._task_lock:
+            cached = self._agent_cache.get(cache_key)
+            if cached is not None:
+                return cached
+
+            override_settings = self._override_settings(override_model)
+            agent = self._construct_agent(override_settings)
+            self._agent_cache[cache_key] = agent
+            return agent
+
+    def _override_settings(self, model: str) -> BiochatSettings:
+        """Effective settings copy for a model-override agent."""
+        s = self._settings
+        return BiochatSettings(
+            data_path=s.data_path,
+            timeout_seconds=s.timeout_seconds,
+            use_tool_retriever=s.use_tool_retriever,
+            tool_profile=s.tool_profile,
+            commercial_mode=s.commercial_mode,
+            recursion_limit=s.recursion_limit,
+            llm_model=model,
+            llm_source=s.llm_source,
+            temperature=s.temperature,
+            base_url=s.base_url,
+            api_key=s.api_key,
+            max_tokens=s.max_tokens,
+            access_codes=list(s.access_codes),
+            require_verification=s.require_verification,
+            allow_host_code_execution=s.allow_host_code_execution,
+            allow_unauthenticated_remote=s.allow_unauthenticated_remote,
+        )
+
     def shutdown(self) -> None:
-        """Release the agent instance (no-op for now — placeholder)."""
+        """Release the default agent and every cached override agent."""
         with self._agent_lock:
+            agents: list[Any] = []
+            if self._agent is not None:
+                agents.append(self._agent)
+            agents.extend(self._agent_cache.values())
+
+            for agent in agents:
+                shutdown_hook = getattr(agent, "shutdown", None)
+                if callable(shutdown_hook):
+                    try:
+                        shutdown_hook()
+                    except Exception as exc:  # noqa: BLE001 - best-effort teardown
+                        logger.warning("Agent shutdown raised: %s", exc)
+
             self._agent = None
+            self._agent_cache.clear()
             self._initialized = False
             logger.info("BioAgent shut down")
 
@@ -179,7 +293,8 @@ class BioAgentService:
         Raises:
             AgentInitError: If the agent is not initialized and cannot be created.
         """
-        if not self.is_initialized:
+        if not self.is_initialized and not getattr(request, "llm_model", None):
+            # Override requests resolve lazily to cached agents instead.
             self.ensure_initialized()
 
         try:
@@ -217,7 +332,8 @@ class BioAgentService:
         """
         import re as _re
 
-        if not self.is_initialized:
+        if not self.is_initialized and not getattr(request, "llm_model", None):
+            # Override requests resolve lazily to cached agents instead.
             self.ensure_initialized()
 
         def _report(status: AgentStatus, detail: str = "") -> None:
@@ -230,6 +346,12 @@ class BioAgentService:
         _report(AgentStatus.PLANNING, "正在分析问题并制定计划...")
         logger.info("Starting streaming task: %s", request.message[:100])
 
+        # Resolve the serving agent (model override → cached agent) and
+        # the request-scoped timeout before entering the serialized region.
+        agent = self._resolve_agent(request)
+        bounded_timeout = _bounded_timeout(getattr(request, "timeout_seconds", None))
+        previous_timeout = getattr(agent, "timeout_seconds", None)
+
         # Track state across streaming steps
         accumulated_answer: str = ""
         trace_lines: list[str] = []
@@ -238,9 +360,15 @@ class BioAgentService:
         gen_buffer: str = ""
         """Raw tokens of the current LLM generation (reset at each run boundary)."""
 
+        # Serialize retrieval mutation plus the full go_stream consumption
+        # behind the re-entrant task lock; restore any request-scoped
+        # timeout override when the request finishes.
+        self._task_lock.acquire()
+        if bounded_timeout is not None:
+            agent.timeout_seconds = bounded_timeout
         try:
             # ── Phase 1: Tool retrieval (if enabled) ──────────────
-            if self._agent.use_tool_retriever:
+            if agent.use_tool_retriever:
                 _report(AgentStatus.RETRIEVING_TOOLS, "正在检索相关工具和数据库...")
                 yield {
                     "status": "retrieving",
@@ -250,9 +378,9 @@ class BioAgentService:
                     "language": "",
                 }
                 try:
-                    selected = self._agent._prepare_resources_for_retrieval(request.message)
+                    selected = agent._prepare_resources_for_retrieval(request.message)
                     if selected:
-                        self._agent.update_system_prompt_with_selected_resources(selected)
+                        agent.update_system_prompt_with_selected_resources(selected)
                         tool_count = len(selected.get("tools", []))
                         data_count = len(selected.get("data_lake", []))
                         lib_count = len(selected.get("libraries", []))
@@ -265,9 +393,9 @@ class BioAgentService:
             # ── Phase 2: Agent execution stream ──────────────────
             _report(AgentStatus.RUNNING_CODE, "Agent 正在执行任务...")
 
-            if not hasattr(self._agent, "go_stream"):
+            if not hasattr(agent, "go_stream"):
                 # Fallback: use synchronous go() and yield once
-                log_entries, final_output = self._agent.go(request.message)
+                log_entries, final_output = agent.go(request.message, session_id=request.session_id)
                 response = self._parse_agent_output(log_entries, final_output, request.message)
                 _report(AgentStatus.COMPLETED, "任务完成")
                 yield {
@@ -279,7 +407,7 @@ class BioAgentService:
                 }
                 return
 
-            for event in self._agent.go_stream(request.message):
+            for event in agent.go_stream(request.message, session_id=request.session_id):
                 step_count += 1
 
                 # ── Token-level events: stream the final answer live ──
@@ -413,8 +541,8 @@ class BioAgentService:
 
             # ── Phase 3: Fallback if no explicit <solution> ───────
             if not solution_found:
-                log_entries = getattr(self._agent, "log", [])
-                final_state = getattr(self._agent, "_conversation_state", None)
+                log_entries = getattr(agent, "log", [])
+                final_state = getattr(agent, "_conversation_state", None)
                 final_text = ""
                 if final_state and "messages" in final_state:
                     msgs = final_state["messages"]
@@ -462,6 +590,10 @@ class BioAgentService:
                     "trace_line": "",
                     "language": "",
                 }
+        finally:
+            if bounded_timeout is not None and previous_timeout is not None:
+                agent.timeout_seconds = previous_timeout
+            self._task_lock.release()
 
         # Store trace for later retrieval
         self._last_trace_lines = trace_lines
@@ -505,11 +637,25 @@ class BioAgentService:
         _report(AgentStatus.PLANNING, "Analyzing query and planning approach...")
         logger.info("Starting task: %s", request.message[:100])
 
+        # Resolve the serving agent (model override → cached agent).
+        agent = self._resolve_agent(request)
+        bounded_timeout = _bounded_timeout(getattr(request, "timeout_seconds", None))
+        previous_timeout = getattr(agent, "timeout_seconds", None)
+
         try:
-            # ── Run the agent ─────────────────────────────────
+            # ── Run the agent (serialized; request-scoped timeout) ──
             _report(AgentStatus.RUNNING_CODE, "Agent is working on your task...")
 
-            log_entries, final_output = self._agent.go(request.message)
+            with self._task_lock:
+                if bounded_timeout is not None:
+                    agent.timeout_seconds = bounded_timeout
+                try:
+                    log_entries, final_output = agent.go(
+                        request.message, session_id=request.session_id
+                    )
+                finally:
+                    if bounded_timeout is not None and previous_timeout is not None:
+                        agent.timeout_seconds = previous_timeout
 
             # ── Extract structured data from raw output ───────
             response = self._parse_agent_output(

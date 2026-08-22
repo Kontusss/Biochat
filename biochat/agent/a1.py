@@ -56,6 +56,15 @@ if os.path.exists(".env"):
 # A1 — composition facade
 # ═══════════════════════════════════════════════════════════════
 
+def _validated_session_id(session_id: object) -> str:
+    """Validate a caller-supplied session id (never derived from content)."""
+    if not isinstance(session_id, str) or not session_id.strip():
+        raise ValueError(
+            "session_id must be a non-empty string identifying the conversation."
+        )
+    return session_id
+
+
 class A1:
     """General-purpose biomedical AI agent.
 
@@ -229,6 +238,9 @@ class A1:
             custom_software=custom_software,
             know_how_docs=know_how_docs,
         )
+        # Capture the base prompt so each request can start from it —
+        # resources selected for one session must not leak into the next.
+        self._base_system_prompt = self.system_prompt
 
         # Build LangGraph workflow via the extracted module
         from biochat.agent.workflow import build_agent_workflow
@@ -236,20 +248,44 @@ class A1:
         # Backward-compat: expose checkpointer on the agent instance
         self.checkpointer = getattr(self.app, "checkpointer", None)
 
+    def _reset_request_state(self) -> None:
+        """Restore per-request mutable state before a new request runs.
+
+        Currently this restores the base system prompt captured at
+        ``configure()`` time so retrieval results applied for one request
+        never persist into another session's prompt.
+        """
+        base_prompt = getattr(self, "_base_system_prompt", None)
+        if base_prompt is not None:
+            self.system_prompt = base_prompt
+
     # ═══════════════════════════════════════════════════════════
     # Execution — go / go_stream
     # ═══════════════════════════════════════════════════════════
 
-    def go(self, prompt: str):
-        """Execute the agent synchronously.  Returns (log, final_text)."""
+    def go(self, prompt: str, *, session_id: str = "default"):
+        """Execute the agent synchronously.  Returns (log, final_text).
+
+        ``session_id`` isolates LangGraph thread state and executor
+        namespaces per conversation; it must be a non-empty string.
+        """
+        session_id = _validated_session_id(session_id)
         self.critic_count = 0
         self.user_task = prompt
+        self._reset_request_state()
 
         if self.use_tool_retriever:
             self._run_retrieval(prompt)
 
-        inputs = {"messages": [HumanMessage(content=prompt)], "next_step": None}
-        config = {"recursion_limit": 500, "configurable": {"thread_id": 42}}
+        inputs = {
+            "messages": [HumanMessage(content=prompt)],
+            "next_step": None,
+            "session_id": session_id,
+        }
+        config = {
+            "recursion_limit": getattr(self, "recursion_limit", 500),
+            "configurable": {"thread_id": session_id},
+        }
         self.log = []
         final_state = None
 
@@ -261,8 +297,11 @@ class A1:
         self._conversation_state = final_state
         return self.log, message.content
 
-    def go_stream(self, prompt) -> Generator[dict, None, None]:
+    def go_stream(self, prompt, *, session_id: str = "default") -> Generator[dict, None, None]:
         """Execute the agent with token-level streaming yields.
+
+        ``session_id`` isolates LangGraph thread state and executor
+        namespaces per conversation; it must be a non-empty string.
 
         Yields dicts:
           - ``{"type": "token", "content": str, "chunk_position": ...}``
@@ -273,8 +312,10 @@ class A1:
             Completed conversation messages (AI responses, retry prompts,
             observations) — same text shape as the legacy event stream.
         """
+        session_id = _validated_session_id(session_id)
         self.critic_count = 0
         self.user_task = prompt
+        self._reset_request_state()
 
         if self.use_tool_retriever:
             self._run_retrieval(prompt)
@@ -288,8 +329,15 @@ class A1:
         except Exception:
             pass
 
-        inputs = {"messages": [HumanMessage(content=prompt)], "next_step": None}
-        config = {"recursion_limit": 500, "configurable": {"thread_id": 42}}
+        inputs = {
+            "messages": [HumanMessage(content=prompt)],
+            "next_step": None,
+            "session_id": session_id,
+        }
+        config = {
+            "recursion_limit": getattr(self, "recursion_limit", 500),
+            "configurable": {"thread_id": session_id},
+        }
         self.log = []
         final_state = None
 

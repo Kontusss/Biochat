@@ -75,6 +75,12 @@ class ChatRequest:
     llm_model: str | None = None
     timeout_seconds: int | None = None
 
+    def __post_init__(self) -> None:
+        # The session id is the canonical conversation identifier; it must
+        # be a real, non-empty string so it can never collide with unset.
+        if not isinstance(self.session_id, str) or not self.session_id.strip():
+            raise ValueError("session_id must be a non-empty string")
+
     def to_dict(self) -> dict[str, Any]:
         return {
             "message": self.message,
