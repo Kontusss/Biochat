@@ -10,7 +10,7 @@ from __future__ import annotations
 
 import os
 import traceback
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, Optional
 
 # Standard IGHV3-23 framework template for VH-only antibody construction.
 # CDRH3 is inserted at the "..." placeholder between the conserved CAR/CAK

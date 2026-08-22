@@ -17,14 +17,11 @@ Security note:
 from __future__ import annotations
 
 import threading
-import traceback
 from typing import Any, Callable
 
 from biochat.core.errors import (
     AgentError,
     AgentInitError,
-    AgentTaskError,
-    AgentTimeoutError,
 )
 from biochat.core.logging import get_logger
 from biochat.core.settings import (
@@ -265,7 +262,7 @@ class BioAgentService:
                 if callable(shutdown_hook):
                     try:
                         shutdown_hook()
-                    except Exception as exc:  # noqa: BLE001 - best-effort teardown
+                    except Exception as exc:
                         logger.warning("Agent shutdown raised: %s", exc)
 
             self._agent = None

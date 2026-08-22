@@ -1,7 +1,11 @@
+from __future__ import annotations
+
 import base64
 import io
-import sys
-from io import StringIO
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from biochat.execution.host import HostCodeExecutor
 
 # Global list to store captured plots
 _captured_plots = []

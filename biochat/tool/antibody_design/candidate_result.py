@@ -10,10 +10,9 @@ Target-agnostic: works for any epitope/antigen/target.
 from __future__ import annotations
 
 import json
-import os
 import uuid
 from dataclasses import dataclass, field, asdict
-from datetime import datetime, timezone
+from datetime import datetime, UTC
 from typing import Any, Dict, List, Optional, Literal
 
 
@@ -35,7 +34,7 @@ Recommendation = Literal[
 
 
 def _utc_now_iso() -> str:
-    return datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
+    return datetime.now(UTC).isoformat().replace("+00:00", "Z")
 
 
 def _new_id(prefix: str = "") -> str:
@@ -83,7 +82,7 @@ class ToolRunRecord:
             try:
                 t0 = datetime.fromisoformat(self.started_at.replace("Z", "+00:00"))
                 self.runtime_seconds = round(
-                    (datetime.now(timezone.utc) - t0).total_seconds(), 3
+                    (datetime.now(UTC) - t0).total_seconds(), 3
                 )
             except Exception:
                 pass

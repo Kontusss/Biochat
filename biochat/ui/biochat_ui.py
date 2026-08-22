@@ -168,8 +168,10 @@ def create_biochat_ui(
     try:
         import gradio as gr
         from gradio import ChatMessage
-    except ImportError:
-        raise ImportError("Gradio is not installed.  pip install 'gradio>=5.0,<6.0'")
+    except ImportError as exc:
+        raise ImportError(
+            "Gradio is not installed.  pip install 'gradio>=5.0,<6.0'"
+        ) from exc
 
     from .biochat_theme import BiochatTheme
 
@@ -411,8 +413,8 @@ def create_biochat_ui(
             background_fill_secondary="#fbfcfd",
         ),
     ) as demo:
-        # Hidden state for example-prompt relay
-        example_query = gr.State("")
+        # Hidden state for example-prompt relay (wired by component id)
+        _example_query = gr.State("")
 
         # ── Verification ──────────────────────────────────────
         verification_container = gr.Group(visible=require_verification)

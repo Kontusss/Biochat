@@ -14,8 +14,8 @@ from __future__ import annotations
 
 import json
 import os
-from datetime import datetime, timezone
-from typing import Any, Dict, List, Optional
+from datetime import datetime, UTC
+from typing import Any, Dict, List
 
 
 # ═══════════════════════════════════════════════════════════════
@@ -66,7 +66,7 @@ def _write_mock_pdb(
     """Write a placeholder PDB file. Returns the file path."""
     os.makedirs(os.path.dirname(output_path), exist_ok=True)
     content = _MOCK_PDB_TEMPLATE.format(
-        timestamp=datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
+        timestamp=datetime.now(UTC).strftime("%Y-%m-%dT%H:%M:%SZ"),
         candidate_id=candidate_id,
         cdrh3_sequence=cdrh3_sequence,
         framework=framework,
@@ -309,7 +309,7 @@ def _make_manifest(output_dir, method, framework, dry_run, mock, nb2_available,
     return {
         "manifest": {
             "manifest_version": "3C-3",
-            "generated_at": datetime.now(timezone.utc).isoformat(),
+            "generated_at": datetime.now(UTC).isoformat(),
             "output_dir": os.path.abspath(output_dir),
             "method": method,
             "framework": framework,

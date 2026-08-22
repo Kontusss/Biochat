@@ -19,13 +19,11 @@ from __future__ import annotations
 
 import glob
 import os
-import re
 from collections.abc import Generator
-from typing import Any, Literal
+from typing import Any
 
-import pandas as pd
 from dotenv import load_dotenv
-from langchain_core.messages import AIMessage, BaseMessage, HumanMessage
+from langchain_core.messages import HumanMessage
 from langchain_core.prompts import ChatPromptTemplate
 from biochat.agent.agent_state import AgentState  # noqa: F401 — re-exported for external use
 from biochat.config import default_config
@@ -37,15 +35,9 @@ from biochat.model.resource_selector import ResourceSelector
 from biochat.tool.registry import ToolRegistry
 from biochat.utils import (
     check_and_download_s3_files,
-    format_execute_tags_in_content,
-    format_lists_in_text,
-    format_observation_as_terminal,
-    function_to_api_schema,
-    has_execution_results,
     parse_tool_calls_with_modules,
     pretty_print,
     read_module2api,
-    textify_api_dict,
 )
 
 if os.path.exists(".env"):

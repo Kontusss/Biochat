@@ -14,8 +14,7 @@ import math
 import os
 from collections import Counter
 from dataclasses import dataclass, field
-from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, List
 
 from biochat.tool.antibody_design.artifact_schema import TargetType, new_artifact_id, _hash_string, _utc_now_iso
 

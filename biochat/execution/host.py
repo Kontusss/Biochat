@@ -29,7 +29,7 @@ import tempfile
 import threading
 import ctypes
 
-from biochat.execution.base import LEGACY_DEFAULT_TIMEOUT_SECONDS, ExecutionResult
+from biochat.execution.base import ExecutionResult
 
 
 class HostCodeExecutor:
@@ -104,9 +104,9 @@ class HostCodeExecutor:
             def _worker() -> None:
                 sys.stdout = buffer
                 try:
-                    exec(compile(code, "<biochat-host-exec>", "exec"), namespace)  # noqa: S102
+                    exec(compile(code, "<biochat-host-exec>", "exec"), namespace)
                     done.put(("ok", ""))
-                except BaseException as exc:  # noqa: BLE001 - boundary reports, never raises
+                except BaseException as exc:
                     done.put(("error", f"{type(exc).__name__}: {exc}"))
                 finally:
                     # Only reclaim the global if we still own it — a timed-
@@ -205,7 +205,7 @@ class HostCodeExecutor:
 
     def _run_process(self, args: list[str], *, timeout: float) -> ExecutionResult:
         """Run *args* in its own process group and enforce the wall clock."""
-        proc = subprocess.Popen(  # noqa: S603 - args are tokenised above, explicit opt-in
+        proc = subprocess.Popen(
             args,
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,

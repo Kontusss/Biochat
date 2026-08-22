@@ -1,3 +1,13 @@
+# Pytest defaults: collect only the maintained test tree. Tutorial
+# example scripts are not unit tests (some launch servers / need async
+# plugins) and stay excluded from default and CI runs.
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+markers = [
+    "network: test requires internet access (deselected by default CI)",
+    "model: test requires a live LLM (deselected by default CI)",
+]
+
 [build-system]
 requires = ["setuptools>=61.0", "wheel"]
 build-backend = "setuptools.build_meta"
@@ -103,6 +113,11 @@ include = ["biochat", "biochat.*"]
 "biochat.tool.protocols" = ["**/*.txt"]
 "biochat.tool.schema_db" = ["*.pkl"]
 "biochat.tool.antibody_design.models" = ["*.pth"]
+
+[tool.ruff.lint.per-file-ignores]
+# Re-export hub: every imported name is intentionally re-exported for
+# backward compatibility (`from biochat.utils import ...` consumers).
+"biochat/utils/__init__.py" = ["F401"]
 
 [tool.ruff]
 line-length = 120

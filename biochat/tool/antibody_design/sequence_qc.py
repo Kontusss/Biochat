@@ -15,7 +15,7 @@ Target-agnostic: works for any epitope sequence.
 import math
 import re
 from collections import Counter
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional
 
 VALID_AAS = set("ACDEFGHIKLMNPQRSTVWY")
 AROMATIC_AAS = set("YFW")
@@ -84,7 +84,6 @@ def detect_identical_runs(seq: str, window: int = 4) -> List[Dict[str, Any]]:
         return results
     max_run = 1
     current_run = 1
-    max_run_aa = seq[0]
     for i in range(1, len(seq)):
         if seq[i] == seq[i - 1]:
             current_run += 1
@@ -98,7 +97,6 @@ def detect_identical_runs(seq: str, window: int = 4) -> List[Dict[str, Any]]:
                 })
             if current_run > max_run:
                 max_run = current_run
-                max_run_aa = seq[i - 1]
             current_run = 1
     if current_run >= window:
         results.append({
@@ -109,7 +107,6 @@ def detect_identical_runs(seq: str, window: int = 4) -> List[Dict[str, Any]]:
         })
     if current_run > max_run:
         max_run = current_run
-        max_run_aa = seq[-1]
     return results
 
 
@@ -178,7 +175,7 @@ def evaluate_cdrh3_sequence(
         }
 
     # ── Invalid amino acids ─────────────────────────────────────────────
-    invalid_chars = sorted(set(ch for ch in seq if ch not in VALID_AAS))
+    invalid_chars = sorted({ch for ch in seq if ch not in VALID_AAS})
     if invalid_chars:
         return {
             "status": "fail",
@@ -383,7 +380,7 @@ def evaluate_cdrh3_sequence(
     metrics["epitope_net_charge"] = None
     if target_peptide:
         target_seq = (target_peptide or "").strip().upper()
-        target_invalid = sorted(set(ch for ch in target_seq if ch not in VALID_AAS))
+        target_invalid = sorted({ch for ch in target_seq if ch not in VALID_AAS})
         if not target_invalid and target_seq:
             target_charge = _charge_from_seq(target_seq)
             metrics["epitope_net_charge"] = round(target_charge, 2)
@@ -515,7 +512,6 @@ def run_full_qc(
         developability_qc: dict
         features: dict (sequence features)
     """
-    from biochat.tool.antibody_design.developability_checks import basic_developability_report, detect_deamidation_sites
 
     seq_qc = evaluate_cdrh3_sequence(
         cdrh3,
@@ -532,8 +528,6 @@ def run_full_qc(
 
     # Compute sequence features
     seq = cdrh3.upper()
-    dev_report = basic_developability_report(cdrh3)
-    deam = detect_deamidation_sites(cdrh3)
 
     features = {
         "cdrh3_length": len(seq),

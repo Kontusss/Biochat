@@ -18,8 +18,10 @@ def launch_biochat_about(server_name: str = "127.0.0.1", share: bool = False):
     """
     try:
         import gradio as gr
-    except ImportError:
-        raise ImportError("Gradio is not installed. Install with: pip install gradio>=5.0,<6.0")
+    except ImportError as exc:
+        raise ImportError(
+            "Gradio is not installed. Install with: pip install gradio>=5.0,<6.0"
+        ) from exc
 
     from biochat.core.settings import PROJECT_VERSION, biochat_settings as _settings
     from biochat.ui.auth import validate_remote_exposure

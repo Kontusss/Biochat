@@ -9,7 +9,7 @@ prompt by ``SystemPromptBuilder`` when a ``task_type`` is specified.
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 
 
 @dataclass(frozen=True)

@@ -11,7 +11,6 @@ behind the timeout mechanism choices.
 
 from __future__ import annotations
 
-import os
 import platform
 import signal
 from concurrent.futures import ProcessPoolExecutor

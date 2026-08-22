@@ -342,7 +342,7 @@ def run_docking_jobs(
         hdock_binary/createpl_binary: Used when runtime="local".
         docker_image/hdock_host_dir/platform: Used when runtime="docker".
     """
-    import subprocess, shutil
+    import subprocess
 
     os.makedirs(output_dir, exist_ok=True)
     results_base = os.path.join(output_dir, "results")

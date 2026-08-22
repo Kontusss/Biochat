@@ -18,7 +18,10 @@ import ctypes
 import os
 import queue
 import threading
-from typing import Any, Callable
+from typing import TYPE_CHECKING, Any, Callable
+
+if TYPE_CHECKING:
+    from biochat.execution.host import HostCodeExecutor
 
 from biochat.execution import format_result
 from biochat.execution.base import LEGACY_DEFAULT_TIMEOUT_SECONDS

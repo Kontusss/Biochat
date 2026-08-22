@@ -16,7 +16,7 @@ import re
 import sys
 import time
 import traceback
-from datetime import datetime, timezone
+from datetime import datetime, UTC
 from pathlib import Path
 from typing import Any
 
@@ -27,7 +27,7 @@ if str(_PROJECT_ROOT) not in sys.path:
 
 import streamlit as st
 
-from biochat.ui.sanitize import sanitize_visible_text, render_trace_event
+from biochat.ui.sanitize import sanitize_visible_text
 
 # ═══════════════════════════════════════════════════════════════════
 # Page configuration
@@ -827,7 +827,7 @@ def render_welcome_card() -> None:
 def stream_agent_response(
     user_query: str,
     session_id: str = "default",
-    settings: "BiochatSettings | None" = None,
+    settings=None,
 ):
     """Stream agent execution with real-time incremental updates.
 
@@ -977,9 +977,9 @@ def render_assistant_card_streaming(
         body_html = answer_html
     else:
         body_html = (
-            f'<div class="biochat-thinking">'
-            f'<div class="bc-spinner"></div>'
-            f'正在处理您的请求...</div>'
+            '<div class="biochat-thinking">'
+            '<div class="bc-spinner"></div>'
+            '正在处理您的请求...</div>'
         )
 
     return (
@@ -1018,7 +1018,7 @@ def main() -> None:
     st.markdown(BIOCHAT_CSS, unsafe_allow_html=True)
 
     # ── Access gate (before any Agent initialization) ────────
-    from biochat.core.settings import BiochatSettings, PROJECT_VERSION
+    from biochat.core.settings import PROJECT_VERSION
     from biochat.core.settings import biochat_settings as _gate_cfg
     from biochat.ui.auth import verify_access_code as _verify_access_code
 
@@ -1052,7 +1052,7 @@ def main() -> None:
         st.stop()
 
     # ── Sidebar ──────────────────────────────────────────────
-    settings = render_sidebar()
+    render_sidebar()
 
     # ═══════════════════════════════════════════════════════════
     # Phase 1: Accept user input — append to messages + rerun
@@ -1068,7 +1068,7 @@ def main() -> None:
         st.session_state.messages.append({
             "role": "user",
             "content": prompt,
-            "timestamp": datetime.now(timezone.utc).isoformat(),
+            "timestamp": datetime.now(UTC).isoformat(),
         })
         st.rerun()
 
@@ -1256,7 +1256,7 @@ def main() -> None:
             "role": "assistant",
             "content": final_answer,
             "trace": trace_str,
-            "timestamp": datetime.now(timezone.utc).isoformat(),
+            "timestamp": datetime.now(UTC).isoformat(),
         })
         st.session_state.is_processing = False
         st.rerun()

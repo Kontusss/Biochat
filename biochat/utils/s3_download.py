@@ -8,7 +8,6 @@ from __future__ import annotations
 
 import os
 import tempfile
-from typing import Any
 from urllib.parse import urljoin
 
 import requests

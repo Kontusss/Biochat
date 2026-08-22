@@ -12,9 +12,6 @@ from __future__ import annotations
 
 import inspect
 import os
-import sys
-import types as _types
-from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
 import pandas as pd
@@ -85,7 +82,7 @@ def add_custom_tool(agent: "A1", api: callable) -> dict:
 
         agent.configure()
         return schema
-    except Exception as e:
+    except Exception:
         import traceback
         traceback.print_exc()
         raise

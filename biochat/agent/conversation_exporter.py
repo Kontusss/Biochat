@@ -14,10 +14,8 @@ from __future__ import annotations
 import os
 import re
 import tempfile
-from datetime import datetime
 from typing import TYPE_CHECKING, Any
 
-from biochat.utils.io_utils import load_pickle
 from biochat.utils.pdf_export import execute_with_timeout, _convert_markdown_to_pdf_in_subprocess
 from biochat.utils.text_cleanup import clean_message_content
 

@@ -36,7 +36,7 @@ def launch_legacy_gradio_ui(
             "Gradio is not installed. Please install with: pip install gradio"
         ) from None
 
-    from langchain_core.messages import AIMessage, HumanMessage
+    from langchain_core.messages import HumanMessage
 
     from biochat.core.settings import biochat_settings as _settings
     from biochat.ui.auth import (

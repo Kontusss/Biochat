@@ -239,7 +239,7 @@ def test_settings_default_has_no_hard_coded_access_code():
     import os
 
     saved = {k: os.environ.get(k) for k in ("BIOCHAT_ACCESS_CODE", "BIOMNI_ACCESS_CODE")}
-    for key, value in saved.items():
+    for key, _value in saved.items():
         os.environ.pop(key, None)
     try:
         settings = BiochatSettings()

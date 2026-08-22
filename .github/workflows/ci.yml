@@ -1,0 +1,66 @@
+# Biochat CI — quality gates on supported Python versions.
+# Default test selection excludes network- and model-dependent tests.
+
+name: ci
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+
+jobs:
+  tests:
+    name: "py${{ matrix.python-version }} · ${{ matrix.os }}"
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest]
+        python-version: ["3.11", "3.12"]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install package with dev and UI/provider extras
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -e ".[dev,streamlit,gradio,providers]"
+
+      - name: Compile check
+        run: python -m compileall -q biochat tests scripts
+
+      - name: Lint (ruff)
+        run: ruff check biochat tests scripts
+
+      - name: Unit tests (no network, no model)
+        run: pytest -q -m "not network and not model"
+
+      - name: Build wheel
+        run: python -m build --wheel
+
+      - name: Wheel content checks
+        run: pytest -q tests/test_distribution_contents.py
+
+      - name: Clean-wheel install smoke
+        run: |
+          python -m venv .smoke-venv
+          ./.smoke-venv/bin/pip install --quiet dist/biochat-*.whl
+          cd /
+          ./.smoke-venv/bin/python - <<'PY'
+          import biochat
+          from biochat.version import __version__
+          from biochat.environment.loader import load_catalog  # noqa: F401
+          from biochat.knowledge import KnowledgeRegistry  # noqa: F401
+          from biochat.llm.source_detector import detect_llm_source
+          assert detect_llm_source("deepseek-r1") == "Ollama"
+          print("clean-wheel smoke ok:", __version__)
+          PY
+
+      - name: Remove smoke environment
+        if: always()
+        run: rm -rf .smoke-venv

@@ -9,6 +9,45 @@ Before contributing, please ensure you:
 - Follow the existing code style and conventions
 - Include appropriate documentation
 
+## Development Setup
+
+```bash
+# Install with the development tooling (pytest, ruff, build, pre-commit, mcp)
+pip install -e ".[dev]"
+
+# Install pre-commit hooks
+pre-commit install
+
+# Local quality gates (same commands as CI)
+python -m compileall -q biochat tests scripts
+ruff check biochat tests scripts
+pytest -q -m "not network and not model"
+
+# Wheel build and content verification
+python -m build --wheel
+pytest -q tests/test_distribution_contents.py
+
+# Clean-wheel install smoke (fresh environment, repository root not on PYTHONPATH)
+python -m venv .smoke-venv && ./.smoke-venv/bin/pip install dist/biochat-*.whl \
+  && cd / && ../$(basename $OLDPWD)/.smoke-venv/bin/python -c "import biochat; print(biochat.__version__)"
+```
+
+### Test markers
+
+- `network` — test requires internet access; excluded from default CI.
+- `model` — test requires a live LLM; excluded from default CI.
+
+Run everything CI runs with: `pytest -q -m "not network and not model"`.
+
+### Security-sensitive changes
+
+- Generated-code execution stays **disabled by default**; anything that
+  widens execution must be gated behind `BIOCHAT_ALLOW_HOST_CODE_EXECUTION`
+  and must say plainly that host mode is not a sandbox.
+- UI binds default to `127.0.0.1`; remote binding requires access codes or
+  an explicit `BIOCHAT_ALLOW_UNAUTHENTICATED_REMOTE=true` acknowledgement.
+- Never add literal access codes or API keys anywhere in the repository.
+
 ## Types of Contributions
 
 ### 🛠️ Adding a New Tool
@@ -111,7 +150,7 @@ We welcome all bug fixes and enhancements to the existing codebase!
 ## Submission Process
 
 1. **Fork** the repository
-2. **Create a feature branch** from `main`
+2. **Create a feature branch** from `master` (the repository's default branch)
 3. **Make your changes** following the guidelines above
 4. **Test thoroughly** in your local environment
 5. **Submit a pull request** with a clear description

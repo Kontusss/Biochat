@@ -36,7 +36,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "--host",
         default=_DEFAULT_HOST,
-        help=f"Server bind address (default: %(default)s).",
+        help="Server bind address (default: %(default)s).",
     )
     parser.add_argument(
         "--port",

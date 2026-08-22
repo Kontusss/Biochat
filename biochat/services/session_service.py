@@ -12,7 +12,7 @@ FastAPI backend.
 from __future__ import annotations
 
 import uuid
-from datetime import datetime, timezone
+from datetime import datetime, UTC
 from typing import Protocol
 
 from biochat.core.logging import get_logger
@@ -60,7 +60,7 @@ class InMemorySessionStore:
     def save_session(self, session_id: str, messages: list[ChatMessage]) -> None:
         self._sessions[session_id] = list(messages)
         previous = self._meta.get(session_id)
-        now = datetime.now(timezone.utc).isoformat()
+        now = datetime.now(UTC).isoformat()
         self._meta[session_id] = SessionInfo(
             session_id=session_id,
             title=self._message_title(messages, previous.title if previous else "New Chat"),
@@ -114,7 +114,7 @@ class SessionService:
     def create_session(self, title: str = "New Chat") -> str:
         """Create a new empty session and return its ID."""
         session_id = str(uuid.uuid4())[:12]
-        now = datetime.now(timezone.utc).isoformat()
+        now = datetime.now(UTC).isoformat()
         self._store.save_session(session_id, [])
         self._store.save_session_info(SessionInfo(
             session_id=session_id,
@@ -158,7 +158,7 @@ class SessionService:
         """Save messages and update their session metadata through the store protocol."""
         previous = self._store.get_session_info(session_id)
         self._store.save_session(session_id, list(messages))
-        now = datetime.now(timezone.utc).isoformat()
+        now = datetime.now(UTC).isoformat()
         self._store.save_session_info(SessionInfo(
             session_id=session_id,
             title=self._message_title(messages, previous.title if previous else "New Chat"),

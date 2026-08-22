@@ -8,19 +8,13 @@ Target-agnostic: works for any epitope/antigen/target.
 
 from __future__ import annotations
 
-import json
 import math
-import os
 from collections import defaultdict
 from enum import Enum
 from typing import Any, Dict, List, Optional, Tuple
 
 from biochat.tool.antibody_design.artifact_schema import (
-    ArtifactStatus,
     new_score_record,
-    new_artifact_id,
-    _hash_string,
-    _utc_now_iso,
     ProvenanceManifest,
 )
 
@@ -77,7 +71,7 @@ class ScoreCalibration:
         proxy_ranks = rank([p[0] for p in pairs])
         real_ranks = rank([p[1] for p in pairs])
 
-        d2 = sum((pr - rr) ** 2 for pr, rr in zip(proxy_ranks, real_ranks))
+        d2 = sum((pr - rr) ** 2 for pr, rr in zip(proxy_ranks, real_ranks, strict=False))
         rho = 1.0 - (6.0 * d2) / (n * (n**2 - 1))
         return round(rho, 4)
 
