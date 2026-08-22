@@ -29,6 +29,8 @@ from langchain_core.messages import AIMessage, BaseMessage, HumanMessage
 from langchain_core.prompts import ChatPromptTemplate
 from biochat.agent.agent_state import AgentState  # noqa: F401 — re-exported for external use
 from biochat.config import default_config
+from biochat.core.settings import biochat_settings
+from biochat.execution import CodeExecutor, create_code_executor, format_result
 from biochat.knowledge import KnowledgeRegistry
 from biochat.llm import SourceType, get_llm
 from biochat.model.resource_selector import ResourceSelector
@@ -40,13 +42,9 @@ from biochat.utils import (
     format_observation_as_terminal,
     function_to_api_schema,
     has_execution_results,
-    inject_custom_functions_to_repl,
     parse_tool_calls_with_modules,
     pretty_print,
     read_module2api,
-    run_bash_script,
-    run_r_code,
-    run_with_timeout,
     textify_api_dict,
 )
 
@@ -160,6 +158,11 @@ class A1:
         self.log: list[str] = []
         self.system_prompt: str = ""
         self.app: Any = None
+
+        # ── Execution policy boundary ──────────────────────────
+        # Host execution is only selected when explicitly enabled via
+        # settings (BIOCHAT_ALLOW_HOST_CODE_EXECUTION / constructor).
+        self.code_executor: CodeExecutor = create_code_executor(biochat_settings)
 
         # ── Build workflow ─────────────────────────────────────
         self.configure()
@@ -625,8 +628,10 @@ class A1:
             code, self.module2api, getattr(self, "_custom_functions", {})
         )
 
-    def _inject_custom_functions_to_repl(self) -> None:
-        inject_custom_functions_to_repl(getattr(self, "_custom_functions", {}))
+    def _inject_custom_functions_to_repl(self, session_id: str = "default") -> None:
+        """Register custom callables into the executor's session namespace."""
+        for name, function in getattr(self, "_custom_functions", {}).items():
+            self.code_executor.register_function(session_id, name, function)
 
     def _clear_execution_plots(self) -> None:
         try:
@@ -635,16 +640,24 @@ class A1:
         except Exception:
             pass
 
-    def _run_python_with_timeout(self, code: str, timeout: int) -> str:
-        self._inject_custom_functions_to_repl()
-        from biochat.tool.support_tools import run_python_repl
-        return run_with_timeout(run_python_repl, [code], timeout=timeout)
+    def _run_python_with_timeout(self, code: str, timeout: int, session_id: str = "default") -> str:
+        """Deprecated wrapper — the workflow calls ``self.code_executor`` directly."""
+        self._inject_custom_functions_to_repl(session_id)
+        return format_result(
+            self.code_executor.execute_python(code, timeout=timeout, session_id=session_id)
+        )
 
-    def _run_r_with_timeout(self, code: str, timeout: int) -> str:
-        return run_with_timeout(run_r_code, [code], timeout=timeout)
+    def _run_r_with_timeout(self, code: str, timeout: int, session_id: str = "default") -> str:
+        """Deprecated wrapper — the workflow calls ``self.code_executor`` directly."""
+        return format_result(
+            self.code_executor.execute_r(code, timeout=timeout, session_id=session_id)
+        )
 
-    def _run_bash_with_timeout(self, code: str, timeout: int) -> str:
-        return run_with_timeout(run_bash_script, [code], timeout=timeout)
+    def _run_bash_with_timeout(self, code: str, timeout: int, session_id: str = "default") -> str:
+        """Deprecated wrapper — the workflow calls ``self.code_executor`` directly."""
+        return format_result(
+            self.code_executor.execute_bash(code, timeout=timeout, session_id=session_id)
+        )
 
     def _filter_know_how_for_commercial_mode(self) -> None:
         for doc_id in self.know_how_loader.exclude_non_commercial():

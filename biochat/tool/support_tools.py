@@ -3,45 +3,33 @@ import io
 import sys
 from io import StringIO
 
-# Create a persistent namespace that will be shared across all executions
-_persistent_namespace = {}
-
 # Global list to store captured plots
 _captured_plots = []
 
+# Module-level trusted host executor backing the deprecated REPL wrapper.
+# One instance => one shared "legacy" session namespace, preserving the
+# historical persistent-REPL semantics for direct legacy callers only.
+from biochat.execution import HostCodeExecutor, format_result
+from biochat.execution.host import LEGACY_DEFAULT_TIMEOUT_SECONDS
+
+_legacy_trusted_executor = HostCodeExecutor()
+
 
 def run_python_repl(command: str) -> str:
-    """Executes the provided Python command in a persistent environment and returns the output.
-    Variables defined in one execution will be available in subsequent executions.
+    """Deprecated legacy entry point for direct callers.
+
+    The agent workflow routes generated code through
+    ``A1.code_executor`` (execution-policy boundary) instead of this
+    helper.  Kept as a thin wrapper around a trusted host executor so
+    existing direct callers keep their persistent-namespace behaviour.
     """
-
-    def execute_in_repl(command: str) -> str:
-        """Helper function to execute the command in the persistent environment."""
-        old_stdout = sys.stdout
-        sys.stdout = mystdout = StringIO()
-
-        # Use the persistent namespace
-        global _persistent_namespace
-
-        try:
-            # Apply matplotlib monkey patches before execution
-            _apply_matplotlib_patches()
-
-            # Execute the command in the persistent namespace
-            exec(command, _persistent_namespace)
-            output = mystdout.getvalue()
-
-            # Capture any matplotlib plots that were generated
-            # _capture_matplotlib_plots()
-
-        except Exception as e:
-            output = f"Error: {str(e)}"
-        finally:
-            sys.stdout = old_stdout
-        return output
-
     command = command.strip("```").strip()
-    return execute_in_repl(command)
+    result = _legacy_trusted_executor.execute_python(
+        command,
+        timeout=LEGACY_DEFAULT_TIMEOUT_SECONDS,
+        session_id="legacy",
+    )
+    return format_result(result)
 
 
 def _capture_matplotlib_plots():
