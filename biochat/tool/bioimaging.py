@@ -1,5 +1,6 @@
 import logging
 import os
+from pathlib import Path
 
 import matplotlib
 import requests
@@ -12,7 +13,7 @@ import torch
 import torch.serialization
 from nnunet.inference.predict import predict_from_folder
 
-from biochat.utils.filesystem_safety import safe_extract_zip
+from biochat.utils.filesystem_safety import resolve_child_path, safe_extract_zip
 
 # Apply safe globals for torch serialization
 torch.serialization.add_safe_globals([tuple, list, dict, set, int, float, str, bytes, bytearray])
@@ -241,11 +242,13 @@ class SegmentationTool:
         results_folder = os.path.expanduser(results_folder)
 
         # Create the nnUNet directory
-        nnunet_dir = os.path.join(results_folder, "nnUNet")
-        os.makedirs(nnunet_dir, exist_ok=True)
+        nnunet_dir = Path(results_folder) / "nnUNet"
+        nnunet_dir.mkdir(parents=True, exist_ok=True)
+
+        task_dir = resolve_child_path(nnunet_dir, model_type, task_id)
+        temp_zip = resolve_child_path(nnunet_dir, f"{task_id}_temp.zip")
 
         # Check if model already exists
-        task_dir = os.path.join(nnunet_dir, model_type, task_id)
         if os.path.exists(task_dir):
             # Check if it has the expected structure
             plans_file = os.path.join(task_dir, "nnUNetTrainerV2__nnUNetPlansv2.1")
@@ -257,8 +260,6 @@ class SegmentationTool:
         download_url = f"https://zenodo.org/record/4003545/files/{task_id}.zip?download=1"
 
         # Create temporary file for download
-        temp_zip = os.path.join(nnunet_dir, f"{task_id}_temp.zip")
-
         # Download with browser headers
         if self._download_model_with_browser_headers(download_url, temp_zip):
             try:

@@ -5,7 +5,9 @@ from __future__ import annotations
 from dataclasses import dataclass
 import hashlib
 from pathlib import Path
+import shutil
 import stat
+import tempfile
 from typing import Union
 from zipfile import ZipFile, ZipInfo
 
@@ -77,24 +79,39 @@ def safe_extract_zip(
     output_root = Path(destination).resolve(strict=False)
     with ZipFile(archive, "r") as zip_file:
         validated = _validate_archive_members(zip_file.infolist(), output_root, limits)
-        output_root.mkdir(parents=True, exist_ok=True)
-        extracted: list[Path] = []
-        written_total = 0
-        for info, target in validated:
-            if info.is_dir():
-                target.mkdir(parents=True, exist_ok=True)
-                continue
+        output_root.parent.mkdir(parents=True, exist_ok=True)
+        staging_root = Path(tempfile.mkdtemp(prefix=".biochat-zip-", dir=output_root.parent))
+        try:
+            written_total = 0
+            for info, target in validated:
+                staged_target = resolve_child_path(staging_root, target.relative_to(output_root))
+                if info.is_dir():
+                    staged_target.mkdir(parents=True, exist_ok=True)
+                    continue
 
-            target.parent.mkdir(parents=True, exist_ok=True)
-            written = 0
-            with zip_file.open(info, "r") as source, target.open("wb") as output:
-                for chunk in iter(lambda: source.read(1024 * 1024), b""):
-                    written += len(chunk)
-                    written_total += len(chunk)
-                    if written > limits.max_member_bytes:
-                        raise ValueError(f"Archive member exceeds size limit: {info.filename}")
-                    if written_total > limits.max_total_bytes:
-                        raise ValueError("Archive total uncompressed size exceeds limit")
-                    output.write(chunk)
-            extracted.append(target)
-    return extracted
+                staged_target.parent.mkdir(parents=True, exist_ok=True)
+                written = 0
+                with zip_file.open(info, "r") as source, staged_target.open("wb") as output:
+                    for chunk in iter(lambda: source.read(1024 * 1024), b""):
+                        written += len(chunk)
+                        written_total += len(chunk)
+                        if written > limits.max_member_bytes:
+                            raise ValueError(f"Archive member exceeds size limit: {info.filename}")
+                        if written_total > limits.max_total_bytes:
+                            raise ValueError("Archive total uncompressed size exceeds limit")
+                        output.write(chunk)
+
+            output_root.mkdir(parents=True, exist_ok=True)
+            extracted: list[Path] = []
+            for info, target in validated:
+                staged_target = resolve_child_path(staging_root, target.relative_to(output_root))
+                if info.is_dir():
+                    target.mkdir(parents=True, exist_ok=True)
+                    continue
+
+                target.parent.mkdir(parents=True, exist_ok=True)
+                staged_target.replace(target)
+                extracted.append(target)
+            return extracted
+        finally:
+            shutil.rmtree(staging_root, ignore_errors=True)

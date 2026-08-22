@@ -151,13 +151,21 @@ def sync_data_lake_files(
         except ValueError:
             results[filename] = False
             continue
+        expected_sha256 = (checksums or {}).get(filename)
         if os.path.exists(local):
-            results[filename] = True
-            continue
+            if not expected_sha256:
+                results[filename] = True
+                continue
+            try:
+                verify_sha256(local, expected_sha256)
+                results[filename] = True
+                continue
+            except ValueError:
+                pass
 
         s3_url = urljoin(s3_bucket_url + "/" + folder + "/", filename)
         os.makedirs(local.parent, exist_ok=True)
-        results[filename] = _download_progress(s3_url, str(local), filename, (checksums or {}).get(filename))
+        results[filename] = _download_progress(s3_url, str(local), filename, expected_sha256)
 
     return results
 
