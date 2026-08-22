@@ -25,6 +25,22 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 
+# Process-wide checkpoint store: thread ids are validated session ids, so
+# a single saver keeps per-session histories consistent across every
+# compiled agent (default and model-override cached alike).
+_SHARED_CHECKPOINT_SAVER = None
+
+
+def _get_shared_checkpoint_saver():
+    """Lazily construct the shared LangGraph memory checkpointer."""
+    global _SHARED_CHECKPOINT_SAVER
+    if _SHARED_CHECKPOINT_SAVER is None:
+        from langgraph.checkpoint.memory import MemorySaver
+
+        _SHARED_CHECKPOINT_SAVER = MemorySaver()
+    return _SHARED_CHECKPOINT_SAVER
+
+
 # ═══════════════════════════════════════════════════════════════
 # Node factory: generation (LLM → <execute> or <solution>)
 # ═══════════════════════════════════════════════════════════════
@@ -263,9 +279,11 @@ def build_agent_workflow(
     workflow.add_edge("execute", "generate")
     workflow.add_edge(START, "generate")
 
-    from langgraph.checkpoint.memory import MemorySaver
     compiled = workflow.compile()
-    compiled.checkpointer = MemorySaver()
+    # One process-wide saver keyed by thread id (= session id): every agent
+    # variant (default or model-override cached) serves the same stored
+    # history for a session, while distinct sessions remain isolated.
+    compiled.checkpointer = _get_shared_checkpoint_saver()
     return compiled
 
 

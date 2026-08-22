@@ -190,6 +190,49 @@ def test_request_timeout_override_applied_then_restored():
     assert service._agent.timeout_seconds == 600
 
 
+def test_timeout_override_removed_after_request_for_agents_without_one():
+    """An override must not leak onto agents that never had a timeout."""
+    service = make_recording_service()  # RecordingServiceAgent has NO timeout_seconds
+
+    def recording_go(prompt, *, session_id="default"):
+        assert getattr(service._agent, "timeout_seconds", None) == 120
+        return [], "<solution>ok</solution>"
+
+    service._agent.go = recording_go
+    service.run_task(ChatRequest(message="q", session_id="t", timeout_seconds=120))
+    assert not hasattr(service._agent, "timeout_seconds"), (
+        "timeout override leaked onto an agent without a configured timeout"
+    )
+
+
+def test_all_compiled_workflows_share_one_checkpoint_saver():
+    """Model-override and default agents serve one history per session."""
+    from biochat.agent import workflow as workflow_module
+
+    class Bare:
+        pass
+
+    app_one = workflow_module.build_agent_workflow(Bare())
+    app_two = workflow_module.build_agent_workflow(Bare())
+    saver = workflow_module._get_shared_checkpoint_saver()
+    assert app_one.checkpointer is saver
+    assert app_two.checkpointer is saver
+
+
+def test_cache_hit_requires_identical_source_and_base_url_components():
+    built: list[tuple] = []
+    service = BioAgentService(BiochatSettings())
+
+    def spy_factory(settings):
+        built.append((settings.llm_model, settings.llm_source, settings.base_url))
+        return RecordingServiceAgent()
+
+    service._agent_factory = spy_factory
+    service.run_task(ChatRequest(message="a", session_id="s", llm_model="m"))
+    service.run_task(ChatRequest(message="b", session_id="s", llm_model="m"))
+    assert len(built) == 1
+
+
 def test_timeout_override_clamped_to_settings_maximum(monkeypatch):
     from biochat.services import agent_service as agent_service_module
 

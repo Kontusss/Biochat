@@ -346,11 +346,12 @@ class BioAgentService:
         _report(AgentStatus.PLANNING, "正在分析问题并制定计划...")
         logger.info("Starting streaming task: %s", request.message[:100])
 
-        # Resolve the serving agent (model override → cached agent) and
-        # the request-scoped timeout before entering the serialized region.
+        # Resolve the serving agent (model override → cached agent) before
+        # entering the serialized region.  The request-scoped timeout is
+        # snapshotted inside the lock so a concurrent request on the same
+        # cached agent can never capture an in-flight override.
         agent = self._resolve_agent(request)
         bounded_timeout = _bounded_timeout(getattr(request, "timeout_seconds", None))
-        previous_timeout = getattr(agent, "timeout_seconds", None)
 
         # Track state across streaming steps
         accumulated_answer: str = ""
@@ -364,8 +365,12 @@ class BioAgentService:
         # behind the re-entrant task lock; restore any request-scoped
         # timeout override when the request finishes.
         self._task_lock.acquire()
+        override_applied = False
         if bounded_timeout is not None:
+            had_previous_timeout = hasattr(agent, "timeout_seconds")
+            previous_timeout = getattr(agent, "timeout_seconds", None)
             agent.timeout_seconds = bounded_timeout
+            override_applied = True
         try:
             # ── Phase 1: Tool retrieval (if enabled) ──────────────
             if agent.use_tool_retriever:
@@ -591,8 +596,13 @@ class BioAgentService:
                     "language": "",
                 }
         finally:
-            if bounded_timeout is not None and previous_timeout is not None:
-                agent.timeout_seconds = previous_timeout
+            if override_applied:
+                # Symmetric restore: delete the attribute when the agent
+                # never carried a configured timeout of its own.
+                if had_previous_timeout:
+                    agent.timeout_seconds = previous_timeout
+                else:
+                    delattr(agent, "timeout_seconds")
             self._task_lock.release()
 
         # Store trace for later retrieval
@@ -640,22 +650,28 @@ class BioAgentService:
         # Resolve the serving agent (model override → cached agent).
         agent = self._resolve_agent(request)
         bounded_timeout = _bounded_timeout(getattr(request, "timeout_seconds", None))
-        previous_timeout = getattr(agent, "timeout_seconds", None)
 
         try:
             # ── Run the agent (serialized; request-scoped timeout) ──
             _report(AgentStatus.RUNNING_CODE, "Agent is working on your task...")
 
             with self._task_lock:
+                override_applied = False
                 if bounded_timeout is not None:
+                    had_previous_timeout = hasattr(agent, "timeout_seconds")
+                    previous_timeout = getattr(agent, "timeout_seconds", None)
                     agent.timeout_seconds = bounded_timeout
+                    override_applied = True
                 try:
                     log_entries, final_output = agent.go(
                         request.message, session_id=request.session_id
                     )
                 finally:
-                    if bounded_timeout is not None and previous_timeout is not None:
-                        agent.timeout_seconds = previous_timeout
+                    if override_applied:
+                        if had_previous_timeout:
+                            agent.timeout_seconds = previous_timeout
+                        else:
+                            delattr(agent, "timeout_seconds")
 
             # ── Extract structured data from raw output ───────
             response = self._parse_agent_output(
