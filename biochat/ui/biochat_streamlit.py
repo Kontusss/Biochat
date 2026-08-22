@@ -716,11 +716,6 @@ def render_sidebar() -> dict[str, Any]:
 
     # ── History sessions ────────────────────────────────────
     st.sidebar.caption("📋 最近会话")
-    if "sessions" not in st.session_state:
-        st.session_state.sessions = {}
-    if "active_session_id" not in st.session_state:
-        st.session_state.active_session_id = "default"
-
     # Auto-track current conversation as a full-message session
     view = _session_view()
     msgs = view["messages"]
@@ -829,7 +824,11 @@ def render_welcome_card() -> None:
 # Agent interaction (streaming via service layer)
 # ═══════════════════════════════════════════════════════════════════
 
-def stream_agent_response(user_query: str, session_id: str = "default"):
+def stream_agent_response(
+    user_query: str,
+    session_id: str = "default",
+    settings: "BiochatSettings | None" = None,
+):
     """Stream agent execution with real-time incremental updates.
 
     Uses ``BioAgentService.run_task_stream()`` which calls
@@ -843,7 +842,8 @@ def stream_agent_response(user_query: str, session_id: str = "default"):
     from biochat.services.agent_service import get_agent_service
     from biochat.schemas.chat import ChatRequest
 
-    svc = get_agent_service()
+    # Explicitly applied settings (Apply button) win over the singleton.
+    svc = get_agent_service(settings)
 
     try:
         svc.ensure_initialized()
@@ -1018,9 +1018,24 @@ def main() -> None:
     st.markdown(BIOCHAT_CSS, unsafe_allow_html=True)
 
     # ── Access gate (before any Agent initialization) ────────
-    from biochat.core.settings import PROJECT_VERSION
+    from biochat.core.settings import BiochatSettings, PROJECT_VERSION
     from biochat.core.settings import biochat_settings as _gate_cfg
     from biochat.ui.auth import verify_access_code as _verify_access_code
+
+    # Reject unsafe non-loopback binds for direct `streamlit run` usage.
+    bound_host = st.get_option("server.address") or "0.0.0.0"
+    try:
+        from biochat.ui.auth import validate_remote_exposure as _validate_exposure
+
+        _validate_exposure(bound_host, _gate_cfg)
+    except Exception as exc:
+        st.error(f"🚫 拒绝启动: {exc}")
+        st.info(
+            "请使用 `python -m biochat.ui.cli --host 127.0.0.1` 本地运行，"
+            "或配置 BIOCHAT_ACCESS_CODE / 显式设置 "
+            "BIOCHAT_ALLOW_UNAUTHENTICATED_REMOTE=true。"
+        )
+        return
 
     if _gate_cfg.require_verification and not st.session_state.get("bc_authenticated"):
         st.markdown('<div class="biochat-main">', unsafe_allow_html=True)
@@ -1077,6 +1092,7 @@ def main() -> None:
     from biochat.core.settings import biochat_settings as _cfg
 
     # Dynamic status: show "就绪" when idle, "处理中" when busy
+    effective_cfg = st.session_state.get("applied_settings") or _cfg
     status_text = "处理中..." if st.session_state.is_processing else "就绪"
     status_dot_class = "bc-status-dot" if not st.session_state.is_processing else "bc-status-dot-processing"
 
@@ -1084,7 +1100,7 @@ def main() -> None:
         '<div class="biochat-header">'
         '<span class="bc-title">🧬 Biochat</span>'
         f'<span class="bc-version">v{PROJECT_VERSION}</span>'
-        f'<span class="bc-model">{_cfg.llm_model}</span>'
+        f'<span class="bc-model">{effective_cfg.llm_model}</span>'
         f'<span class="bc-status">'
         f'<span class="{status_dot_class}"></span> {status_text}'
         '</span>'
@@ -1144,6 +1160,7 @@ def main() -> None:
         for update in stream_agent_response(
             streaming_prompt,
             session_id=st.session_state.get("active_session_id", "default"),
+            settings=st.session_state.get("applied_settings"),
         ):
             final_status = update["status"]
             # P0: sanitize trace lines — whitelist status events only

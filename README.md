@@ -292,7 +292,7 @@ CUSTOM_MODEL_API_KEY=your_custom_api_key_here
 # BIOCHAT_DATA_PATH=./data             # 数据湖位置（~11GB）
 
 # ── UI 访问码（可选） ───────────────────────────────────────
-# BIOCHAT_ACCESS_CODE=Biochat2025      # 留空则不校验
+# BIOCHAT_ACCESS_CODE=<set-your-own-secret-code>      # 留空则不校验
 ```
 
 ### 环境变量一览

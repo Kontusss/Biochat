@@ -176,8 +176,16 @@ def create_biochat_ui(
     SUPPORTED_EXTENSIONS = (".png", ".jpg", ".jpeg", ".gif", ".bmp", ".webp", ".pdf")
     agent.main_history_copy = []
     from biochat.core.settings import biochat_settings as _settings
-    from biochat.ui.auth import verify_access_code as _verify_access_code
+    from biochat.ui.auth import (
+        effective_require_verification,
+        verify_access_code as _verify_access_code,
+    )
     available_access_codes = list(_settings.access_codes)
+    # Configured codes imply verification is wanted; callers may not
+    # remember to pass require_verification explicitly.
+    require_verification = effective_require_verification(
+        require_verification, _settings
+    )
 
     # ── Helper: footer status bar ─────────────────────────────
 
@@ -424,7 +432,7 @@ def create_biochat_ui(
             gr.HTML('<div class="biochat-shell">')
 
             # Header
-            gr.HTML(_HEADER_HTML)
+            gr.HTML(_header_html())
 
             # Main layout row
             gr.HTML('<div class="biochat-main">')

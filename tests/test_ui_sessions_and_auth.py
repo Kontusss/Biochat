@@ -142,7 +142,8 @@ def test_loopback_without_codes_is_allowed():
     from biochat.ui.auth import validate_remote_exposure
 
     settings = BiochatSettings(access_codes=[], allow_unauthenticated_remote=False)
-    for host in ("127.0.0.1", "localhost", "::1"):
+    for host in ("127.0.0.1", "localhost", "::1", "[::1]", "127.9.9.9",
+                 "0:0:0:0:0:0:0:1", "LocalHost"):
         assert validate_remote_exposure(host, settings) is None
 
 
@@ -168,13 +169,70 @@ def test_launcher_defaults_are_loopback_only():
 
     from biochat.agent.a1 import A1
     from biochat.agent import ui_launcher
+    from biochat.ui import biochat_about, biochat_ui, gradio_legacy
 
-    for func in (A1.launch_gradio_demo, A1.launch_biochat_ui):
+    launchers = [
+        A1.launch_gradio_demo,
+        A1.launch_biochat_ui,
+        ui_launcher.launch_biochat_ui_from_agent,
+        biochat_ui.launch_biochat_ui,
+        gradio_legacy.launch_legacy_gradio_ui,
+        biochat_about.launch_biochat_about,
+    ]
+    for func in launchers:
         sig = inspect.signature(func)
-        assert sig.parameters["server_name"].default == "127.0.0.1"
+        assert sig.parameters["server_name"].default == "127.0.0.1", (
+            f"{func.__qualname__} does not default to loopback"
+        )
 
-    launcher_sig = inspect.signature(ui_launcher.launch_biochat_ui_from_agent)
-    assert launcher_sig.parameters["server_name"].default == "127.0.0.1"
+
+def test_effective_require_verification_follows_configured_codes():
+    from biochat.ui.auth import effective_require_verification
+
+    with_codes = BiochatSettings(access_codes=["k"])
+    without_codes = BiochatSettings(access_codes=[])
+    assert effective_require_verification(False, with_codes) is True
+    assert effective_require_verification(True, without_codes) is True
+    assert effective_require_verification(False, without_codes) is False
+
+
+def test_chat_stream_forwards_session_and_applied_settings(monkeypatch):
+    """The UI chat path must pass applied settings and the session id."""
+    from biochat.ui import biochat_streamlit as streamlit_module
+
+    captured: dict = {}
+
+    class _StubService:
+        def ensure_initialized(self):
+            return None
+
+        def run_task_stream(self, request, **kwargs):
+            captured["request"] = request
+            yield {
+                "status": "completed",
+                "content": "ok",
+                "answer_so_far": "ok",
+                "trace_line": "",
+                "language": "",
+            }
+
+    def fake_get_agent_service(settings=None):
+        captured["settings"] = settings
+        return _StubService()
+
+    monkeypatch.setattr(
+        "biochat.services.agent_service.get_agent_service", fake_get_agent_service
+    )
+
+    sentinel_settings = object()
+    events = list(
+        streamlit_module.stream_agent_response(
+            "question", session_id="ui-session-7", settings=sentinel_settings
+        )
+    )
+    assert any(e.get("status") == "completed" for e in events)
+    assert captured["settings"] is sentinel_settings
+    assert captured["request"].session_id == "ui-session-7"
 
 
 def test_settings_default_has_no_hard_coded_access_code():

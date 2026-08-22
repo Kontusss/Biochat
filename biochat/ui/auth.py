@@ -10,11 +10,20 @@ the risk via ``BIOCHAT_ALLOW_UNAUTHENTICATED_REMOTE=true``.
 from __future__ import annotations
 
 import hmac
+import ipaddress
 
 from biochat.core.errors import ConfigError
 
-# Hosts considered loopback for exposure purposes.
-_LOOPBACK_HOSTS = frozenset({"127.0.0.1", "localhost", "::1"})
+
+def is_loopback_host(host: str | None) -> bool:
+    """True when *host* binds only the local machine."""
+    candidate = (host or "").strip().lower().strip("[]")
+    if candidate in ("localhost", "") or candidate.startswith("localhost."):
+        return True
+    try:
+        return ipaddress.ip_address(candidate).is_loopback
+    except ValueError:
+        return False
 
 
 def verify_access_code(candidate: object, configured_codes: list[str] | None) -> bool:
@@ -34,9 +43,9 @@ def verify_access_code(candidate: object, configured_codes: list[str] | None) ->
     return False
 
 
-def is_loopback_host(host: str | None) -> bool:
-    """True when *host* binds only the local machine."""
-    return (host or "").strip().lower() in _LOOPBACK_HOSTS
+def effective_require_verification(requested: bool, settings) -> bool:
+    """Verification is on when requested OR any access code is configured."""
+    return bool(requested or getattr(settings, "access_codes", None))
 
 
 def validate_remote_exposure(host: str | None, settings) -> None:

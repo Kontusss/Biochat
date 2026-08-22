@@ -39,12 +39,19 @@ def launch_legacy_gradio_ui(
     from langchain_core.messages import AIMessage, HumanMessage
 
     from biochat.core.settings import biochat_settings as _settings
-    from biochat.ui.auth import validate_remote_exposure, verify_access_code as _verify_code
+    from biochat.ui.auth import (
+        effective_require_verification,
+        validate_remote_exposure,
+        verify_access_code as _verify_code,
+    )
 
     # Reject unsafe non-loopback binds before building the UI.
     validate_remote_exposure(server_name, _settings)
 
     available_access_codes = list(_settings.access_codes)
+    require_verification = effective_require_verification(
+        require_verification, _settings
+    )
     agent.main_history_copy: list[dict] = []
 
     def _verify(code: str):
