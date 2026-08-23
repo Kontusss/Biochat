@@ -17,7 +17,7 @@ from __future__ import annotations
 import logging
 import os
 import sys
-from datetime import datetime, timezone
+from datetime import datetime, UTC
 from typing import ClassVar
 
 
@@ -39,7 +39,7 @@ class ConsoleFormatter(logging.Formatter):
 
     def format(self, record: logging.LogRecord) -> str:
         colour = self._COLORS.get(record.levelno, "")
-        timestamp = datetime.now(timezone.utc).strftime("%H:%M:%S")
+        timestamp = datetime.now(UTC).strftime("%H:%M:%S")
         prefix = f"{colour}[{timestamp}][{record.levelname}]{self._RESET}"
         name = f"\033[90m[{record.name}]\033[0m"
         return f"{prefix} {name} {record.getMessage()}"
@@ -52,7 +52,7 @@ class JsonFormatter(logging.Formatter):
         import json
 
         payload = {
-            "timestamp": datetime.now(timezone.utc).isoformat(),
+            "timestamp": datetime.now(UTC).isoformat(),
             "level": record.levelname,
             "logger": record.name,
             "message": record.getMessage(),

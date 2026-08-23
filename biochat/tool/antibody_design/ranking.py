@@ -11,11 +11,10 @@ Key principles:
 from __future__ import annotations
 
 import math
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Tuple
 
 from candidate_result import (
     CandidateResult, Recommendation,
-    build_candidate_id,
 )
 
 # Extended recommendation type that includes the new seed-level category
@@ -404,8 +403,8 @@ def _build_explanation(candidate: CandidateResult) -> str:
     # Note if raw score differs from adjusted rank
     if candidate.sequence_qc.penalty > 0:
         parts.append(
-            f"(note: raw developability may not be highest, but this candidate "
-            f"has the best penalty-adjusted priority in current screening tier)"
+            "(note: raw developability may not be highest, but this candidate "
+            "has the best penalty-adjusted priority in current screening tier)"
         )
     return " | ".join(parts)
 

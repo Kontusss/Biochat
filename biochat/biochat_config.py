@@ -4,15 +4,39 @@ Biochat Project Configuration
 Biochat-specific configuration constants and metadata.
 This module does NOT modify Biochat core configuration — it adds
 Biochat's project-level settings on top.
+
+Project identity constants are canonical in ``biochat.core.settings``
+(the version ultimately comes from ``biochat.version.__version__``);
+they are re-exported here for backward compatibility instead of being
+redefined.
 """
 
+from biochat.core.settings import (
+    PROJECT_DESCRIPTION,
+    PROJECT_ENGINE,
+    PROJECT_ENGINE_VERSION,
+    PROJECT_LICENSE,
+    PROJECT_NAME,
+    PROJECT_VERSION,
+)
+
 # ── Project Identity ───────────────────────────────────────
-PROJECT_NAME = "Biochat"
-PROJECT_VERSION = "2.0.0"
-PROJECT_DESCRIPTION = "A General-Purpose Biomedical AI Agent"
-PROJECT_ENGINE = "Biochat"
-PROJECT_ENGINE_VERSION = "0.0.8"
-PROJECT_LICENSE = "Apache-2.0"
+# Re-exported canonical constants (see module docstring): PROJECT_NAME,
+# PROJECT_VERSION, PROJECT_DESCRIPTION, PROJECT_ENGINE,
+# PROJECT_ENGINE_VERSION, PROJECT_LICENSE.
+
+__all__ = [
+    "PROJECT_NAME",
+    "PROJECT_VERSION",
+    "PROJECT_DESCRIPTION",
+    "PROJECT_ENGINE",
+    "PROJECT_ENGINE_VERSION",
+    "PROJECT_LICENSE",
+    "THEME",
+    "CAPABILITIES",
+    "SAFETY_POLICY",
+    "QUICK_ACTIONS",
+]
 
 # ── UI Theme ───────────────────────────────────────────────
 # ProtChat-inspired design tokens

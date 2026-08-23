@@ -9,7 +9,7 @@ content that does not modify core Biochat functionality.
 from __future__ import annotations
 
 
-def launch_biochat_about(server_name: str = "0.0.0.0", share: bool = False):
+def launch_biochat_about(server_name: str = "127.0.0.1", share: bool = False):
     """Launch the Biochat About & Landing page.
 
     This standalone page provides project information, capability
@@ -18,10 +18,17 @@ def launch_biochat_about(server_name: str = "0.0.0.0", share: bool = False):
     """
     try:
         import gradio as gr
-    except ImportError:
-        raise ImportError("Gradio is not installed. Install with: pip install gradio>=5.0,<6.0")
+    except ImportError as exc:
+        raise ImportError(
+            "Gradio is not installed. Install with: pip install gradio>=5.0,<6.0"
+        ) from exc
 
+    from biochat.core.settings import PROJECT_VERSION, biochat_settings as _settings
+    from biochat.ui.auth import validate_remote_exposure
     from biochat.ui.biochat_theme import BiochatTheme
+
+    # Reject unsafe non-loopback binds before building the page.
+    validate_remote_exposure(server_name, _settings)
 
     with gr.Blocks(
         css=BiochatTheme.CUSTOM_CSS,
@@ -34,10 +41,10 @@ def launch_biochat_about(server_name: str = "0.0.0.0", share: bool = False):
             block_radius="12px",
         ),
     ) as demo:
-        gr.HTML("""
+        gr.HTML(f"""
         <div class="biochat-header">
             <span class="logo">🧬 Biochat</span>
-            <span class="version-badge">v2.0</span>
+            <span class="version-badge">v{PROJECT_VERSION}</span>
             <span class="engine-badge">Biochat Engine</span>
         </div>
         """)

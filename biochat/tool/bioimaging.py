@@ -1,6 +1,6 @@
 import logging
 import os
-import zipfile
+from pathlib import Path
 
 import matplotlib
 import requests
@@ -13,6 +13,8 @@ import torch
 import torch.serialization
 from nnunet.inference.predict import predict_from_folder
 
+from biochat.utils.filesystem_safety import resolve_child_path, safe_extract_zip
+
 # Apply safe globals for torch serialization
 torch.serialization.add_safe_globals([tuple, list, dict, set, int, float, str, bytes, bytearray])
 torch.serialization.add_safe_globals([complex, slice, range])
@@ -20,6 +22,7 @@ torch.serialization.add_safe_globals([np.core.multiarray.scalar])
 
 # Configure logging
 logger = logging.getLogger(__name__)
+DEFAULT_MAX_MODEL_DOWNLOAD_BYTES = 5 * 1024**3
 
 
 # ============================================================================
@@ -189,7 +192,9 @@ class SegmentationTool:
         print(f"  nnUNet_raw_data_base: {os.environ['nnUNet_raw_data_base']}")
         print(f"  nnUNet_preprocessed: {os.environ['nnUNet_preprocessed']}")
 
-    def _download_model_with_browser_headers(self, url, output_path):
+    def _download_model_with_browser_headers(
+        self, url, output_path, max_download_bytes=DEFAULT_MAX_MODEL_DOWNLOAD_BYTES
+    ):
         """
         Download model with browser-like headers to bypass Zenodo's anti-bot protection
         """
@@ -205,13 +210,20 @@ class SegmentationTool:
         logger.info(f"Downloading model from: {url}")
 
         try:
-            response = requests.get(url, headers=headers, stream=True, timeout=300)
-            response.raise_for_status()
+            with requests.get(url, headers=headers, stream=True, timeout=(10, 120)) as response:
+                response.raise_for_status()
+                content_length = int(response.headers.get("content-length", 0))
+                if content_length > max_download_bytes:
+                    raise ValueError("Download exceeds configured byte limit")
 
-            with open(output_path, "wb") as f:
-                for chunk in response.iter_content(chunk_size=8192):
-                    if chunk:
-                        f.write(chunk)
+                with open(output_path, "wb") as f:
+                    downloaded = 0
+                    for chunk in response.iter_content(chunk_size=8192):
+                        if chunk:
+                            downloaded += len(chunk)
+                            if downloaded > max_download_bytes:
+                                raise ValueError("Download exceeds configured byte limit")
+                            f.write(chunk)
 
             logger.info(f"Download completed: {output_path}")
             return True
@@ -230,11 +242,13 @@ class SegmentationTool:
         results_folder = os.path.expanduser(results_folder)
 
         # Create the nnUNet directory
-        nnunet_dir = os.path.join(results_folder, "nnUNet")
-        os.makedirs(nnunet_dir, exist_ok=True)
+        nnunet_dir = Path(results_folder) / "nnUNet"
+        nnunet_dir.mkdir(parents=True, exist_ok=True)
+
+        task_dir = resolve_child_path(nnunet_dir, model_type, task_id)
+        temp_zip = resolve_child_path(nnunet_dir, f"{task_id}_temp.zip")
 
         # Check if model already exists
-        task_dir = os.path.join(nnunet_dir, model_type, task_id)
         if os.path.exists(task_dir):
             # Check if it has the expected structure
             plans_file = os.path.join(task_dir, "nnUNetTrainerV2__nnUNetPlansv2.1")
@@ -246,17 +260,11 @@ class SegmentationTool:
         download_url = f"https://zenodo.org/record/4003545/files/{task_id}.zip?download=1"
 
         # Create temporary file for download
-        temp_zip = os.path.join(nnunet_dir, f"{task_id}_temp.zip")
-
         # Download with browser headers
         if self._download_model_with_browser_headers(download_url, temp_zip):
             try:
                 logger.info(f"Extracting {temp_zip} to {nnunet_dir}")
-                with zipfile.ZipFile(temp_zip, "r") as zip_ref:
-                    zip_ref.extractall(nnunet_dir)
-
-                # Remove temporary zip file
-                os.remove(temp_zip)
+                safe_extract_zip(temp_zip, nnunet_dir)
 
                 # Verify extraction worked
                 if os.path.exists(task_dir):
@@ -269,9 +277,10 @@ class SegmentationTool:
 
             except Exception as e:
                 logger.error(f"Extraction failed: {e}")
+                return False
+            finally:
                 if os.path.exists(temp_zip):
                     os.remove(temp_zip)
-                return False
         else:
             return False
 

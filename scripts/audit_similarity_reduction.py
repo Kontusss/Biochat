@@ -37,7 +37,7 @@ PROJECT_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(PROJECT_ROOT / "scripts"))
 sys.path.insert(0, str(PROJECT_ROOT))
 
-from audit_import_usage import (  # noqa: E402
+from audit_import_usage import (
     EXCLUDE_DIRS,
     classify_importer,
     module_name,

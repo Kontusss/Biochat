@@ -7,6 +7,10 @@ Maintains full backward compatibility with existing code.
 
 import os
 from dataclasses import dataclass
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from biochat.core.settings import BiochatSettings
 
 # Load .env file early so config values are available even when
 # biochat.agent (which also calls load_dotenv) hasn't been imported yet.
@@ -112,6 +116,31 @@ class BiochatConfig:
             "source": self.source,
         }
 
+    def to_settings(self) -> "BiochatSettings":
+        """Convert this legacy config into canonical ``BiochatSettings``.
+
+        This is the single legacy-to-canonical conversion path: bridging
+        code must delegate through it instead of re-mapping individual
+        fields.  ``BiochatConfig`` stays mutable for backward
+        compatibility; the returned settings object is the canonical
+        representation of the current field values (an unrecognized
+        ``source`` is normalized to ``None`` by the canonical model).
+        """
+        from biochat.core.settings import BiochatSettings
+
+        return BiochatSettings(
+            data_path=self.path,
+            timeout_seconds=self.timeout_seconds,
+            use_tool_retriever=self.use_tool_retriever,
+            tool_profile=self.tool_profile,
+            commercial_mode=self.commercial_mode,
+            llm_model=self.llm,
+            temperature=self.temperature,
+            base_url=self.base_url,
+            api_key=self.api_key,
+            llm_source=self.source,
+        )
+
 
 # Global default config instance (optional, for convenience)
 default_config = BiochatConfig()
@@ -128,17 +157,25 @@ default_config = BiochatConfig()
 #
 
 def _sync_legacy_to_new() -> None:
-    """Copy legacy default_config values into the new biochat_settings."""
+    """Copy legacy default_config values into the new biochat_settings.
+
+    Delegates the field mapping to ``BiochatConfig.to_settings()`` so the
+    conversion logic exists in exactly one place.
+    """
     try:
         from biochat.core.settings import biochat_settings as _new
 
-        _new.llm_model = default_config.llm
-        _new.llm_source = default_config.source
-        _new.data_path = default_config.path
-        _new.timeout_seconds = default_config.timeout_seconds
-        _new.use_tool_retriever = default_config.use_tool_retriever
-        _new.commercial_mode = default_config.commercial_mode
-        _new.base_url = default_config.base_url
-        _new.api_key = default_config.api_key
+        converted = default_config.to_settings()
+        for field in (
+            "llm_model",
+            "llm_source",
+            "data_path",
+            "timeout_seconds",
+            "use_tool_retriever",
+            "commercial_mode",
+            "base_url",
+            "api_key",
+        ):
+            setattr(_new, field, getattr(converted, field))
     except Exception:
         pass  # Best-effort; new settings module may not be available

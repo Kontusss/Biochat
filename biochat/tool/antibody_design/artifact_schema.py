@@ -13,9 +13,8 @@ import hashlib
 import json
 import os
 import uuid
-from datetime import datetime, timezone
+from datetime import datetime, UTC
 from enum import Enum
-from pathlib import Path
 from typing import Any, Dict, List, Optional
 
 
@@ -52,7 +51,7 @@ class TargetType(str, Enum):
 
 # ── Core artifact record ───────────────────────────────────────────────────
 def _utc_now_iso() -> str:
-    return datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
+    return datetime.now(UTC).isoformat().replace("+00:00", "Z")
 
 
 def _hash_string(content: str) -> str:

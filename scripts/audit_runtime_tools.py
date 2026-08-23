@@ -90,7 +90,7 @@ def audit() -> tuple[list[dict], dict]:
             if "__pycache__" in py_file.parts:
                 continue
             source = py_file.read_text(errors="ignore")
-            for module_key, tools in module2api.items():
+            for _module_key, tools in module2api.items():
                 for tool in tools:
                     name = tool["name"]
                     if re.search(rf"\b{re.escape(name)}\b", source):

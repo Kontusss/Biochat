@@ -156,7 +156,7 @@ def _normalise_selected_resources(agent: "A1", selected: dict) -> dict:
 def _print_retrieval_summary(resources: dict) -> None:
     """Log a human-readable retrieval summary."""
     logger.info("Resource retrieval complete — "
-                 f"tools=%d, data=%d, libs=%d, know_how=%d",
+                 "tools=%d, data=%d, libs=%d, know_how=%d",
                  len(resources.get("tools", [])),
                  len(resources.get("data_lake", [])),
                  len(resources.get("libraries", [])),

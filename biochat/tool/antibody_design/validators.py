@@ -10,7 +10,7 @@ def validate_epitope(epitope: str) -> tuple[bool, str]:
     if not epitope or not epitope.strip():
         return False, "empty_epitope"
     epi = epitope.strip().upper()
-    invalid = sorted(set(c for c in epi if c not in VALID_AAS))
+    invalid = sorted({c for c in epi if c not in VALID_AAS})
     if invalid:
         return False, f"invalid_amino_acids: {invalid}"
     if len(epi) < 3:

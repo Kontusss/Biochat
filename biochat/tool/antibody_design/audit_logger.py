@@ -14,14 +14,11 @@ from __future__ import annotations
 import json
 import os
 import sys
-import time
-from datetime import datetime, timezone
-from typing import Any, Callable, Dict, List, Optional, TextIO
+from datetime import datetime, UTC
+from typing import Any, Dict, List, Optional, TextIO
 
 from biochat.tool.antibody_design.candidate_result import (
-    CandidateResult, ToolRunRecord, DockingResult, RosettaResult,
-    SequenceQC, DevelopabilityQC, Ranking, build_candidate_id,
-    generate_run_id,
+    CandidateResult, ToolRunRecord, generate_run_id,
 )
 
 
@@ -203,7 +200,7 @@ class AuditLogger:
         return {
             "audit_report_version": "2.0",
             "run_id": self.run_id,
-            "generated_at": datetime.now(timezone.utc).isoformat().replace("+00:00", "Z"),
+            "generated_at": datetime.now(UTC).isoformat().replace("+00:00", "Z"),
             "summary": {
                 "total_candidates": len(candidates_list),
                 "total_tool_runs": len(tool_runs_list),
@@ -273,7 +270,7 @@ class AuditLogger:
             f"- **Run ID**: {self.run_id}",
             f"- **Epitope**: {epitope}",
             f"- **Total Candidates**: {len(candidates)}",
-            f"- **Generated At**: {datetime.now(timezone.utc).isoformat().replace('+00:00', 'Z')}",
+            f"- **Generated At**: {datetime.now(UTC).isoformat().replace('+00:00', 'Z')}",
             "",
         ]
 
@@ -344,11 +341,11 @@ class AuditLogger:
         # Output files
         lines.append("## Output Files")
         lines.append("")
-        lines.append(f"- `audit_report.json` — Full audit trail (this run)")
-        lines.append(f"- `candidates.json` — Complete candidate data")
-        lines.append(f"- `tool_runs.jsonl` — Per-tool-call event log")
-        lines.append(f"- `summary.md` — This summary")
-        lines.append(f"- `ranked_candidates.fasta` — QC-consistent FASTA output")
+        lines.append("- `audit_report.json` — Full audit trail (this run)")
+        lines.append("- `candidates.json` — Complete candidate data")
+        lines.append("- `tool_runs.jsonl` — Per-tool-call event log")
+        lines.append("- `summary.md` — This summary")
+        lines.append("- `ranked_candidates.fasta` — QC-consistent FASTA output")
         lines.append("")
 
         path = os.path.join(self.output_dir, "summary.md")

@@ -10,7 +10,6 @@ exclusion) is enforced here rather than in the agent.
 
 from __future__ import annotations
 
-import os
 from pathlib import Path
 
 from biochat.knowledge.loaders.local import LocalMarkdownLoader

@@ -24,6 +24,8 @@ import os
 from functools import lru_cache
 from typing import ClassVar
 
+from biochat.version import __version__
+
 try:
     from dotenv import load_dotenv as _load_dotenv
 
@@ -93,12 +95,17 @@ ALLOWED_LLM_SOURCES: frozenset[str] = frozenset({
 
 # ═══════════════════════════════════════════════════════════════════
 # Project identity constants (moved from biochat_config.py)
+#
+# ``biochat.version.__version__`` is the sole version source for the
+# package (pyproject reads it dynamically), both UIs, and project
+# metadata.  Never duplicate a literal version here.
 # ═══════════════════════════════════════════════════════════════════
 
 PROJECT_NAME: str = "Biochat"
-PROJECT_VERSION: str = "2.0.0"
+PROJECT_VERSION: str = __version__
 PROJECT_DESCRIPTION: str = "A General-Purpose Biomedical AI Agent"
 PROJECT_ENGINE: str = "Biochat"
+PROJECT_ENGINE_VERSION: str = __version__
 PROJECT_LICENSE: str = "Apache-2.0"
 
 
@@ -227,6 +234,12 @@ class BiochatSettings:
     access_codes: list[str]
     require_verification: bool
 
+    # ── Security policy ───────────────────────────────────────────
+    # Both default to False: unrestricted host code execution and
+    # unauthenticated non-loopback exposure must be explicitly enabled.
+    allow_host_code_execution: bool
+    allow_unauthenticated_remote: bool
+
     # ── Third-party ───────────────────────────────────────────────
     protocols_io_access_token: str | None
 
@@ -244,6 +257,8 @@ class BiochatSettings:
         "base_url": ("BIOCHAT_CUSTOM_BASE_URL", "CUSTOM_MODEL_BASE_URL", "BIOMNI_CUSTOM_BASE_URL"),
         "api_key": ("BIOCHAT_CUSTOM_API_KEY", "CUSTOM_MODEL_API_KEY", "BIOMNI_CUSTOM_API_KEY"),
         "max_tokens": ("BIOCHAT_MAX_TOKENS", "BIOMNI_MAX_TOKENS"),
+        "allow_host_code_execution": ("BIOCHAT_ALLOW_HOST_CODE_EXECUTION",),
+        "allow_unauthenticated_remote": ("BIOCHAT_ALLOW_UNAUTHENTICATED_REMOTE",),
     }
 
     def __init__(
@@ -263,6 +278,8 @@ class BiochatSettings:
         max_tokens: int | None = None,
         access_codes: list[str] | None = None,
         require_verification: bool | None = None,
+        allow_host_code_execution: bool | None = None,
+        allow_unauthenticated_remote: bool | None = None,
     ):
         """Initialise settings, resolving env vars for unset fields."""
         # ── Data / execution ──────────────────────────────────
@@ -339,12 +356,26 @@ class BiochatSettings:
             if access_codes is not None
             else [c.strip() for c in access_code_env.split(",") if c.strip()]
             if access_code_env
-            else ["Biochat2025", ]
+            else []
         )
         self.require_verification = (
             require_verification
             if require_verification is not None
             else bool(self.access_codes)
+        )
+
+        # ── Security policy ──────────────────────────────────
+        # Secure defaults: both flags require an explicit environment
+        # acknowledgement (or explicit constructor argument) to enable.
+        self.allow_host_code_execution = (
+            allow_host_code_execution
+            if allow_host_code_execution is not None
+            else _env_bool(*self._ENV_MAP["allow_host_code_execution"], default=False)
+        )
+        self.allow_unauthenticated_remote = (
+            allow_unauthenticated_remote
+            if allow_unauthenticated_remote is not None
+            else _env_bool(*self._ENV_MAP["allow_unauthenticated_remote"], default=False)
         )
 
         # ── Third-party ───────────────────────────────────────
@@ -377,6 +408,8 @@ class BiochatSettings:
             "base_url": self.base_url,
             "max_tokens": self.max_tokens,
             "require_verification": self.require_verification,
+            "allow_host_code_execution": self.allow_host_code_execution,
+            "allow_unauthenticated_remote": self.allow_unauthenticated_remote,
         }
         if self.api_key:
             d["api_key"] = "***" + self.api_key[-4:] if len(self.api_key) > 4 else "***"

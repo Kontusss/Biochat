@@ -19,35 +19,25 @@ from __future__ import annotations
 
 import glob
 import os
-import re
 from collections.abc import Generator
-from typing import Any, Literal
+from typing import Any
 
-import pandas as pd
 from dotenv import load_dotenv
-from langchain_core.messages import AIMessage, BaseMessage, HumanMessage
+from langchain_core.messages import HumanMessage
 from langchain_core.prompts import ChatPromptTemplate
 from biochat.agent.agent_state import AgentState  # noqa: F401 — re-exported for external use
 from biochat.config import default_config
+from biochat.core.settings import biochat_settings
+from biochat.execution import CodeExecutor, create_code_executor, format_result
 from biochat.knowledge import KnowledgeRegistry
 from biochat.llm import SourceType, get_llm
 from biochat.model.resource_selector import ResourceSelector
 from biochat.tool.registry import ToolRegistry
 from biochat.utils import (
     check_and_download_s3_files,
-    format_execute_tags_in_content,
-    format_lists_in_text,
-    format_observation_as_terminal,
-    function_to_api_schema,
-    has_execution_results,
-    inject_custom_functions_to_repl,
     parse_tool_calls_with_modules,
     pretty_print,
     read_module2api,
-    run_bash_script,
-    run_r_code,
-    run_with_timeout,
-    textify_api_dict,
 )
 
 if os.path.exists(".env"):
@@ -57,6 +47,15 @@ if os.path.exists(".env"):
 # ═══════════════════════════════════════════════════════════════
 # A1 — composition facade
 # ═══════════════════════════════════════════════════════════════
+
+def _validated_session_id(session_id: object) -> str:
+    """Validate a caller-supplied session id (never derived from content)."""
+    if not isinstance(session_id, str) or not session_id.strip():
+        raise ValueError(
+            "session_id must be a non-empty string identifying the conversation."
+        )
+    return session_id
+
 
 class A1:
     """General-purpose biomedical AI agent.
@@ -77,6 +76,8 @@ class A1:
         commercial_mode: bool | None = None,
         tool_profile: str | None = None,
         expected_data_lake_files: list | None = None,
+        *,
+        allow_host_code_execution: bool | None = None,
     ):
         # ── Resolve parameters from default_config ─────────────
         path = path or default_config.path
@@ -161,6 +162,19 @@ class A1:
         self.system_prompt: str = ""
         self.app: Any = None
 
+        # ── Execution policy boundary ──────────────────────────
+        # Host execution is only selected when explicitly enabled via
+        # settings (BIOCHAT_ALLOW_HOST_CODE_EXECUTION / constructor).
+        from biochat.core.settings import BiochatSettings as _BiochatSettings
+
+        if allow_host_code_execution is None:
+            executor_settings = biochat_settings
+        else:
+            executor_settings = _BiochatSettings(
+                allow_host_code_execution=allow_host_code_execution
+            )
+        self.code_executor: CodeExecutor = create_code_executor(executor_settings)
+
         # ── Build workflow ─────────────────────────────────────
         self.configure()
 
@@ -216,6 +230,9 @@ class A1:
             custom_software=custom_software,
             know_how_docs=know_how_docs,
         )
+        # Capture the base prompt so each request can start from it —
+        # resources selected for one session must not leak into the next.
+        self._base_system_prompt = self.system_prompt
 
         # Build LangGraph workflow via the extracted module
         from biochat.agent.workflow import build_agent_workflow
@@ -223,20 +240,44 @@ class A1:
         # Backward-compat: expose checkpointer on the agent instance
         self.checkpointer = getattr(self.app, "checkpointer", None)
 
+    def _reset_request_state(self) -> None:
+        """Restore per-request mutable state before a new request runs.
+
+        Currently this restores the base system prompt captured at
+        ``configure()`` time so retrieval results applied for one request
+        never persist into another session's prompt.
+        """
+        base_prompt = getattr(self, "_base_system_prompt", None)
+        if base_prompt is not None:
+            self.system_prompt = base_prompt
+
     # ═══════════════════════════════════════════════════════════
     # Execution — go / go_stream
     # ═══════════════════════════════════════════════════════════
 
-    def go(self, prompt: str):
-        """Execute the agent synchronously.  Returns (log, final_text)."""
+    def go(self, prompt: str, *, session_id: str = "default"):
+        """Execute the agent synchronously.  Returns (log, final_text).
+
+        ``session_id`` isolates LangGraph thread state and executor
+        namespaces per conversation; it must be a non-empty string.
+        """
+        session_id = _validated_session_id(session_id)
         self.critic_count = 0
         self.user_task = prompt
+        self._reset_request_state()
 
         if self.use_tool_retriever:
             self._run_retrieval(prompt)
 
-        inputs = {"messages": [HumanMessage(content=prompt)], "next_step": None}
-        config = {"recursion_limit": 500, "configurable": {"thread_id": 42}}
+        inputs = {
+            "messages": [HumanMessage(content=prompt)],
+            "next_step": None,
+            "session_id": session_id,
+        }
+        config = {
+            "recursion_limit": getattr(self, "recursion_limit", 500),
+            "configurable": {"thread_id": session_id},
+        }
         self.log = []
         final_state = None
 
@@ -248,8 +289,11 @@ class A1:
         self._conversation_state = final_state
         return self.log, message.content
 
-    def go_stream(self, prompt) -> Generator[dict, None, None]:
+    def go_stream(self, prompt, *, session_id: str = "default") -> Generator[dict, None, None]:
         """Execute the agent with token-level streaming yields.
+
+        ``session_id`` isolates LangGraph thread state and executor
+        namespaces per conversation; it must be a non-empty string.
 
         Yields dicts:
           - ``{"type": "token", "content": str, "chunk_position": ...}``
@@ -260,8 +304,10 @@ class A1:
             Completed conversation messages (AI responses, retry prompts,
             observations) — same text shape as the legacy event stream.
         """
+        session_id = _validated_session_id(session_id)
         self.critic_count = 0
         self.user_task = prompt
+        self._reset_request_state()
 
         if self.use_tool_retriever:
             self._run_retrieval(prompt)
@@ -275,8 +321,15 @@ class A1:
         except Exception:
             pass
 
-        inputs = {"messages": [HumanMessage(content=prompt)], "next_step": None}
-        config = {"recursion_limit": 500, "configurable": {"thread_id": 42}}
+        inputs = {
+            "messages": [HumanMessage(content=prompt)],
+            "next_step": None,
+            "session_id": session_id,
+        }
+        config = {
+            "recursion_limit": getattr(self, "recursion_limit", 500),
+            "configurable": {"thread_id": session_id},
+        }
         self.log = []
         final_state = None
 
@@ -589,7 +642,7 @@ class A1:
     # ═══════════════════════════════════════════════════════════
 
     def launch_biochat_ui(
-        self, thread_id=42, share=False, server_name="0.0.0.0", require_verification=False
+        self, thread_id=42, share=False, server_name="127.0.0.1", require_verification=False
     ) -> None:
         from biochat.agent.ui_launcher import launch_biochat_ui_from_agent
         launch_biochat_ui_from_agent(
@@ -598,7 +651,7 @@ class A1:
         )
 
     def launch_gradio_demo(
-        self, thread_id=42, share=False, server_name="0.0.0.0", require_verification=False
+        self, thread_id=42, share=False, server_name="127.0.0.1", require_verification=False
     ) -> None:
         """Legacy Gradio demo — preserved for backward compatibility.
 
@@ -625,8 +678,10 @@ class A1:
             code, self.module2api, getattr(self, "_custom_functions", {})
         )
 
-    def _inject_custom_functions_to_repl(self) -> None:
-        inject_custom_functions_to_repl(getattr(self, "_custom_functions", {}))
+    def _inject_custom_functions_to_repl(self, session_id: str = "default") -> None:
+        """Register custom callables into the executor's session namespace."""
+        for name, function in getattr(self, "_custom_functions", {}).items():
+            self.code_executor.register_function(session_id, name, function)
 
     def _clear_execution_plots(self) -> None:
         try:
@@ -635,16 +690,24 @@ class A1:
         except Exception:
             pass
 
-    def _run_python_with_timeout(self, code: str, timeout: int) -> str:
-        self._inject_custom_functions_to_repl()
-        from biochat.tool.support_tools import run_python_repl
-        return run_with_timeout(run_python_repl, [code], timeout=timeout)
+    def _run_python_with_timeout(self, code: str, timeout: int, session_id: str = "default") -> str:
+        """Deprecated wrapper — the workflow calls ``self.code_executor`` directly."""
+        self._inject_custom_functions_to_repl(session_id)
+        return format_result(
+            self.code_executor.execute_python(code, timeout=timeout, session_id=session_id)
+        )
 
-    def _run_r_with_timeout(self, code: str, timeout: int) -> str:
-        return run_with_timeout(run_r_code, [code], timeout=timeout)
+    def _run_r_with_timeout(self, code: str, timeout: int, session_id: str = "default") -> str:
+        """Deprecated wrapper — the workflow calls ``self.code_executor`` directly."""
+        return format_result(
+            self.code_executor.execute_r(code, timeout=timeout, session_id=session_id)
+        )
 
-    def _run_bash_with_timeout(self, code: str, timeout: int) -> str:
-        return run_with_timeout(run_bash_script, [code], timeout=timeout)
+    def _run_bash_with_timeout(self, code: str, timeout: int, session_id: str = "default") -> str:
+        """Deprecated wrapper — the workflow calls ``self.code_executor`` directly."""
+        return format_result(
+            self.code_executor.execute_bash(code, timeout=timeout, session_id=session_id)
+        )
 
     def _filter_know_how_for_commercial_mode(self) -> None:
         for doc_id in self.know_how_loader.exclude_non_commercial():

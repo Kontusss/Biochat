@@ -11,7 +11,6 @@ The legacy path ``biochat.tool.tool_registry`` remains as a thin adapter.
 from __future__ import annotations
 
 import pickle
-from typing import Any
 
 import pandas as pd
 

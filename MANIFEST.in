@@ -1,27 +1,16 @@
-# MANIFEST.in
+# MANIFEST.in — sdist contents.
+# The wheel is built from setuptools discovery restricted to `biochat*`
+# (see pyproject.toml); the sdist adds only repository metadata files.
 
-# Include all python files from the biochat package
-recursive-include biochat *.py
-
-# Include the .pkl database files
-recursive-include biochat/tool/schema_db *.pkl
-
-# Include specific files from biochat_env, but not the biochat_tools subdirectory
-recursive-include biochat_env *.py *.sh *.yml *.yaml *.txt *.md *.json *.R
-
-# Exclude specific directories that are not part of the package
-prune tutorials/data
-prune biochat_env/biochat_tools
-
-# Exclude build artifacts and caches
-global-exclude *.py[co]
-global-exclude __pycache__
-global-exclude .ruff_cache
-prune build
-prune dist
-prune *.egg-info
-
-# Include other necessary files
 include README.md
 include LICENSE
 include pyproject.toml
+include MANIFEST.in
+include .env.example
+
+# Package resources are declared via [tool.setuptools.package-data];
+# nothing outside the biochat package tree is shipped.
+
+global-exclude *.py[co]
+global-exclude __pycache__
+global-exclude .DS_Store

@@ -1,13 +1,8 @@
 import torch
 import torch.nn as nn
-import torch.optim as optim
-from torch.utils.data import Dataset, DataLoader, random_split
-from torch.optim.lr_scheduler import ReduceLROnPlateau
 import torch.nn.functional as F
 import math
 import os
-import pandas as pd
-from tqdm import tqdm
 import numpy as np
 from collections import Counter
 
@@ -240,7 +235,6 @@ def generate_cdrh3(model, epitope_sequence, device, num_samples=5, cdrh3_max_len
     rec_min = int(length_prior.get("recommended_min", 9))
     rec_max = int(length_prior.get("recommended_max", 20))
     hard_max = min(cdrh3_max_len, int(length_prior.get("hard_max", 30)))
-    dist_mode = length_prior.get("length_distribution_mode", "normal")
 
     def _process_seq(seq, max_len):
         seq_ids = [AA_TO_ID.get(aa, AA_TO_ID['X']) for aa in str(seq)]
@@ -412,7 +406,6 @@ def generate_cdrh3(model, epitope_sequence, device, num_samples=5, cdrh3_max_len
 
         generated_sequences = []
         rejected_count = 0
-        max_rejections = num_samples * 3  # max re-sampling attempts
 
         for i in range(num_samples):
             for retry in range(3):  # up to 3 attempts per slot

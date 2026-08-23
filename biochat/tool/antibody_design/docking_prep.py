@@ -10,7 +10,7 @@ from __future__ import annotations
 
 import json
 import os
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List
 
 from biochat.tool.antibody_design.structure_validation import validate_pdb_for_docking
 
@@ -60,7 +60,7 @@ def build_extended_peptide_pdb(
     if not seq:
         return {"success": False, "error": "empty_sequence"}
 
-    invalid = sorted(set(c for c in seq if c not in VALID_AAS))
+    invalid = sorted({c for c in seq if c not in VALID_AAS})
     if invalid:
         return {"success": False, "error": f"invalid_residues: {invalid}"}
 

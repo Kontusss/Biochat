@@ -10,9 +10,7 @@ Does NOT: parse scores, rank candidates, execute createpl extraction.
 import argparse
 import json
 import os
-import shutil
 import sys
-import tempfile
 
 FORBIDDEN = ["ddG", "Kd", "binding_affinity", "binding affinity",
              "validated", "experimentally confirmed", "high affinity"]
@@ -45,7 +43,6 @@ def main():
     args = parser.parse_args()
 
     results = {"smoke_test": "Phase3D-Fusion-v1", "checks": {}, "status": "unknown"}
-    all_clean = True
 
     os.makedirs(args.output_dir, exist_ok=True)
 
@@ -57,7 +54,6 @@ def main():
         from biochat.tool.antibody_design.hdock_output import (
             inspect_hdock_output, check_createpl_ready, plan_createpl_extraction,
         )
-        from biochat.tool.antibody_design.docking_runner import run_docking_jobs
         results["checks"]["biochat_import"] = "ok"
         print("✅ biochat imports")
     except Exception as exc:

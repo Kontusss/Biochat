@@ -120,7 +120,7 @@ class ContactAnalysisResult:
 def _parse_pdb_atoms(pdb_path: str) -> List[Dict[str, Any]]:
     """Extract all ATOM/HETATM records with coordinates."""
     atoms = []
-    with open(pdb_path, "r", encoding="utf-8", errors="ignore") as f:
+    with open(pdb_path, encoding="utf-8", errors="ignore") as f:
         for line in f:
             if not (line.startswith("ATOM") or line.startswith("HETATM")):
                 continue
@@ -174,7 +174,7 @@ def _find_epitope_chain(
 
     Tries preferred_chain first, then scans all chains.
     """
-    chains = set(a["chain"] for a in atoms)
+    chains = {a["chain"] for a in atoms}
     if preferred_chain and preferred_chain in chains:
         return preferred_chain
 
@@ -345,7 +345,7 @@ def _map_epitope_positions_to_pdb(
         return {}
 
     mapping = {}
-    for i, aa in enumerate(epitope_upper):
+    for i, _aa in enumerate(epitope_upper):
         if idx + i < len(residues):
             mapping[i] = residues[idx + i][0]
     return mapping

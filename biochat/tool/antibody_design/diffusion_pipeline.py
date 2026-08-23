@@ -7,7 +7,7 @@ Environment: BIOMNI_ANTIBODY_MODEL_DIR must point to directory containing:
 from __future__ import annotations
 
 import os
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, Optional
 
 _REQUIRED_MODEL_FILES = [
     "cdrh3_vae_model_best.pth",
@@ -56,7 +56,6 @@ def load_diffusion_model(model_dir: Optional[str] = None, device: str = "auto") 
     if cache_key in _model_cache:
         return _model_cache[cache_key]
 
-    import torch
 
     if model_dir is None:
         model_dir = os.getenv("BIOMNI_ANTIBODY_MODEL_DIR", "")

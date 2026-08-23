@@ -1,12 +1,15 @@
-"""Code execution utilities — Python / R / Bash with timeout support.
+"""Code execution utilities — deprecated legacy wrappers.
 
-Replaces ``run_r_code``, ``run_bash_script``, ``run_cli_command``,
-and ``run_with_timeout`` from the original ``utils.py`` (lines 25-242).
+The agent workflow routes all generated code through the
+execution-policy boundary (``biochat.execution``); these helpers remain
+only for direct legacy callers and delegate to a module-level trusted
+``HostCodeExecutor`` so their behaviour stays identical.
 
 .. warning::
    ``execute_with_thread_timeout`` uses ``ctypes`` to terminate a
-   running Python thread, which is inherently unsafe.  Prefer
-   subprocess-based isolation for production use.
+   running Python thread, which is inherently unsafe.  It is retained
+   only for backward compatibility; the executor boundary is the
+   supported path.
 """
 
 from __future__ import annotations
@@ -14,99 +17,55 @@ from __future__ import annotations
 import ctypes
 import os
 import queue
-import shlex
-import subprocess
-import tempfile
 import threading
-from typing import Any, Callable
+from typing import TYPE_CHECKING, Any, Callable
+
+if TYPE_CHECKING:
+    from biochat.execution.host import HostCodeExecutor
+
+from biochat.execution import format_result
+from biochat.execution.base import LEGACY_DEFAULT_TIMEOUT_SECONDS
+
+# Shared trusted backend for the deprecated wrapper functions below.
+# Created lazily so importing this module stays side-effect free.
+_TRUSTED_HOST_EXECUTOR: "HostCodeExecutor | None" = None
+
+
+def _get_trusted_host_executor() -> "HostCodeExecutor":
+    global _TRUSTED_HOST_EXECUTOR
+    if _TRUSTED_HOST_EXECUTOR is None:
+        from biochat.execution.host import HostCodeExecutor as _Host
+
+        _TRUSTED_HOST_EXECUTOR = _Host()
+    return _TRUSTED_HOST_EXECUTOR
 
 
 # ═══════════════════════════════════════════════════════════════
-# R / Bash / CLI execution
+# R / Bash / CLI execution (deprecated wrappers)
 # ═══════════════════════════════════════════════════════════════
 
 def execute_r_script(code: str) -> str:
-    """Run *code* through ``Rscript``.
-
-    Writes the code to a temporary ``.R`` file, executes it, and
-    returns stdout (or stderr on non-zero exit).
-    """
-    if not code.strip():
-        return "Error: Empty R script"
-
-    with tempfile.NamedTemporaryFile(
-        suffix=".R", mode="w", delete=False, encoding="utf-8"
-    ) as fh:
-        fh.write(code)
-        tmp_path = fh.name
-
-    try:
-        result = subprocess.run(
-            ["Rscript", tmp_path],
-            capture_output=True, text=True,
-        )
-        if result.returncode != 0:
-            return f"Error running R code:\n{result.stderr}"
-        return result.stdout
-    finally:
-        _safe_unlink(tmp_path)
+    """Deprecated: run *code* through ``Rscript`` via the trusted host executor."""
+    result = _get_trusted_host_executor().execute_r(
+        code, timeout=LEGACY_DEFAULT_TIMEOUT_SECONDS, session_id="legacy"
+    )
+    return format_result(result)
 
 
 def execute_bash_script(script: str) -> str:
-    """Run *script* as a Bash script.
-
-    Writes to a temporary ``.sh`` file, makes it executable, and runs
-    it in the current working directory with the current environment.
-    """
-    script = script.strip()
-    if not script:
-        return "Error: Empty script"
-
-    lines: list[str] = []
-    if not script.startswith("#!"):
-        lines.append("#!/bin/bash")
-    if "set -e" not in script:
-        lines.append("set -e")
-    lines.append(script)
-
-    with tempfile.NamedTemporaryFile(
-        suffix=".sh", mode="w", delete=False, encoding="utf-8"
-    ) as fh:
-        fh.write("\n".join(lines))
-        tmp_path = fh.name
-
-    os.chmod(tmp_path, 0o755)
-
-    try:
-        result = subprocess.run(
-            [tmp_path],
-            shell=True, capture_output=True, text=True,
-            env=os.environ.copy(), cwd=os.getcwd(),
-        )
-        if result.returncode != 0:
-            return (
-                f"Error running Bash script "
-                f"(exit code {result.returncode}):\n{result.stderr}"
-            )
-        return result.stdout
-    finally:
-        _safe_unlink(tmp_path)
+    """Deprecated: run *script* as a Bash script via the trusted host executor."""
+    result = _get_trusted_host_executor().execute_bash(
+        script, timeout=LEGACY_DEFAULT_TIMEOUT_SECONDS, session_id="legacy"
+    )
+    return format_result(result)
 
 
 def execute_cli_command(command: str) -> str:
-    """Run a single CLI command via ``subprocess``.
-
-    Uses ``shlex.split`` for proper argument tokenisation.
-    """
-    command = command.strip()
-    if not command:
-        return "Error: Empty command"
-
-    args = shlex.split(command)
-    result = subprocess.run(args, capture_output=True, text=True)
-    if result.returncode != 0:
-        return f"Error running command '{command}':\n{result.stderr}"
-    return result.stdout
+    """Deprecated: run a single CLI command via the trusted host executor."""
+    result = _get_trusted_host_executor().execute_cli(
+        command, timeout=LEGACY_DEFAULT_TIMEOUT_SECONDS, session_id="legacy"
+    )
+    return format_result(result)
 
 
 # ═══════════════════════════════════════════════════════════════

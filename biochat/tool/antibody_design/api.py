@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import os
 from typing import Any, Dict, List, Optional
 
 from biochat.tool.antibody_design.schemas import SAFETY_DISCLAIMER

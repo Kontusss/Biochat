@@ -10,7 +10,7 @@ Key rules:
 from __future__ import annotations
 
 from collections import Counter
-from typing import Any, Dict, List
+from typing import Any, Dict
 
 
 ACIDIC = {"D", "E"}

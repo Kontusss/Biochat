@@ -16,12 +16,29 @@ from langchain_core.messages import AIMessage, HumanMessage, SystemMessage
 from langgraph.graph import END, START, StateGraph
 
 from biochat.agent.agent_state import AgentState
+from biochat.execution import format_result
 import logging
 
 if TYPE_CHECKING:
     from biochat.agent.a1 import A1
 
 logger = logging.getLogger(__name__)
+
+
+# Process-wide checkpoint store: thread ids are validated session ids, so
+# a single saver keeps per-session histories consistent across every
+# compiled agent (default and model-override cached alike).
+_SHARED_CHECKPOINT_SAVER = None
+
+
+def _get_shared_checkpoint_saver():
+    """Lazily construct the shared LangGraph memory checkpointer."""
+    global _SHARED_CHECKPOINT_SAVER
+    if _SHARED_CHECKPOINT_SAVER is None:
+        from langgraph.checkpoint.memory import MemorySaver
+
+        _SHARED_CHECKPOINT_SAVER = MemorySaver()
+    return _SHARED_CHECKPOINT_SAVER
 
 
 # ═══════════════════════════════════════════════════════════════
@@ -134,23 +151,34 @@ def create_execution_node(agent: "A1") -> Callable[[AgentState], AgentState]:
 
         code = exec_match.group(1)
         timeout = agent.timeout_seconds
+        # Active session id (Task 5 propagates it end-to-end); the
+        # executor boundary requires one on every call.
+        session_id = state.get("session_id") or "default"
+        executor = agent.code_executor
 
         # ── Language dispatch ──────────────────────────────────
         if code.strip().startswith(("#!R", "# R code", "# R script")):
             r_code = re.sub(r"^#!R|^# R code|^# R script", "", code, count=1).strip()
-            result = agent._run_r_with_timeout(r_code, timeout)
+            result = format_result(
+                executor.execute_r(r_code, timeout=timeout, session_id=session_id)
+            )
         elif code.strip().startswith(("#!BASH", "# Bash script", "#!CLI")):
+            # Legacy parity: CLI blocks ran through the bash-script path
+            # (shell semantics — pipes/redirects keep working).
             if code.strip().startswith("#!CLI"):
-                cli_cmd = re.sub(r"^#!CLI", "", code, count=1).strip().replace("\n", " ")
-                result = agent._run_bash_with_timeout(cli_cmd, timeout)
+                bash_script = re.sub(r"^#!CLI", "", code, count=1).strip()
             else:
                 bash_script = re.sub(r"^#!BASH|^# Bash script", "", code, count=1).strip()
-                result = agent._run_bash_with_timeout(bash_script, timeout)
+            result = format_result(
+                executor.execute_bash(bash_script, timeout=timeout, session_id=session_id)
+            )
         else:
             # Python
             agent._clear_execution_plots()
-            agent._inject_custom_functions_to_repl()
-            result = agent._run_python_with_timeout(code, timeout)
+            agent._inject_custom_functions_to_repl(session_id)
+            result = format_result(
+                executor.execute_python(code, timeout=timeout, session_id=session_id)
+            )
 
         # Truncate overly long results
         if len(result) > 10000:
@@ -251,9 +279,11 @@ def build_agent_workflow(
     workflow.add_edge("execute", "generate")
     workflow.add_edge(START, "generate")
 
-    from langgraph.checkpoint.memory import MemorySaver
     compiled = workflow.compile()
-    compiled.checkpointer = MemorySaver()
+    # One process-wide saver keyed by thread id (= session id): every agent
+    # variant (default or model-override cached) serves the same stored
+    # history for a session, while distinct sessions remain isolated.
+    compiled.checkpointer = _get_shared_checkpoint_saver()
     return compiled
 
 

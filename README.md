@@ -7,7 +7,7 @@
   <img src="https://img.shields.io/badge/Streamlit-UI-red.svg?style=for-the-badge" alt="Streamlit" />
   <img src="https://img.shields.io/badge/LangChain-Agent-orange.svg?style=for-the-badge" alt="LangChain" />
   <img src="https://img.shields.io/badge/License-Apache%202.0-orange.svg?style=for-the-badge" alt="License" />
-  <img src="https://img.shields.io/badge/Version-v0.0.8-red.svg?style=for-the-badge" alt="Version" />
+  <img src="https://img.shields.io/badge/Version-v2.0.0-red.svg?style=for-the-badge" alt="Version" />
   <img src="https://img.shields.io/badge/Tools-600+-brightgreen.svg?style=for-the-badge" alt="Tools" />
 </p>
 
@@ -26,7 +26,7 @@
 - 🔌 **8 大 LLM 供应商** — Anthropic / OpenAI / Azure / Gemini / Groq / Bedrock / Ollama / 任意 OpenAI 兼容接口（DeepSeek、vLLM…）
 - 💬 **现代化双 UI** — Streamlit（ChatGPT 风格，推荐）+ Gradio（旧版），支持多会话、流式输出、进度可视化、PDF 导出
 - 🧩 **MCP 集成** — 通过 Model Context Protocol 接入外部工具服务
-- 🔒 **安全可控** — 访问码验证、商业/非商业数据集自动隔离、代码执行超时控制
+- 🔒 **安全可控** — 访问码验证（`hmac.compare_digest`）、回环默认绑定、商业/非商业数据集自动隔离；生成代码执行默认禁用，需显式开启
 
 ## 🛠️ 技术栈
 
@@ -59,12 +59,17 @@ cd Biochat-main
 cd biochat_env && bash setup.sh && cd ..
 conda activate biomni_e1
 
-# 3. 安装 Biochat
-pip install -e .
+# 3. 安装 Biochat（按需选择附加依赖）
+pip install -e .                                  # 核心运行时（最小安装）
+pip install -e ".[streamlit]"                     # + Streamlit UI
+pip install -e ".[gradio]"                        # + Gradio UI（旧版）
+pip install -e ".[providers]"                     # + 各 LLM 供应商 SDK
+pip install -e ".[full-tools]"                    # + 科学计算工具栈
+pip install -e ".[dev,streamlit,gradio,providers]" # 开发/CI 全套
 
-# 4. 配置 API Key
+# 4. 配置 API Key 与安全选项
 cp .env.example .env
-vim .env   # 填入你的 API Key，详见下方「配置说明」
+vim .env   # 填入你的 API Key，详见下方「配置说明」与「安全模型」
 
 # 5. 一键启动 🚀
 bash start.sh
@@ -91,12 +96,16 @@ bash start.sh
 ```bash
 conda activate biomni_e1
 
-# Streamlit UI（推荐）
-streamlit run biochat/ui/biochat_streamlit.py    # → http://localhost:8501
+# 推荐：统一入口 CLI（默认绑定 127.0.0.1，未知模式退出码 2）
+python -m biochat.ui.cli                          # Streamlit → http://127.0.0.1:8501
+python -m biochat.ui.cli --ui gradio              # Gradio   → http://127.0.0.1:7860
 
-# Gradio UI（旧版）
-python scripts/biochat_demo.py                  # → http://localhost:7860
+# 直接使用 streamlit 时务必显式回环绑定并配置访问码：
+streamlit run biochat/ui/biochat_streamlit.py --server.address 127.0.0.1
 ```
+
+> ⚠️ 直接 `streamlit run` 而不设置 `--server.address` 会监听所有网卡；
+> 在未配置访问码且未显式确认的情况下，应用将拒绝启动。
 
 #### Windows 环境
 
@@ -292,7 +301,7 @@ CUSTOM_MODEL_API_KEY=your_custom_api_key_here
 # BIOCHAT_DATA_PATH=./data             # 数据湖位置（~11GB）
 
 # ── UI 访问码（可选） ───────────────────────────────────────
-# BIOCHAT_ACCESS_CODE=Biochat2025      # 留空则不校验
+# BIOCHAT_ACCESS_CODE=<set-your-own-secret-code>      # 留空则不校验
 ```
 
 ### 环境变量一览
@@ -308,9 +317,37 @@ CUSTOM_MODEL_API_KEY=your_custom_api_key_here
 | `BIOCHAT_COMMERCIAL_MODE` | 排除非商业许可数据集 | `false` |
 | `BIOCHAT_CUSTOM_BASE_URL` | 自定义模型 API 地址 | — |
 | `BIOCHAT_CUSTOM_API_KEY` | 自定义模型 API Key | — |
-| `BIOCHAT_ACCESS_CODE` | UI 访问码（逗号分隔） | — |
+| `BIOCHAT_ACCESS_CODE` | UI 访问码（逗号分隔） | 未设置 |
+| `BIOCHAT_ALLOW_HOST_CODE_EXECUTION` | 允许在宿主机执行生成代码 | `false` |
+| `BIOCHAT_ALLOW_UNAUTHENTICATED_REMOTE` | 显式允许无鉴权远程绑定 | `false` |
+| `BIOCHAT_HOST` | 启动绑定地址（经 `biochat.ui.cli`） | `127.0.0.1` |
 
 > 所有 `BIOCHAT_*` 变量均向后兼容 `BIOMNI_*` 旧命名。
+
+## 🛡️ 安全模型
+
+Biochat 默认配置面向个人工作站，遵循以下原则：
+
+1. **代码执行默认关闭。** Agent 生成的 Python/R/Bash 代码不会在你的机器上执行，
+   除非你显式设置 `BIOCHAT_ALLOW_HOST_CODE_EXECUTION=true`。该模式**不是沙箱**——
+   它以历史兼容语义直接使用宿主机资源。访问码校验与超时控制不能替代操作系统级隔离；
+   需要强隔离请自行使用容器/虚拟机并仅暴露必要权限。
+2. **UI 默认只绑定回环地址 `127.0.0.1`。** 绑定到非回环地址需要满足其一：
+   已配置 `BIOCHAT_ACCESS_CODE` 访问码；或显式承认风险
+   （`BIOCHAT_ALLOW_UNAUTHENTICATED_REMOTE=true`）。否则启动即被拒绝。
+3. **无内置凭据。** 仓库与安装产物中不包含任何默认访问码或 API Key；
+   访问码比较使用常数时间比较以规避时序侧信道。
+4. **版本唯一来源。** 项目与 UI 显示版本统一取自 `biochat.version.__version__`
+   （当前 `v2.0.0`），wheel 元数据与之保持一致。
+
+### 依赖附加组（extras）
+
+| 附加组 | 内容 |
+|--------|------|
+| `streamlit` / `gradio` | 对应 UI 前端 |
+| `providers` | Anthropic / OpenAI / Gemini / Groq / Bedrock / Ollama SDK |
+| `full-tools` | 科学计算工具栈（matplotlib/scipy/torch/scanpy/nibabel/SimpleITK 等） |
+| `dev` | pytest / ruff / build / pre-commit / mcp（CI 同款） |
 
 ### 支持的 LLM 供应商
 

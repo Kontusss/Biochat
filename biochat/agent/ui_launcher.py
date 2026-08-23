@@ -17,7 +17,7 @@ def launch_biochat_ui_from_agent(
     agent: "A1",
     thread_id: int = 42,
     share: bool = False,
-    server_name: str = "0.0.0.0",
+    server_name: str = "127.0.0.1",
     require_verification: bool = False,
 ) -> None:
     """Launch the ProtChat-inspired Biochat UI for an A1 agent.
@@ -33,6 +33,12 @@ def launch_biochat_ui_from_agent(
         server_name: Server host to bind to.
         require_verification: Require access-code verification.
     """
+    from biochat.core.settings import biochat_settings as _settings
+    from biochat.ui.auth import validate_remote_exposure
+
+    # Reject unsafe non-loopback binds before any UI is built.
+    validate_remote_exposure(server_name, _settings)
+
     from biochat.ui.biochat_ui import launch_biochat_ui as _launch
 
     _launch(

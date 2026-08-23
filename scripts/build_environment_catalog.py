@@ -13,7 +13,6 @@ metadata (source project + license).
 
 from __future__ import annotations
 
-import importlib
 import re
 import sys
 from pathlib import Path

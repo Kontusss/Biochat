@@ -89,13 +89,19 @@ def _best_module_match(target: str, available: list[str]) -> str:
 
 
 def register_custom_functions_in_namespace(custom_functions: dict) -> None:
-    """Inject custom functions into Python REPL execution namespace."""
+    """Inject custom functions into the legacy REPL execution namespace.
+
+    Deprecated path for direct callers: the agent workflow registers
+    custom callables per session via ``CodeExecutor.register_function``.
+    This helper keeps the old shared-namespace behaviour by delegating
+    to the same trusted host executor that backs ``run_python_repl``.
+    """
     if not custom_functions:
         return
 
-    from biochat.tool.support_tools import _persistent_namespace
+    from biochat.tool.support_tools import _get_legacy_trusted_executor
     for name, func in custom_functions.items():
-        _persistent_namespace[name] = func
+        _get_legacy_trusted_executor().register_function("legacy", name, func)
 
     import builtins
     if not hasattr(builtins, "_biochat_custom_functions"):

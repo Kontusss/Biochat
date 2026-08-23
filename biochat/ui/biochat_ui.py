@@ -37,10 +37,14 @@ from time import time
 # HTML SNIPPETS
 # ═══════════════════════════════════════════════════════════════
 
-_HEADER_HTML = """
+def _header_html() -> str:
+    """Header bar with the canonical project version."""
+    from biochat.core.settings import PROJECT_VERSION
+
+    return f"""
 <div class="biochat-header">
     <span class="bc-logo">🧬 Biochat</span>
-    <span class="bc-version">v2.0</span>
+    <span class="bc-version">v{PROJECT_VERSION}</span>
     <span class="bc-engine-badge">Biochat Engine</span>
     <span class="bc-header-status">
         <span class="bc-dot"></span> Safe Mode
@@ -164,14 +168,26 @@ def create_biochat_ui(
     try:
         import gradio as gr
         from gradio import ChatMessage
-    except ImportError:
-        raise ImportError("Gradio is not installed.  pip install 'gradio>=5.0,<6.0'")
+    except ImportError as exc:
+        raise ImportError(
+            "Gradio is not installed.  pip install 'gradio>=5.0,<6.0'"
+        ) from exc
 
     from .biochat_theme import BiochatTheme
 
     SUPPORTED_EXTENSIONS = (".png", ".jpg", ".jpeg", ".gif", ".bmp", ".webp", ".pdf")
     agent.main_history_copy = []
-    available_access_codes = ["Biochat2025", "Biochat2025"]
+    from biochat.core.settings import biochat_settings as _settings
+    from biochat.ui.auth import (
+        effective_require_verification,
+        verify_access_code as _verify_access_code,
+    )
+    available_access_codes = list(_settings.access_codes)
+    # Configured codes imply verification is wanted; callers may not
+    # remember to pass require_verification explicitly.
+    require_verification = effective_require_verification(
+        require_verification, _settings
+    )
 
     # ── Helper: footer status bar ─────────────────────────────
 
@@ -201,7 +217,7 @@ def create_biochat_ui(
     # ── Verification ──────────────────────────────────────────
 
     def verify_access_code(code):
-        if code in available_access_codes:
+        if _verify_access_code(code, available_access_codes):
             return gr.update(visible=False), gr.update(visible=True), gr.update(visible=False)
         return gr.update(visible=True), gr.update(visible=False), gr.update(value="Incorrect access code.", visible=True)
 
@@ -397,8 +413,8 @@ def create_biochat_ui(
             background_fill_secondary="#fbfcfd",
         ),
     ) as demo:
-        # Hidden state for example-prompt relay
-        example_query = gr.State("")
+        # Hidden state for example-prompt relay (wired by component id)
+        _example_query = gr.State("")
 
         # ── Verification ──────────────────────────────────────
         verification_container = gr.Group(visible=require_verification)
@@ -418,7 +434,7 @@ def create_biochat_ui(
             gr.HTML('<div class="biochat-shell">')
 
             # Header
-            gr.HTML(_HEADER_HTML)
+            gr.HTML(_header_html())
 
             # Main layout row
             gr.HTML('<div class="biochat-main">')
@@ -580,9 +596,15 @@ def launch_biochat_ui(
     agent,
     thread_id: int = 42,
     share: bool = False,
-    server_name: str = "0.0.0.0",
+    server_name: str = "127.0.0.1",
     require_verification: bool = False,
 ):
+    from biochat.core.settings import biochat_settings as _settings
+    from biochat.ui.auth import validate_remote_exposure
+
+    # Reject unsafe non-loopback binds before launching.
+    validate_remote_exposure(server_name, _settings)
+
     """Launch the polished ProtChat-inspired Biochat Gradio UI.
 
     Convenience wrapper that builds the UI via ``create_biochat_ui()``

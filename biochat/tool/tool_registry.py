@@ -7,6 +7,6 @@ keeps the legacy import path working:
     from biochat.tool.tool_registry import ToolRegistry
 """
 
-from biochat.tool.registry import ToolRegistry  # noqa: F401
+from biochat.tool.registry import ToolRegistry
 
 __all__ = ["ToolRegistry"]

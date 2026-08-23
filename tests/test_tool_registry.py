@@ -70,7 +70,6 @@ class TestToolRegistry:
         assert len(reg.document_df) == 3
 
     def test_pickle_roundtrip(self, tmp_path):
-        import pickle
 
         from biochat.tool.registry import ToolRegistry
 
@@ -95,5 +94,4 @@ class TestLegacyAdapter:
         module2api = load_all_tool_descriptions()
         reg = ToolRegistry(module2api)
         assert len(reg.tools) > 100
-        names = {t["name"] for t in reg.list_tools()}
         assert reg.get_tool_by_name("annotate_celltype_scRNA")["id"] is not None

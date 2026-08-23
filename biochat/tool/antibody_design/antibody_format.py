@@ -14,7 +14,7 @@ from __future__ import annotations
 import os
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Any, Dict, List, Literal, Optional, Set
+from typing import Dict, List, Optional, Set
 
 
 # ── Enums ──────────────────────────────────────────────────────────────────────
@@ -40,7 +40,7 @@ class ScaffoldType(str, Enum):
 
 # Terms that are ONLY allowed when design_format == VHH
 VHH_ONLY_TERMS: Set[str] = {
-    "VHH", "纳米抗体", "纳米抗体", "nanobody", "single-domain antibody",
+    "VHH", "纳米抗体", "nanobody", "single-domain antibody",
     "骆驼源", "camelid", "llama", "alpaca", "IGHV3H", "VHH scaffold",
     "VHH hallmark", "hallmark residues", "FR2 ERE", "EREGWGR",
     "标准骆驼源", "camelid VHH scaffold",

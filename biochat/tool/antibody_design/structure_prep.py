@@ -12,7 +12,7 @@ Never outputs Kd, ddG, binding affinity, or validated-binder claims.
 from __future__ import annotations
 
 import json
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, List
 
 # ═══════════════════════════════════════════════════════════════
 # Rule definitions
@@ -130,7 +130,7 @@ def _assess_single(seq: str, index: int, epitope: str) -> Dict[str, Any]:
     metrics: Dict[str, Any] = {"length": length}
 
     # ── 1. Forbidden residues ────────────────────────────────
-    forbidden = sorted(set(c for c in seq if c in FORBIDDEN_RESIDUES))
+    forbidden = sorted({c for c in seq if c in FORBIDDEN_RESIDUES})
     if forbidden:
         blocking.append(f"forbidden_residues: {forbidden}")
 
