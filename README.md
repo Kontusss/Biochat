@@ -345,7 +345,7 @@ Biochat 默认配置面向个人工作站，遵循以下原则：
 | 附加组 | 内容 |
 |--------|------|
 | `streamlit` / `gradio` | 对应 UI 前端 |
-| `providers` | Anthropic / OpenAI / Gemini / Groq / Bedrock / Ollama SDK |
+| `providers` | Anthropic / OpenAI / Gemini / Ollama SDK（Groq 与 Bedrock 的 SDK 尚未适配 `langchain-core` 1.x，需按 docs/known_conflicts.md 手动安装） |
 | `full-tools` | 科学计算工具栈（matplotlib/scipy/torch/scanpy/nibabel/SimpleITK 等） |
 | `dev` | pytest / ruff / build / pre-commit / mcp（CI 同款） |
 

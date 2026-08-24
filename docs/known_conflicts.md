@@ -8,13 +8,26 @@ This file lists Python packages that are known to have dependency conflicts with
 - Not installed by default due to dependency conflicts with the main environment.
 - If you need imputation tools that require this package, install it manually in a separate environment or with caution.
 
-### 2. langchain_aws
-- Needed for Amazon Bedrock support.
-- The Bedrock provider module lazy-imports this SDK; install it via the
-  `providers` extra (`pip install -e ".[providers]"`) or manually when you
-  need Bedrock support. No code sections need to be uncommented.
+### 2. langchain_groq
+- Needed for Groq support.
+- **Excluded from the `providers` extra**: every released `langchain-groq`
+  version pins `langchain-core<1.0`, which conflicts with the
+  `langchain-core>=1.0` required by the core agent (and by langgraph 1.x).
+- Install it manually in an isolated environment when you need Groq;
+  the Groq provider module lazy-imports the SDK, so the base install is
+  unaffected.
 
-### 3. cnvkit
+### 3. langchain_aws
+- Needed for Amazon Bedrock support.
+- **Excluded from the `providers` extra**: every released `langchain-aws`
+  version pins `langchain-core<0.4`, which conflicts with the
+  `langchain-core>=1.0` required by the core agent.
+- Install it manually in a separate environment (or with caution) when you
+  need Bedrock support; the Bedrock provider module lazy-imports the SDK,
+  so the base install is unaffected. No code sections need to be
+  uncommented.
+
+### 4. cnvkit
 - **Environment Requirement**: Requires Python 3.10 environment (`bio_env_py310.yml`)
 - **Function**: Supports the `analyze_copy_number_purity_ploidy_and_focal_events` function
 - **Why Separate Environment**: cnvkit has strict dependency requirements that conflict with newer Python versions and other packages in the main Biochat environment. Python 3.10 provides the optimal compatibility for cnvkit and its dependencies, ensuring reliable copy number variation analysis, purity estimation, ploidy detection, and focal event identification.

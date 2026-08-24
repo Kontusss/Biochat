@@ -47,13 +47,15 @@ Repository = "https://github.com/Kontusss/Biochat"
 streamlit = ["streamlit>=1.40,<2.0"]
 gradio = ["gradio>=5.0,<6.0"]
 
-# LLM provider SDKs (lazy-imported per source)
+# LLM provider SDKs (lazy-imported per source).
+# NOTE: langchain-aws is intentionally excluded — every released version
+# pins langchain-core<0.4, which conflicts with the langchain-core 1.x
+# required by the core agent. Install it manually for Bedrock support
+# (see docs/known_conflicts.md).
 providers = [
     "langchain-anthropic>=0.3,<1.0",
     "langchain-openai>=0.3,<1.0",
     "langchain-google-genai>=2.0,<3.0",
-    "langchain-groq>=0.2,<1.0",
-    "langchain-aws>=0.2,<1.0",
     "langchain-ollama>=0.2,<1.0",
 ]
 
