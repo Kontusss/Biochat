@@ -48,6 +48,9 @@ class _ArchiveResponse:
 @pytest.fixture
 def bioimaging_module(monkeypatch):
     """Import the real caller while replacing unavailable optional imaging imports."""
+    # bioimaging imports matplotlib at module level (full-tools dependency);
+    # minimal/CI environments skip these caller tests entirely.
+    pytest.importorskip("matplotlib")
     nibabel = types.ModuleType("nibabel")
     simpleitk = types.ModuleType("SimpleITK")
     simpleitk.Image = type("Image", (), {})
