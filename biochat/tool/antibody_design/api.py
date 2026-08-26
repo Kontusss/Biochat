@@ -116,15 +116,24 @@ def score_and_rank_candidates(
         # Get filter flags
         flags: List[str] = []
         metrics: Dict[str, Any] = {}
+        filter_accepted = True
         try:
             from biochat.tool.antibody_design.generation_filter import filter_cdrh3_design
             ok, f, m = filter_cdrh3_design(cdrh3, epitope)
+            filter_accepted = bool(ok)
             flags = list(f)
             metrics = dict(m)
         except Exception:
             pass
 
         c = score_candidate(cdrh3, epitope, full, flags, metrics)
+
+        # The filter's hard-fail verdict is authoritative: a candidate it rejects
+        # must never surface as accepted, regardless of how the flags scored.
+        if not filter_accepted and c["accepted"]:
+            c["accepted"] = False
+            c["aggregate_score"] = 0.0
+            c["warnings"].append("rejected by generation_filter hard-fail gate")
 
         # Add developability if full sequence available
         if full:
