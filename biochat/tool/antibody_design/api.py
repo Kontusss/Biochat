@@ -147,6 +147,19 @@ def score_and_rank_candidates(
             except Exception as exc:
                 c["warnings"].append(f"dev_failed: {exc}")
 
+        # Side-channel diagnostic. Reported alongside the liability score but
+        # deliberately NOT an input to ranking — the two are on different
+        # scales and answer different questions. Omitted entirely when the
+        # trained artifact is absent; an optional signal must never alter or
+        # break candidate scoring.
+        try:
+            from biochat.tool.antibody_design.antibody_likeness import score_antibody_likeness
+            likeness = score_antibody_likeness(cdrh3)
+            if likeness is not None:
+                c["scores"]["antibody_likeness"] = likeness
+        except Exception as exc:
+            c["warnings"].append(f"likeness_failed: {exc}")
+
         c["index"] = i
         candidates.append(c)
 

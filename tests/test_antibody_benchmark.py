@@ -266,3 +266,79 @@ class TestCDRH3BigramModel:
         folds = cross_validate(self.CORPUS, folds=4)
         assert len(folds) == 4
         assert all(isinstance(f, float) for f in folds)
+
+
+class TestAntibodyLikenessSideChannel:
+    """The likeness signal is reported but must never influence ranking."""
+
+    SEQUENCES = [
+        "WGGDGFYAMDY", "YPHYYGSSHWYFDV", "NDDY",
+        "CLFRNERYSYA", "STYYGGDWYFNV", "DYYDILTDYYIHYWYFDL",
+    ]
+    EPITOPE = "LHCPALVTYNTDTFESM"
+
+    def _rank(self):
+        from biochat.tool.antibody_design.api import score_and_rank_candidates
+
+        result = score_and_rank_candidates(self.SEQUENCES, self.EPITOPE)
+        return [
+            (c["cdrh3_sequence"], c["rank"], c["aggregate_score"], c["accepted"])
+            for c in result["candidates"]
+        ], result
+
+    def test_ranking_is_identical_with_and_without_the_model(self, monkeypatch):
+        from biochat.tool.antibody_design import antibody_likeness
+
+        antibody_likeness.reset_cache()
+        with_model, result = self._rank()
+        assert any("antibody_likeness" in c["scores"] for c in result["candidates"])
+
+        # Point the loader at a path that does not exist: the signal disappears,
+        # everything the pipeline actually decides on must stay byte-identical.
+        monkeypatch.setenv("BIOCHAT_CDRH3_LM_PATH", "/nonexistent/cdrh3_model.json")
+        antibody_likeness.reset_cache()
+        without_model, bare = self._rank()
+
+        assert not any("antibody_likeness" in c["scores"] for c in bare["candidates"])
+        assert with_model == without_model
+
+        antibody_likeness.reset_cache()
+
+    def test_missing_artifact_degrades_silently(self, monkeypatch):
+        from biochat.tool.antibody_design import antibody_likeness
+
+        monkeypatch.setenv("BIOCHAT_CDRH3_LM_PATH", "/nonexistent/cdrh3_model.json")
+        antibody_likeness.reset_cache()
+        assert antibody_likeness.score_antibody_likeness("WGGDGFYAMDY") is None
+        antibody_likeness.reset_cache()
+
+    def test_corrupt_artifact_degrades_silently(self, monkeypatch, tmp_path):
+        from biochat.tool.antibody_design import antibody_likeness
+
+        broken = tmp_path / "broken.json"
+        broken.write_text("{not valid json")
+        monkeypatch.setenv("BIOCHAT_CDRH3_LM_PATH", str(broken))
+        antibody_likeness.reset_cache()
+        assert antibody_likeness.score_antibody_likeness("WGGDGFYAMDY") is None
+        antibody_likeness.reset_cache()
+
+    def test_record_is_labelled_as_non_ranking_and_non_affinity(self):
+        from biochat.tool.antibody_design import antibody_likeness
+
+        antibody_likeness.reset_cache()
+        record = antibody_likeness.score_antibody_likeness("WGGDGFYAMDY")
+        if record is None:  # no trained artifact in this checkout
+            return
+        assert record["ranking_input"] is False
+        assert record["provenance"] == "model_inferred"
+        assert record["calibration"] == "uncalibrated"
+        # The pipeline forbids presenting computed scores as experimental ones.
+        for forbidden in ("affinity", "ΔG", "Kd"):
+            assert forbidden in record["interpretation"] or forbidden.lower() in record["interpretation"].lower()
+
+    def test_sequence_too_short_for_a_pair_yields_no_signal(self):
+        from biochat.tool.antibody_design import antibody_likeness
+
+        antibody_likeness.reset_cache()
+        assert antibody_likeness.score_antibody_likeness("A") is None
+        assert antibody_likeness.score_antibody_likeness("") is None
