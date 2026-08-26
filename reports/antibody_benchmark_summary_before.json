@@ -1,0 +1,118 @@
+{
+  "pass_rate": {
+    "approved_drug": 96.2,
+    "decoy_shuffled": 96.2,
+    "decoy_random": 42.3,
+    "pdb_antibody": 91.8
+  },
+  "score_stats": {
+    "approved_drug": {
+      "n": 26.0,
+      "mean": 68.35,
+      "min": 57.0,
+      "p5": 59.0,
+      "p25": 61.0,
+      "p50": 65.0,
+      "p75": 76.0,
+      "p95": 86.0,
+      "max": 88.0
+    },
+    "decoy_shuffled": {
+      "n": 26.0,
+      "mean": 68.27,
+      "min": 57.0,
+      "p5": 57.0,
+      "p25": 61.0,
+      "p50": 65.0,
+      "p75": 76.0,
+      "p95": 86.0,
+      "max": 88.0
+    },
+    "decoy_random": {
+      "n": 26.0,
+      "mean": 79.46,
+      "min": 59.0,
+      "p5": 62.0,
+      "p25": 76.0,
+      "p50": 84.0,
+      "p75": 86.0,
+      "p95": 86.0,
+      "max": 88.0
+    },
+    "pdb_antibody": {
+      "n": 231.0,
+      "mean": 71.82,
+      "min": 56.0,
+      "p5": 57.0,
+      "p25": 61.0,
+      "p50": 74.0,
+      "p75": 76.0,
+      "p95": 88.0,
+      "max": 88.0
+    }
+  },
+  "auc_vs_shuffled": 0.5,
+  "auc_vs_random": 0.212,
+  "rejected_drugs": [
+    {
+      "drug": "nivolumab",
+      "cdrh3": "NDDY",
+      "length": 4,
+      "flags": [
+        "cdrh3_length_out_of_allowed_range"
+      ]
+    }
+  ],
+  "gate_conflicts": {
+    "approved_drug": 1,
+    "decoy_shuffled": 1,
+    "decoy_random": 15,
+    "pdb_antibody": 19
+  },
+  "qc_gate_disagreement": 5,
+  "gold_flag_frequency": [
+    [
+      "cdrh3_length_outside_preferred_window",
+      19
+    ],
+    [
+      "high_aromatic_fraction",
+      17
+    ],
+    [
+      "high_single_aa_fraction",
+      7
+    ],
+    [
+      "hydrophobic_aromatic_cluster",
+      6
+    ],
+    [
+      "cdrh3_length_out_of_allowed_range",
+      1
+    ]
+  ],
+  "length_distribution": {
+    "n": 257.0,
+    "mean": 11.65,
+    "min": 4.0,
+    "p5": 6.0,
+    "p25": 9.0,
+    "p50": 11.0,
+    "p75": 13.0,
+    "p95": 18.2,
+    "max": 32.0
+  },
+  "aromatic_distribution": {
+    "n": 257.0,
+    "mean": 0.2944,
+    "min": 0.0,
+    "p5": 0.0769,
+    "p25": 0.2,
+    "p50": 0.3,
+    "p75": 0.375,
+    "p95": 0.5,
+    "max": 0.7
+  },
+  "n_calibration_pool": 257
+}

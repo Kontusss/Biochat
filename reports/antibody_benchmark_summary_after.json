@@ -1,0 +1,105 @@
+{
+  "pass_rate": {
+    "approved_drug": 100.0,
+    "decoy_shuffled": 100.0,
+    "decoy_random": 42.3,
+    "pdb_antibody": 95.2
+  },
+  "score_stats": {
+    "approved_drug": {
+      "n": 26.0,
+      "mean": 83.5,
+      "min": 65.0,
+      "p5": 67.0,
+      "p25": 81.5,
+      "p50": 88.0,
+      "p75": 88.0,
+      "p95": 88.0,
+      "max": 88.0
+    },
+    "decoy_shuffled": {
+      "n": 26.0,
+      "mean": 83.42,
+      "min": 63.0,
+      "p5": 67.0,
+      "p25": 80.0,
+      "p50": 88.0,
+      "p75": 88.0,
+      "p95": 88.0,
+      "max": 88.0
+    },
+    "decoy_random": {
+      "n": 26.0,
+      "mean": 36.62,
+      "min": 0.0,
+      "p5": 0.0,
+      "p25": 0.0,
+      "p50": 0.0,
+      "p75": 88.0,
+      "p95": 88.0,
+      "max": 88.0
+    },
+    "pdb_antibody": {
+      "n": 231.0,
+      "mean": 78.75,
+      "min": 0.0,
+      "p5": 53.0,
+      "p25": 76.0,
+      "p50": 86.0,
+      "p75": 88.0,
+      "p95": 88.0,
+      "max": 88.0
+    }
+  },
+  "auc_vs_shuffled": 0.5,
+  "auc_vs_random": 0.734,
+  "rejected_drugs": [],
+  "gate_conflicts": {
+    "approved_drug": 0,
+    "decoy_shuffled": 0,
+    "decoy_random": 0,
+    "pdb_antibody": 0
+  },
+  "qc_gate_disagreement": 6,
+  "gold_flag_frequency": [
+    [
+      "hydrophobic_aromatic_cluster",
+      6
+    ],
+    [
+      "cdrh3_length_outside_preferred_window",
+      3
+    ],
+    [
+      "high_single_aa_fraction",
+      3
+    ],
+    [
+      "high_aromatic_fraction",
+      3
+    ]
+  ],
+  "length_distribution": {
+    "n": 257.0,
+    "mean": 11.65,
+    "min": 4.0,
+    "p5": 6.0,
+    "p25": 9.0,
+    "p50": 11.0,
+    "p75": 13.0,
+    "p95": 18.2,
+    "max": 32.0
+  },
+  "aromatic_distribution": {
+    "n": 257.0,
+    "mean": 0.2944,
+    "min": 0.0,
+    "p5": 0.0769,
+    "p25": 0.2,
+    "p50": 0.3,
+    "p75": 0.375,
+    "p95": 0.5,
+    "max": 0.7
+  },
+  "n_calibration_pool": 257
+}

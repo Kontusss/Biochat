@@ -255,3 +255,6 @@ outputs/
 
 # 本地测试用结构文件（RCSB 下载的 PDB，不进仓库）
 her2_structure/
+
+# Generated presentation artifacts (regenerate: scripts/make_arch_slide.py)
+*.pptx
