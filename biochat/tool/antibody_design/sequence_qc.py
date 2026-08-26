@@ -17,6 +17,17 @@ import re
 from collections import Counter
 from typing import Any, Dict, List, Optional, Tuple
 
+from biochat.tool.antibody_design.generation_filter import (
+    ALLOWED_MAX_LEN,
+    ALLOWED_MIN_LEN,
+    PREFERRED_MAX_LEN,
+    PREFERRED_MIN_LEN,
+)
+
+# Minimum absolute count before the single-AA *fraction* rule may hard-fail a
+# sequence.  Calibrated on 257 real CDR-H3s — see generation_filter.
+SINGLE_AA_MIN_COUNT = 4
+
 VALID_AAS = set("ACDEFGHIKLMNPQRSTVWY")
 AROMATIC_AAS = set("YFW")
 ACIDIC_AAS = set("DE")
@@ -143,13 +154,13 @@ def evaluate_cdrh3_sequence(
     Hard rules (→ fail):
     - Empty sequence
     - Invalid amino acids
-    - Length < 8 or > 22
+    - Length outside ALLOWED_MIN_LEN..ALLOWED_MAX_LEN (shared with generation_filter)
     - Extra Cys in CDRH3 (unless designed_disulfide + structure validated)
     - Max identical run >= 5
     - Excessive single-AA fraction > 0.35
 
     Soft rules (→ warning):
-    - Length 8–10 or 18–22
+    - Length outside PREFERRED_MIN_LEN..PREFERRED_MAX_LEN
     - N-glycosylation motif present
     - Hydrophobic run >= 4
     - Identical run == 4
@@ -194,29 +205,30 @@ def evaluate_cdrh3_sequence(
     metrics["length"] = length
 
     # ── CDRH3 length rules ──────────────────────────────────────────────
-    # 11–17 aa: pass
-    # 8–10 or 18–22 aa: warning
-    # <8 or >22 aa: fail
-    if length < 8:
+    # Thresholds are imported from generation_filter so the two gates cannot
+    # drift apart.  They were previously independent (fail <8 or >22 here,
+    # <6 or >26 there), which let the same sequence pass one gate and fail the
+    # other.  See generation_filter for the calibration data.
+    if length < ALLOWED_MIN_LEN:
         status = _escalate_status(status, "fail")
         penalty += 10000.0
         flags.append("cdrh3_length_high_risk")
-        notes.append(f"CDRH3 too short: {length} aa (<8)")
-    elif length > 22:
+        notes.append(f"CDRH3 too short: {length} aa (<{ALLOWED_MIN_LEN})")
+    elif length > ALLOWED_MAX_LEN:
         status = _escalate_status(status, "fail")
         penalty += 10000.0
         flags.append("cdrh3_length_high_risk")
-        notes.append(f"CDRH3 too long: {length} aa (>22)")
-    elif 8 <= length <= 10:
+        notes.append(f"CDRH3 too long: {length} aa (>{ALLOWED_MAX_LEN})")
+    elif length < PREFERRED_MIN_LEN:
         status = _escalate_status(status, "warning")
         penalty += 100.0
         flags.append("cdrh3_length_outside_preferred_window")
-        notes.append(f"CDRH3 length {length} is below preferred 11–17 window")
-    elif 18 <= length <= 22:
+        notes.append(f"CDRH3 length {length} is below the preferred {PREFERRED_MIN_LEN}–{PREFERRED_MAX_LEN} window")
+    elif length > PREFERRED_MAX_LEN:
         status = _escalate_status(status, "warning")
         penalty += 50.0
         flags.append("cdrh3_length_outside_preferred_window")
-        notes.append(f"CDRH3 length {length} is above preferred 11–17 window")
+        notes.append(f"CDRH3 length {length} is above the preferred {PREFERRED_MIN_LEN}–{PREFERRED_MAX_LEN} window")
 
     # ── Extra Cys in CDRH3 ──────────────────────────────────────────────
     cys_count = counts.get("C", 0)
@@ -300,11 +312,16 @@ def evaluate_cdrh3_sequence(
     metrics["dominant_aa"] = max_aa
     metrics["dominant_aa_fraction"] = round(max_fraction, 3)
 
-    if max_fraction > 0.35:
+    # A bare fraction is unreliable on short loops — in a 4aa CDR-H3 a single
+    # repeat already reads as 50%.  Requiring a minimum absolute count removes
+    # that artefact: on the 257 real CDR-H3s in the benchmark it drops the
+    # false-positive rate from 16.0% to 10.5% (the P90 target) and eliminates
+    # all seven short-sequence false positives, including nivolumab's `NDDY`.
+    if max_fraction > 0.35 and max_count >= SINGLE_AA_MIN_COUNT:
         status = _escalate_status(status, "fail")
         penalty += 10000.0
         flags.append(f"excessive_single_aa_{max_aa}_fraction")
-        notes.append(f"Single AA ({max_aa}) fraction {max_fraction:.2f} > 0.35")
+        notes.append(f"Single AA ({max_aa}) fraction {max_fraction:.2f} > 0.35 ({max_count} residues)")
     elif max_fraction >= 0.25:
         status = _escalate_status(status, "warning")
         penalty += 100.0
