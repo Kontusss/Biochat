@@ -1,0 +1,258 @@
+cohort,drug,pdb_entity,chain_description,chain_length,cdrh3,cdrh3_length,aromatic_fraction,extraction_start,extraction_end,n_structures,n_agreeing
+gold,trastuzumab,6BHZ_1,Trastuzumab Anti-HER2 Fab Heavy Chain,225,WGGDGFYAMDY,11,0.3636,98,109,6,5
+gold,bevacizumab,7V5N_2,bevacizumab fab heavy chain,231,YPHYYGSSHWYFDV,14,0.4286,98,112,1,1
+gold,rituximab,2OSL_2,"heavy chain of the Rituximab Fab fragment,heavy chain of the Rituximab Fab fragment",224,STYYGGDWYFNV,12,0.4167,98,110,5,5
+gold,adalimumab,3WD5_3,Adalimumab Heavy Chain,219,VSYLSTASSLDY,12,0.1667,98,110,4,4
+gold,nivolumab,5GGQ_2,nivolumab heavy chain,225,NDDY,4,0.25,98,102,2,2
+gold,pembrolizumab,5B8C_2,Pembrolizumab heavy chain variable region (PemVH),120,RDYRFDMGFDY,11,0.3636,98,109,2,2
+gold,infliximab,5VH3_1,Infliximab Fab Heavy Chain,226,NYYGSTYDY,9,0.4444,100,109,4,4
+gold,cetuximab,1YY8_2,Cetuximab Fab Heavy chain,221,ALTYYDYEFAY,11,0.4545,97,108,4,4
+gold,ipilimumab,5TRU_2,Ipilimumab Fab heavy chain,225,TGWLGPFDY,9,0.3333,98,107,4,4
+gold,ustekinumab,3HMW_2,USTEKINUMAB FAB HEAVY CHAIN,226,RRPGQGYFDF,10,0.3,98,108,2,2
+gold,tocilizumab,8J6F_1,Heavy chain of Tocilizumab Fab,226,SLARTTAMDY,10,0.1,98,108,1,1
+gold,omalizumab,2XA8_1,OMALIZUMAB HEAVY CHAIN,219,GSHYFGHWHFAV,12,0.3333,98,110,6,6
+gold,natalizumab,4IRZ_3,Fab Natalizumab heavy chain,222,EGYYGNYGVYAMDY,14,0.3571,98,112,3,3
+gold,eculizumab,5I5K_2,Eculizumab heavy chain (variable domain),230,YFFGSSPNWYFDV,13,0.4615,98,111,1,1
+gold,atezolizumab,5X8L_3,atezolizumab heavy chain,230,RHWPGGFDY,9,0.3333,98,107,2,2
+gold,durvalumab,5X8M_2,durvalumab heavy chain,235,EGGWFGELAFDY,12,0.3333,98,110,2,2
+gold,panitumumab,5SX4_2,Panitumumab Fab Heavy Chain,221,DRVTGAFDI,9,0.1111,99,108,2,2
+gold,golimumab,5YOY_3,Golimumab heavy chain variable region,129,DRGIAAGGNYYYYGMDV,17,0.2353,101,118,1,1
+gold,canakinumab,4G5Z_1,canakinumab antibody fragment heavy chain,218,DLRTGPFDY,9,0.2222,98,107,4,4
+gold,secukinumab,9SFX_2,Secukinumab Fv heavy-chain,133,DYYDILTDYYIHYWYFDL,18,0.4444,98,116,1,1
+gold,dupilumab,6WG8_1,Dupilumab Fab heavy chain,234,DRLSITIRPRYYGLDV,16,0.125,98,114,5,5
+gold,obinutuzumab,6Y97_2,Obinutuzumab Fab heavy chain,116,NVFDGYWLVY,10,0.4,97,107,2,2
+gold,ofatumumab,3GIZ_2,"Fab fragment of anti-CD20 antibody Ofatumumab, heavy chain",222,DIQYGNYYYGMDV,13,0.3077,98,111,2,2
+gold,pertuzumab,4LLU_1,PERTUZUMAB FAB Heavy chain,227,NLGPSFYFDY,10,0.4,98,108,4,4
+gold,belimumab,5Y9J_2,belimumab heavy chain,235,SRDLLLFPHHALSP,14,0.0714,98,112,3,3
+gold,basiliximab,3IU3_1,Heavy chain of Fab fragment of Basiliximab,215,DYGYYFDF,8,0.625,96,104,1,1
+distribution,,12E8_2,IGG1-KAPPA 2E8 FAB (HEAVY CHAIN),221,GHDYDRGRFPY,11,0.2727,98,109,1,1
+distribution,,1A5F_2,MONOCLONAL ANTI-E-SELECTIN 7A9 ANTIBODY (HEAVY CHAIN),217,VGLSYWYAMDY,11,0.3636,98,109,1,1
+distribution,,1A6T_2,IGG1 FAB1-IA FAB (HEAVY CHAIN),217,RDDYYFDF,8,0.5,98,106,1,1
+distribution,,1AD0_2,ANTIBODY A5B7 (HEAVY CHAIN),220,DRGLRFYFDY,10,0.4,100,110,1,1
+distribution,,1AD9_2,IGG CTM01 FAB (HEAVY CHAIN),219,EKTTYYYAMDY,11,0.3636,98,109,1,1
+distribution,,1ADQ_3,IGM-LAMBDA RF-AN FAB (HEAVY CHAIN),225,TRSYVVAAEYYFHY,14,0.3571,98,112,1,1
+distribution,,1AIF_2,ANTI-IDIOTYPIC FAB 409.5.3 (IGG2A) FAB (HEAVY CHAIN),218,RPLFYYAVDY,10,0.4,100,110,1,1
+distribution,,1AY1_2,TP7 FAB,213,YYYGYWYFDV,10,0.7,98,108,1,1
+distribution,,1B2W_2,PROTEIN (ANTIBODY (HEAVY CHAIN)),220,GFLPWFAD,8,0.375,98,106,1,1
+distribution,,1BAF_2,IGG1-KAPPA AN02 FAB (HEAVY CHAIN),217,GWPLAY,6,0.3333,98,104,1,1
+distribution,,1BBJ_2,IGG4-KAPPA B72.3 FAB (HEAVY CHAIN),212,SYYGH,5,0.4,98,103,1,1
+distribution,,1BFO_2,CAMPATH-1G ANTIBODY,216,EGHTAAPFDY,10,0.2,100,110,1,1
+distribution,,1BM3_2,"IMMUNOGLOBULIN OPG2 FAB, VARIABLE DOMAIN",227,HPFYRYDGGNYYAMDH,16,0.3125,98,114,1,1
+distribution,,1BQL_2,HYHEL-5 FAB (HEAVY CHAIN),215,GNYDFDG,7,0.2857,98,105,1,1
+distribution,,1CGS_2,IGG2B-KAPPA NC6.8 FAB (HEAVY CHAIN),214,GYSSMDY,7,0.2857,98,105,1,1
+distribution,,1CR9_2,FAB ANTIBODY HEAVY CHAIN,217,DLHDY,5,0.2,98,103,1,1
+distribution,,1DBA_2,IGG1-KAPPA DB3 FAB (HEAVY CHAIN),219,GDYVNWYFDV,10,0.4,98,108,1,1
+distribution,,1DN0_2,IGM-KAPPA COLD AGGLUTININ (HEAVY CHAIN),232,PPHDTSGHYWNY,12,0.25,97,109,1,1
+distribution,,1DQD_2,FAB HGR-2 F6,222,PPGYYGSGPYAMDY,14,0.2857,97,111,1,1
+distribution,,1E6O_1,IMMUNOGLOBULIN HEAVY CHAIN,219,PVVRLGYNFDY,11,0.2727,98,109,1,1
+distribution,,1EAP_2,IGG2B-KAPPA 17E8 FAB (HEAVY CHAIN),216,SYYGSSYVDY,10,0.4,98,108,1,1
+distribution,,1EMT_2,IGG ANTIBODY (HEAVY CHAIN),213,SSAY,4,0.25,98,102,1,1
+distribution,,1F4W_2,"ANTIBODY S-20-4, FAB FRAGMENT, HEAVY CHAIN",216,HFYAVLDY,8,0.375,98,106,1,1
+distribution,,1F8T_2,ANTIBODY FAB FRAGMENT (HEAVY CHAIN),220,YDDYTWFTY,9,0.5556,98,107,1,1
+distribution,,1FAI_2,IGG2B-KAPPA R19.9 FAB (HEAVY CHAIN),221,SFYGGSDLAVYYFDS,15,0.3333,98,113,1,1
+distribution,,1FGN_2,IMMUNOGLOBULIN FAB 5G9,214,DNSYYFDY,8,0.5,98,106,1,1
+distribution,,1FIG_2,IGG1-KAPPA 1F7 FAB (HEAVY CHAIN),216,RRDGNYGFTY,10,0.3,98,108,1,1
+distribution,,1FOR_2,IGG2A-KAPPA 17-IA FAB (HEAVY CHAIN),219,SGNYPYAMDY,10,0.3,98,108,1,1
+distribution,,1FSK_3,ANTIBODY HEAVY CHAIN FAB,220,GARDTWFAY,9,0.3333,98,107,1,1
+distribution,,1FVD_2,IGG1-KAPPA 4D5 FAB (HEAVY CHAIN),223,WGGDGFYAMDV,11,0.2727,98,109,1,1
+distribution,,1FVE_2,IGG1-KAPPA 4D5 FAB (HEAVY CHAIN),223,WGGDGFYAMDY,11,0.3636,98,109,1,1
+distribution,,1GIG_2,IGG1-KAPPA HC19 FAB (HEAVY CHAIN),221,DFYDYDVFYYAMDY,14,0.5,97,111,1,1
+distribution,,1H3P_1,ANTIBODY FAB FRAGMENT,219,FNWDVAY,7,0.4286,98,105,1,1
+distribution,,1HIL_2,IGG2A-KAPPA 17/9 FAB (HEAVY CHAIN),220,RERYDENGFAY,11,0.2727,98,109,1,1
+distribution,,1I8M_4,ANTIBODY HEAVY CHAIN FAB,224,GGYRPYYAMDY,11,0.3636,98,109,1,1
+distribution,,1I9I_2,RECOMBINANT MONOCLONAL ANTI-TESTOSTERONE FAB FRAGMENT HEAVY CHAIN,220,EYYGYVGLAY,10,0.4,97,107,1,1
+distribution,,1IAI_2,IDIOTYPIC FAB 730.1.4 (IGG1) OF VIRUS NEUTRALIZING ANTIBODY,219,DGYYENYYAMDY,12,0.4167,98,110,1,1
+distribution,,1IBG_2,IGG2B-KAPPA 40-50 FAB (HEAVY CHAIN),217,FRFASYYDYAVDY,13,0.4615,96,109,1,1
+distribution,,1IGC_2,IGG1-KAPPA MOPC21 FAB (HEAVY CHAIN),222,WGNYPYYAMDY,11,0.4545,98,109,1,1
+distribution,,1IGF_2,IGG1-KAPPA B13I2 FAB (HEAVY CHAIN),221,YSSDPFYFDY,10,0.5,98,108,1,1
+distribution,,1IKF_2,IGG1-KAPPA R45-45-11 FAB (HEAVY CHAIN),228,HTLYDTLYGNYPVWFAD,17,0.2941,98,115,1,1
+distribution,,1IL1_1,monoclonal antibody G3-519 (heavy chain),219,ISTTRDYYALDY,12,0.25,96,108,1,1
+distribution,,1JN6_2,monoclonal anti-estradiol 10G6D6 Fab heavy chain,218,GRSLYYTMDY,10,0.3,98,108,1,1
+distribution,,1JPT_2,"immunoglobulin Fab D3H44, heavy chain",225,DTAAYFDY,8,0.375,98,106,1,1
+distribution,,1K4C_1,antibody Fab fragment heavy chain,219,ERGDGYFAV,9,0.2222,98,107,1,1
+distribution,,1KEG_3,Anti-(6-4) photoproduct antibody 64M-2 Fab (heavy chain),220,RSGYKYYALDY,11,0.3636,98,109,1,1
+distribution,,1KEL_2,28B4 FAB,218,WGSYAMDY,8,0.375,100,108,1,1
+distribution,,1KNO_2,IGG2A FAB FRAGMENT CNJ206,220,GDYYGSRGAY,10,0.3,98,108,1,1
+distribution,,1M71_2,heavy chain of the monoclonal antibody Fab SYA/J6,220,GGAVGAMDY,9,0.1111,100,109,1,1
+distribution,,1MCP_2,IGA-KAPPA MCPC603 FAB (HEAVY CHAIN),222,NYYGSTWYFDV,11,0.4545,100,111,1,1
+distribution,,1MEX_2,Fab 29G12 heavy chain,215,EYLDY,5,0.4,98,103,1,1
+distribution,,1MFA_2,IGG1-LAMBDA SE155-4 FAB (HEAVY CHAIN),120,GGHGYYGDY,9,0.3333,98,107,1,1
+distribution,,1MHH_2,"Fab, heavy chain",217,FLLRQYFDV,9,0.3333,98,107,1,1
+distribution,,1MLB_2,IGG1-KAPPA D44.1 FAB (HEAVY CHAIN),218,GDGNYGY,7,0.2857,98,105,1,1
+distribution,,1MRC_2,IGG2B-KAPPA JEL103 FAB (HEAVY CHAIN),215,LRGYFDY,7,0.4286,98,105,1,1
+distribution,,1NAK_2,Fab 83.1 - heavy chain,214,DDFDI,5,0.2,97,102,1,1
+distribution,,1PKQ_2,"(8-18C5) chimeric Fab, heavy chain",252,GNTMVNMPY,9,0.1111,119,128,1,1
+distribution,,1Q0X_2,"Fab 9B1, heavy chain",221,WVLDYYGMDY,10,0.4,98,108,1,1
+distribution,,1Q1J_2,"Fab 447-52D, heavy chain",231,DGFIMIRGVSEDYYYYYMDV,20,0.3,100,120,1,1
+distribution,,1Q72_2,"Fab M82G2, Heavy chain",223,VPQLGRGFAY,10,0.2,100,110,1,1
+distribution,,1Q9K_2,S25-2 Fab (IgG1k) heavy chain,222,DHDGYYERFSY,11,0.3636,100,111,1,1
+distribution,,1Q9O_1,S45-2 Fab (IgG1k) heavy chain,226,DIYSFGSRDGMDY,13,0.2308,100,113,1,1
+distribution,,1RHH_2,"Fab X5, heavy chain",239,DFGPDWEDGDSYDGSGRGFFDF,22,0.2727,99,121,1,1
+distribution,,1RMF_2,IGG2A-KAPPA R6.5 FAB (HEAVY CHAIN),216,GGWLLLSFDY,10,0.3,98,108,1,1
+distribution,,1RZ7_2,Fab 48d heavy chain,219,DPWELNAFNV,10,0.2,98,108,1,1
+distribution,,1RZ8_2,Fab 17b heavy chain,228,VYEGEADEGEYDNNGFLKH,19,0.1579,98,117,1,1
+distribution,,1RZF_2,Fab E51 heavy chain,235,NSIAGVAAAGDYADYDGGYYYDMDV,25,0.2,98,123,1,1
+distribution,,1RZG_1,Fab 412d light chain,231,PYPNDYNDYAPEEGMSWYFDL,21,0.2857,98,119,1,1
+distribution,,1RZI_2,Fab 47e heavy chain,230,GGEDGDYLSDPFYYNHGMDV,20,0.2,98,118,1,1
+distribution,,1U6A_2,F105 HEAVY CHAIN,224,GPVPAVFYGDYRLDP,15,0.2,97,112,1,1
+distribution,,1UZ6_2,"IGG FAB (IGG3, KAPPA) HEAVY CHAIN 291-2G3-A",217,ETGTRFDY,8,0.25,98,106,1,1
+distribution,,1WC7_2,"FAB FRAGMENT OF CATALYTIC ANTIBODY 15A9, HEAVY CHAIN",226,DKGSYGNYEAWFAY,14,0.3571,100,114,1,1
+distribution,,1XGY_2,K42-41L Fab Heavy Chain,219,TVSYVMDY,8,0.25,98,106,1,1
+distribution,,1Y0L_2,Catalytic Antibody Fab 34E4 Heavy chain,226,LDFDVYNHYYVLDY,14,0.3571,98,112,1,1
+distribution,,1YED_2,IGG1 FAB FRAGMENT (D.2.4),226,WGFTTVRENYYAMDY,15,0.3333,98,113,1,1
+distribution,,1YUH_2,88C6/12 FAB (HEAVY CHAIN),218,YAYCRPMDY,9,0.3333,98,107,1,1
+distribution,,1Z3G_2,2A8 Fab Heavy Chain,216,GWDVAY,6,0.3333,98,104,1,1
+distribution,,1ZAN_2,Fab AD11 Heavy Chain,224,DGGYSSSTLYAMDA,14,0.1429,97,111,1,1
+distribution,,2A6D_2,Germline antibody 36-65 Fab Heavy chain,222,SVYYGGSYYFDY,12,0.5,98,110,1,1
+distribution,,2ADG_2,Q425 Fab heavy chain,222,HEDGNWNYFDY,11,0.3636,98,109,1,1
+distribution,,2B1H_2,"Fab 2219, heavy chain",226,LGGDYEDSGADAFDF,15,0.2,98,113,1,1
+distribution,,2F58_2,PROTEIN (IGG1 FAB 58.2 ANTIBODY (HEAVY CHAIN)),228,EEAMPYGNQAYYYAMDC,17,0.2353,98,115,1,1
+distribution,,2FB4_2,IGG1-LAMBDA KOL FAB (HEAVY CHAIN),229,DGGHGFCSSASCFGPDY,17,0.1765,98,115,1,1
+distribution,,2FBJ_2,IGA-KAPPA J539 FAB (HEAVY CHAIN),220,LHYYGYNAY,9,0.4444,98,107,1,1
+distribution,,2FGW_2,H52 FAB (HEAVY CHAIN),232,WRGLNYGFDVRYFDV,15,0.3333,98,113,1,1
+distribution,,2G60_2,anti-FLAG M2 Fab heavy chain,215,AAAAGADY,8,0.125,98,106,1,1
+distribution,,2GSI_2,Immunoglobulin (gamma) heavy chain (VH + CH1 fragment),221,GVITMMGYQAMDY,13,0.1538,97,110,1,1
+distribution,,2HFF_2,"CB2 Fab, heavy chain",232,RVCYNRLGVCAGGMDY,16,0.125,98,114,1,1
+distribution,,2HKH_2,Immunoglobulin Heavy chain Fab fragment,218,YGNHPFAY,8,0.375,100,108,1,1
+distribution,,2HWZ_2,Immunoglobulin Fab heavy chain,227,SMITNWYFDV,10,0.3,99,109,1,1
+distribution,,2J4W_2,FAB FRAGMENT OF MONOCLONAL ANTIBODY F8.12.19,225,DGPTDSSGYGGFGY,14,0.2143,98,112,1,1
+distribution,,2JB6_2,FAB FRAGMENT MOR03268 HEAVY CHAIN,244,YFMSYKHLSDY,11,0.3636,98,109,1,1
+distribution,,2OK0_3,Fab ED10 heavy chain,216,WTYGSSFDY,9,0.4444,96,105,1,1
+distribution,,2PR4_2,nmAb 2F5 Fab' light Chain,235,RRGPTTLFGVPIARGPVNAMDV,22,0.0455,99,121,1,1
+distribution,,2Q76_2,Fab F10.6.6 fragment Heavy Chain,216,GDGFYVY,7,0.4286,98,105,1,1
+distribution,,2W9D_1,ICSM 18-ANTI-PRP THERAPEUTIC FAB HEAVY CHAIN,215,YYYDVSY,7,0.5714,98,105,1,1
+distribution,,2Z4Q_2,"anti egfr antibody fab, heavy chain",218,SGGPYFFDY,9,0.4444,98,107,1,1
+distribution,,2Z91_1,Anti-ciguatoxin antibody 10C9 FAB heavy chain,218,DDFYSDY,7,0.4286,96,103,1,1
+distribution,,2ZKH_2,Monoclonal TN1 FAB heavy chain,217,WSFLY,5,0.6,100,105,1,1
+distribution,,3BKC_2,WO2 IgG2a Fab fragment Heavy Chain,228,RGFYGRKYEVNHFDY,15,0.3333,99,114,1,1
+distribution,,3BQU_4,3H6 Fab heavy chain,241,TSIGYGSSPPFPY,13,0.2308,117,130,1,1
+distribution,,3C08_2,Matuzumab Fab Heavy chain,223,RDYDYDGRYFDY,12,0.4167,98,110,1,1
+distribution,,3E8U_1,Fab 106.3 heavy chain,217,SHRFGLDY,8,0.25,98,106,1,1
+distribution,,3EO9_2,"Efalizumab Fab fragment, heavy chain",219,GIYFYGTTYFDY,12,0.5,98,110,1,1
+distribution,,3EYU_2,PFA1 Fab Heavy Chain,226,RAHTTVLGDWFAY,13,0.2308,99,112,1,1
+distribution,,3EYV_2,"hu3S193 Fab, heavy chain",222,GTRDGSWFAY,10,0.3,98,108,1,1
+distribution,,3G6A_2,CNTO607 Fab Heavy chain,229,GLGAFHWDMQPDY,13,0.2308,98,111,1,1
+distribution,,3GGW_2,FAB F22-4 HEAVY CHAIN,217,PMDY,4,0.25,100,104,1,1
+distribution,,3GK8_2,Fab 14 Heavy Chain,220,RGFHGSYSFAY,11,0.3636,97,108,1,1
+distribution,,3HMW_2,USTEKINUMAB FAB HEAVY CHAIN,226,RRPGQGYFDF,10,0.3,98,108,1,1
+distribution,,3HNS_1,CS-35 Fab Heavy Chain,220,FGNYVPFAY,9,0.4444,98,107,1,1
+distribution,,3HZK_2,S73-2 Fab (IgG1k) heavy chain,226,DINPGSDGYYDALDY,15,0.2,100,115,1,1
+distribution,,3J7E_2,H16.V5 Fab heavy chain,121,PPYYYGTTYYFDY,13,0.5385,98,111,1,1
+distribution,,3LMJ_1,Heavy chain of anti HIV Fab from human 21c antibody,231,GGNYYNLWTGYYPLAY,16,0.375,98,114,1,1
+distribution,,3LS5_2,Heavy chain of antibody Fab fragment,219,GTTIVAGDV,9,0.0,97,106,1,1
+distribution,,3MJ8_2,STIMULATORY HAMSTER ANTIBODY HL4E10 FAB HEAVY CHAIN,223,HFYTYFDV,8,0.5,97,105,1,1
+distribution,,3MLS_2,Human monoclonal anti-HIV-1 gp120 V3 antibody 2557 Fab heavy chain,226,LYLFEGAQSSNAFDL,15,0.2,98,113,1,1
+distribution,,3MLY_2,Human monoclonal anti-HIV-1 gp120 V3 antibody 3074 Fab heavy chain,230,DFGEYHYDGRGFQCEGFDL,19,0.2632,97,116,1,1
+distribution,,3NFS_2,Light chain of Fab fragment of daclizumab,216,GGGVFDY,7,0.2857,98,105,1,1
+distribution,,3O6K_2,11H6H1 Fab' heavy chain,219,DYDYGVDY,8,0.375,98,106,1,1
+distribution,,3OKD_2,S25-39 Fab (IgG1k) heavy chain,222,DHDGYYERFAY,11,0.3636,100,111,1,1
+distribution,,3PHO_2,S64-4 Fab (IgG1) heavy chain,222,DIGYGNSPFAY,11,0.2727,100,111,1,1
+distribution,,3Q6G_2,Heavy chain of Fab of rhesus mAb 2.5B,234,IDVVITSHEDDFGDYYTGEYYGLDS,25,0.2,98,123,1,1
+distribution,,3QNX_2,Fab fragment of IMMUNOGLOBULIN A1 HEAVY CHAIN,221,RGDVYNRQ,8,0.125,100,108,1,1
+distribution,,3R06_2,anti-mouse CD3epsilon antibody 2C11 Fab heavy chain,216,FDWDKNY,7,0.4286,98,105,1,1
+distribution,,3S96_1,3B5H10 FAB heavy chain,220,GGDNYLWFAY,10,0.4,98,108,1,1
+distribution,,3V0V_2,WN1 222-5 Fab (IgG2a) heavy chain,220,QGRGYTLDY,9,0.2222,100,109,1,1
+distribution,,3V6F_1,Fab e6 Heavy Chain,224,EGAYSGSSSYPMDY,14,0.2143,98,112,1,1
+distribution,,3WII_2,anti-human ROBO1 antibody B2212A Fab heavy chain,220,FSNYVYPFDY,10,0.5,98,108,1,1
+distribution,,4DCQ_2,3B5H10 FAB Heavy Chain,218,GGNNFLWFAY,10,0.4,98,108,1,1
+distribution,,4F57_2,Heavy chain of Fab of a neutralizing antibody L1,226,HRSQWNFWPREGGLDH,16,0.1875,98,114,1,1
+distribution,,4FZE_2,N26_i1 Fab heavy chain,232,TVYYDILTGLYTNFHY,16,0.3125,98,114,1,1
+distribution,,4GSD_2,H5.3 Fab Heavy Chain,226,VALFDILTGGWFDP,14,0.2143,98,112,1,1
+distribution,,4GW5_2,Fab Heavy Chain,221,ALTYYDYEFAY,11,0.4545,97,108,1,1
+distribution,,4H20_2,Heavy chain of Fab Fragment from the  anti-Ricin Monoclonal Antibody RAC18,220,RGLTGALFAY,10,0.2,98,108,1,1
+distribution,,4HXA_2,13D9 FAB HEAVY CHAIN,221,SRGRTLDY,8,0.125,100,108,1,1
+distribution,,4HXB_2,6B9 FAB HEAVY CHAIN,215,LRAVDY,6,0.1667,98,104,1,1
+distribution,,4ISV_2,1C2 FAB HEAVY CHAIN,221,RRSDGYSNYFDY,12,0.3333,98,110,1,1
+distribution,,4K7P_2,antibody rhumAb6 Fab fragment heavy chain,230,VVYYSASYWYFDV,13,0.4615,98,111,1,1
+distribution,,4K7P_3,antibody 10C4 Fab fragment heavy chain,226,EGNLWGNYANWFFDV,15,0.3333,98,113,1,1
+distribution,,4KI5_1,MURINE MONOCLONAL 3E6 FAB HEAVY CHAIN,219,EDDGLAS,7,0.0,98,105,1,1
+distribution,,4KI5_3,MURINE MONOCLONAL G99 FAB HEAVY CHAIN,224,TSYYFGSSYDFDV,13,0.3846,98,111,1,1
+distribution,,4LEX_2,FAB LIGHT CHAIN,217,VDNSAALDY,9,0.1111,97,106,1,1
+distribution,,4M61_2,Fab A52 heavy chain,220,GRLRRGGYFDY,11,0.2727,98,109,1,1
+distribution,,4M7Z_1,S25-26 Fab (Igg1k) Heavy Chain,219,MRITTDWFAY,10,0.3,97,107,1,1
+distribution,,4NGH_2,FAB HEAVY CHAIN,228,EGTTGWGWLGKPIGAFAH,18,0.1667,98,116,1,1
+distribution,,4NKI_1,Fab light chain,232,IKLGTVTTVDY,11,0.0909,98,109,1,1
+distribution,,4ODS_1,S55-3 Fab (IgG2b) heavy chain,222,HKGLRGGTNAMDY,13,0.0769,98,111,1,1
+distribution,,4ODT_1,S1-15 Fab (IgG2b) heavy chain,226,HRGAPLYYGNGAWFAY,16,0.3125,100,116,1,1
+distribution,,4ODV_2,A6 Fab (IgG2b) heavy chain,222,LYGNYVRIHTMDY,13,0.2308,98,111,1,1
+distribution,,4S2S_1,RoAb13 Fab Heavy chain,224,GRGDRGDLFGY,11,0.1818,97,108,1,1
+distribution,,4TPR_2,Fab heavy chain,221,RGGMITTDFFDY,12,0.25,98,110,1,1
+distribution,,4X0K_1,Fab fragment heavy chain,242,RGGSSHYYAMDY,12,0.25,99,111,1,1
+distribution,,4X7T_1,Omalizumab-Fab Heavy chain,222,GSHYFGHWHFAV,12,0.3333,98,110,1,1
+distribution,,5AZ2_1,anti-human epiregulin antibody 9E5 Fab heavy chain,222,GGGDPVFVY,9,0.2222,98,107,1,1
+distribution,,5B4M_1,Fab heavy chain,221,HPLIYHGNYLDY,12,0.25,98,110,1,1
+distribution,,5CHN_1,Antibody 5M16 Fab Heavy Chain,222,GAHRSIGTTPLDS,13,0.0,98,111,1,1
+distribution,,5DQD_2,S55-5 Fab (IgG1) heavy chain,222,HKGLRRGTNAMDY,13,0.0769,98,111,1,1
+distribution,,5I8K_2,HHH1 Fab Heavy chain,222,GAPAWGTANV,10,0.1,95,105,1,1
+distribution,,5IHU_2,bovine Fab B11 heavy chain,273,SCGGASACRDWWPYRSICSSDNTYTYEFHVDA,32,0.1875,128,160,1,1
+distribution,,5IJV_2,bovine Fab E03 heavy chain,254,GSRLIGNDCRNEDGDDVNYITTFDYEWYVDA,31,0.1613,110,141,1,1
+distribution,,5ILT_2,bovine Fab A01 heavy chain,271,LCPSDWQLTLHCHRLDSSTYTYDWHVET,28,0.1429,130,158,1,1
+distribution,,5JO4_1,D80 Fab Heavy Chain,228,GLYYYESSLDY,11,0.3636,101,112,1,1
+distribution,,5JO4_3,G6 Fab Heavy Chain,222,SRYGNNALDY,10,0.2,96,106,1,1
+distribution,,5MTH_1,antibody Fab heavy chain,221,DYYGTSFAMDY,11,0.3636,98,109,1,1
+distribution,,5NIV_2,Heavy chain of 5D3 Fab,221,FYGAKGTLDY,10,0.3,98,108,1,1
+distribution,,5UBZ_1,Anti-HIV1 gp120 mAb 1E12 Fab heavy chain,228,QWRYSSGSLDC,11,0.1818,105,116,1,1
+distribution,,5UIX_1,DH576 Fab heavy chain,230,DRARSTGYFGGIYYYYYGMDV,21,0.3333,98,119,1,1
+distribution,,5VSH_1,CH1/Clambda Fab heavy chain,219,NLGPSFYFDY,10,0.4,98,108,1,1
+distribution,,5VZ1_2,Apo Antibody Fab Heavy Chain,235,WSYDQSMSYKSGMDY,15,0.2667,101,116,1,1
+distribution,,5WTG_2,FAB Heavy chain,221,RVTTVAEYYFDY,12,0.3333,98,110,1,1
+distribution,,5X4G_1,6H8 Fab heavy chain,241,YDYEY,5,0.6,119,124,1,1
+distribution,,5XAJ_1,FabHM14c10 heavy chain,227,GIAGGWAFWGIDL,13,0.2308,98,111,1,1
+distribution,,5XAJ_4,Fab E1 heavy chain,215,GLPVDY,6,0.1667,98,104,1,1
+distribution,,5YFI_2,Heavy chain of Fab fragment,253,RWYTYDGDWFAY,12,0.5,117,129,1,1
+distribution,,5YUP_1,the heavy chain of the Fab fragment of FVIIa antibody mAb4F5,219,DDGYYRVDY,9,0.3333,97,106,1,1
+distribution,,5ZMJ_1,Heavy chain of a Fab fraction of human IgG,248,RPPRFYDKTEYWEDGFDV,18,0.2778,117,135,1,1
+distribution,,6BPB_1,Monoclonal antibody 4F7 Fab heavy chain,254,ETVVGSFDY,9,0.2222,117,126,1,1
+distribution,,6BPD_1,Monoclonal antibody 10B12 Fab heavy chain,238,FYDYVRGVDF,10,0.4,117,127,1,1
+distribution,,6BTJ_1,Heavy chain of H7.5 Fab,233,DMPYYHDSGGPLFDL,15,0.2,98,113,1,1
+distribution,,6D9G_1,Antibody heavy chain Fab,229,SAYGSEGFAMDY,12,0.25,98,110,1,1
+distribution,,6DC7_2,Fab heavy chain,217,ERDNYGVY,8,0.25,98,106,1,1
+distribution,,6ELJ_1,fAB heavy chain,227,PNYYGSRYHYYAMDY,15,0.4,98,113,1,1
+distribution,,6FAB_2,IGG1-KAPPA 36-71 FAB (HEAVY CHAIN),222,SEYYGGSYKFDY,12,0.4167,98,110,1,1
+distribution,,6FG1_1,HEAVY CHAIN OF FAB NAA32,241,PTSEGVAGPSRYYWYFDL,18,0.2778,98,116,1,1
+distribution,,6FG1_3,HEAVY CHAIN OF FAB NATALIZUMAB,234,EGYYGNYGVYAMDY,14,0.3571,98,112,1,1
+distribution,,6FG2_1,HEAVY CHAIN FAB NAA84,240,DLWSPDSNYYDQSAFDI,17,0.2353,98,115,1,1
+distribution,,6GHG_1,Fab heavy chain,218,GSGFDY,6,0.3333,98,104,1,1
+distribution,,6GXX_1,FAB 1D9 heavy chain,226,AEFITTATWGVYAMDY,16,0.25,98,114,1,1
+distribution,,6H3H_1,Anti-fullerene antibody Fab fragment Heavy chain,222,GDYRYGGTAY,10,0.3,98,108,1,1
+distribution,,6HKG_1,FISW84 Fab Fragment Heavy Chain,217,MRRTMIAFGGNDF,13,0.1538,98,111,1,1
+distribution,,6I1O_1,FAB 2H2 heavy chain,216,HAGVHY,6,0.1667,98,104,1,1
+distribution,,6IDG_2,Anti-(6-4) photoproduct antibody 64M-5 Fab (heavy chain),221,RNYGSSYAMDY,11,0.2727,98,109,1,1
+distribution,,6JC2_1,ipilimumab fab heavy chain,230,TGWLGPFDY,9,0.3333,98,107,1,1
+distribution,,6JP7_1,immunoglobulin Fab heavy chain,238,LNYDILTGYYFFDF,14,0.4286,99,113,1,1
+distribution,,6OBZ_1,Heavy chain of FluA-20 Fab,235,GTEDLGYCSSGSCPNH,16,0.0625,99,115,1,1
+distribution,,6P4Y_1,4A10 Fab heavy chain,225,RLYSNSYYYAMDY,13,0.3846,98,111,1,1
+distribution,,6PYD_1,"3E9 anti-marinobufagenin antibody Fab heavy chain, recloned with human IgG4 C region",222,ARYGYGFDY,9,0.4444,97,106,1,1
+distribution,,6PZH_2,NA-22 Fab heavy chain,234,DKRFITMILVGPFDY,15,0.2,99,114,1,1
+distribution,,6SXI_1,Fab heavy chain,218,ITTTTYAMDY,10,0.2,97,107,1,1
+distribution,,6SXI_3,Single chain Fv - heavy chain,119,PWAFGNYGAWFAY,13,0.4615,96,109,1,1
+distribution,,6VRQ_1,iv12 Fab Heavy Chain,224,KFMPTGFFDY,10,0.4,98,108,1,1
+distribution,,6VRQ_3,gl12A21 Fab Heavy Chain,234,DGSGDDTSWHLHP,13,0.0769,98,111,1,1
+distribution,,6VU2_1,M1214 N1 Fab heavy chain,222,ELREAWYGDLRDYSGLDV,18,0.1667,96,114,1,1
+distribution,,6W4W_2,5c8 Fab heavy chain,226,SDGRNDMDS,9,0.0,98,107,1,1
+distribution,,6WG8_1,Dupilumab Fab heavy chain,234,DRLSITIRPRYYGLDV,16,0.125,98,114,1,1
+distribution,,6WJU_2,4A10 Fab Heavy Chain,233,YDGYLFAF,8,0.5,98,106,1,1
+distribution,,6WKM_1,22D2 Fab Heavy Chain,235,NYRWFGAMDH,10,0.3,98,108,1,1
+distribution,,6WT3_1,5D2 FAB HEAVY CHAIN,223,HEDRNYYSYWDY,12,0.4167,99,111,1,1
+distribution,,6XOC_1,Iv4 Fab Heavy Chain,221,LDSGDWYYYGLDY,13,0.3846,98,111,1,1
+distribution,,6XOC_3,iGL-VRC01 Fab Heavy Chain,221,GKNCDYNWDFQH,12,0.25,98,110,1,1
+distribution,,6Y1K_1,FAB A.17 L47R mutant Heavy Chain,255,LTQSSHNDAN,10,0.0,98,108,1,1
+distribution,,6Y1N_1,FAB A.5 Heavy chain,254,FGTRGNTH,8,0.125,99,107,1,1
+distribution,,6YHQ_1,"Fab F5.18.6 anti-Plasmodium vivax AMA1, heavy chain",220,GDSSGYGDFAY,11,0.2727,98,109,1,1
+distribution,,7DUN_1,Fab heavy chain,223,DKILWFGEPVFDY,13,0.3077,98,111,1,1
+distribution,,7FAB_2,IGG1-LAMBDA NEW FAB (HEAVY CHAIN),217,NLIAGGIDV,9,0.0,97,106,1,1
+distribution,,7FGK_1,Fab Heavy Chain,219,STYYSGALDY,10,0.3,98,108,1,1
+distribution,,7KX4_2,ADI-36121 Fab heavy chain,230,DPKAWLEPEW,10,0.2,97,107,1,1
+distribution,,7L6M_2,DH898.1 Fab heavy chain,219,LEPDFLSGWAH,11,0.1818,98,109,1,1
+distribution,,7NC0_2,A33 Fab heavy chain,217,TTVVPFAY,8,0.25,98,106,1,1
+distribution,,7S8G_1,25.10C-FNQI Fab Heavy Chain,227,EIRRASTWSADL,12,0.0833,98,110,1,1
+distribution,,8FAB_2,IGG1-LAMBDA HIL FAB (HEAVY CHAIN),224,DPDILTAFSFDY,12,0.25,98,110,1,1
+distribution,,8XX0_2,anti-IgE antibody HMK-12 Fab heavy chain,225,HGYYSSRVMDA,11,0.1818,99,110,1,1
+distribution,,8XX0_3,SPE7 immunoglobulin E F(ab')2 heavy chain,321,MWYYGTYYFDY,11,0.6364,98,109,1,1
+distribution,,9PZC_11,Immunoglobulin heavy variable 4-39,121,RVTYTKTWAFDY,12,0.3333,99,111,1,1
+distribution,,9PZC_14,Immunoglobulin heavy variable 1-46,123,GGPTVVVVAATPFDD,15,0.0667,98,113,1,1
+distribution,,9PZC_15,C4K Fab heavy chain,119,EVSVITEWRGLDV,13,0.0769,98,111,1,1
+distribution,,9PZC_4,G1L Fab heavy chain,125,PMTGFLVRGVMWGGFGP,17,0.1765,98,115,1,1
+distribution,,9PZC_5,Immunoglobulin heavy variable 1-46,119,GGYNSRLRLDS,11,0.0909,98,109,1,1
+distribution,,9PZC_7,A12K Fab heavy chain,116,SPMKRLDF,8,0.125,98,106,1,1
+distribution,,9PZC_8,Immunoglobulin heavy variable 4-34,123,GHRKGARISGRNWFDP,16,0.125,97,113,1,1
