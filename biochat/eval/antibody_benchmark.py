@@ -20,6 +20,7 @@ from __future__ import annotations
 import json
 import random
 import re
+import time
 import urllib.parse
 import urllib.request
 from collections import Counter
@@ -170,11 +171,20 @@ def _post_json(url: str, payload: dict, timeout: int = 30) -> dict:
         return json.load(fh)
 
 
-def fetch_entities(entity_ids: Sequence[str], batch_size: int = 50, timeout: int = 30) -> dict[str, dict]:
+def fetch_entities(
+    entity_ids: Sequence[str],
+    batch_size: int = 50,
+    timeout: int = 45,
+    retries: int = 2,
+    progress: bool = False,
+) -> dict[str, dict]:
     """Fetch polymer-entity sequences from the PDB GraphQL API.
 
     Args:
         entity_ids: ``"<PDB_ID>_<ENTITY_ID>"`` identifiers, e.g. ``"1N8Z_2"``.
+        retries: attempts per batch before that batch is skipped.  A large
+            corpus pull is many requests; one slow response should cost that
+            batch, not the whole run.
 
     Returns:
         ``{rcsb_id: {"description": str, "sequence": str}}``.
@@ -184,6 +194,8 @@ def fetch_entities(entity_ids: Sequence[str], batch_size: int = 50, timeout: int
     """
     out: dict[str, dict] = {}
     ids = list(entity_ids)
+    skipped = 0
+
     for start in range(0, len(ids), batch_size):
         chunk = ids[start : start + batch_size]
         query = (
@@ -191,49 +203,83 @@ def fetch_entities(entity_ids: Sequence[str], batch_size: int = 50, timeout: int
             "rcsb_polymer_entity{pdbx_description} "
             "entity_poly{pdbx_seq_one_letter_code_can}}}" % json.dumps(chunk)
         )
-        data = _post_json(GRAPHQL_URL, {"query": query}, timeout=timeout)
+        data = None
+        for attempt in range(retries + 1):
+            try:
+                data = _post_json(GRAPHQL_URL, {"query": query}, timeout=timeout)
+                break
+            except Exception:  # noqa: BLE001 - a slow batch is skipped, not fatal
+                if attempt == retries:
+                    skipped += len(chunk)
+                    data = None
+                else:
+                    time.sleep(1.5 * (attempt + 1))
+        if data is None:
+            continue
+
         for rec in (data.get("data") or {}).get("polymer_entities") or []:
             if not rec:
                 continue
             entity = (rec.get("rcsb_polymer_entity") or {}).get("pdbx_description") or ""
             seq = (rec.get("entity_poly") or {}).get("pdbx_seq_one_letter_code_can") or ""
             out[rec["rcsb_id"]] = {"description": entity, "sequence": seq.strip().upper()}
+
+        if progress and (start // batch_size) % 10 == 9:
+            print(f"      … {len(out)} sequences fetched", flush=True)
+
+    if skipped:
+        print(f"      ⚠️  {skipped} entities skipped after {retries + 1} failed attempts")
     return out
 
 
-def search_antibody_entities(rows: int = 400, timeout: int = 40) -> list[str]:
-    """Return polymer-entity ids for antibody heavy chains via the PDB search API."""
-    payload = {
-        "query": {
-            "type": "group",
-            "logical_operator": "and",
-            "nodes": [
-                {
-                    "type": "terminal",
-                    "service": "full_text",
-                    "parameters": {"value": "immunoglobulin Fab heavy chain"},
-                },
-                {
-                    "type": "terminal",
-                    "service": "text",
-                    "parameters": {
-                        "attribute": "entity_poly.rcsb_entity_polymer_type",
-                        "operator": "exact_match",
-                        "value": "Protein",
+def search_antibody_entities(rows: int = 400, timeout: int = 40, page_size: int = 1000) -> list[str]:
+    """Return polymer-entity ids for antibody heavy chains via the PDB search API.
+
+    Paginated: the API caps a single response, so ``rows`` above ``page_size``
+    is fetched across successive requests.  A zero-hit page answers ``204`` with
+    an empty body and ends the walk.
+    """
+    out: list[str] = []
+    start = 0
+    while len(out) < rows:
+        payload = {
+            "query": {
+                "type": "group",
+                "logical_operator": "and",
+                "nodes": [
+                    {
+                        "type": "terminal",
+                        "service": "full_text",
+                        "parameters": {"value": "immunoglobulin Fab heavy chain"},
                     },
-                },
-            ],
-        },
-        "return_type": "polymer_entity",
-        "request_options": {
-            "paginate": {"start": 0, "rows": rows},
-            "results_content_type": ["experimental"],
-        },
-    }
-    url = f"{SEARCH_URL}?json={urllib.parse.quote(json.dumps(payload))}"
-    with urllib.request.urlopen(url, timeout=timeout) as fh:
-        data = json.load(fh)
-    return [hit["identifier"] for hit in data.get("result_set", [])]
+                    {
+                        "type": "terminal",
+                        "service": "text",
+                        "parameters": {
+                            "attribute": "entity_poly.rcsb_entity_polymer_type",
+                            "operator": "exact_match",
+                            "value": "Protein",
+                        },
+                    },
+                ],
+            },
+            "return_type": "polymer_entity",
+            "request_options": {
+                "paginate": {"start": start, "rows": min(page_size, rows - len(out))},
+                "results_content_type": ["experimental"],
+            },
+        }
+        url = f"{SEARCH_URL}?json={urllib.parse.quote(json.dumps(payload))}"
+        with urllib.request.urlopen(url, timeout=timeout) as fh:
+            body = fh.read()
+        if not body.strip():
+            break
+        page = [hit["identifier"] for hit in json.loads(body).get("result_set", [])]
+        if not page:
+            break
+        out.extend(page)
+        start += len(page)
+    return out[:rows]
 
 
 # ═══════════════════════════════════════════════════════════════════

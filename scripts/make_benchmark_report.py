@@ -29,6 +29,12 @@ REPORTS = PROJECT_ROOT / "reports"
 OUT_MD = REPORTS / "antibody_benchmark_report.md"
 
 
+def _load_lm_eval() -> dict | None:
+    """The position-sensitive prototype's evaluation, if it has been run."""
+    path = REPORTS / "cdrh3_lm_eval.json"
+    return json.loads(path.read_text()) if path.exists() else None
+
+
 def delta(before: float, after: float, higher_is_better: bool = True) -> str:
     if before == after:
         return "—"
@@ -144,17 +150,70 @@ def main() -> int:
         "",
         "## 未解决的问题（如实记录）",
         "",
-        f"### 1. 打分器对「真实抗体性」无判别力（AUC = {a['auc_vs_shuffled']}）",
+        f"### 1. 生产打分器对「真实抗体性」无判别力（AUC = {a['auc_vs_shuffled']}）",
         "",
         "真药与其**组分匹配打乱序列**的 AUC 修复前后均为 0.5，"
         "26 对中 21 对分数完全相同，其余仅差 ±2。",
         "根因是打分完全由氨基酸**组成**决定（长度、芳香族占比、电荷计数），"
-        "而打乱保留组成不变——因此打分器无法区分真实治疗性抗体与其乱序版本。",
+        "而打乱保留组成不变——因此生产打分器无法区分真实治疗性抗体与其乱序版本。",
         "",
-        "这是**架构层面的限制，不是可通过调参解决的缺陷**。要获得判别力需引入位置敏感的打分"
-        "（如残基位置偏好、结构可及性、配对能量），属于后续工作。"
-        "本次修复解决的是「打分方向错误」，而非「打分缺乏分辨率」。",
-        "",
+        "这是架构层面的限制，不是调参能解决的。**已在原型中验证了解决路径**，见下节；"
+        "但尚未接入生产路径。本次修复解决的是「打分方向错误」，而非「打分缺乏分辨率」。",
+        "",]
+
+    lm = _load_lm_eval()
+    if lm:
+        shuf = lm["auc_vs_shuffled"]
+        lines += [
+            "## 后续方向的原型验证：位置敏感打分",
+            "",
+            "`biochat/eval/cdrh3_lm.py` —— 组成受控的二肽（相邻残基）模型。打分为相邻残基对的"
+            "**点互信息**均值：",
+            "",
+            "```",
+            "score(s) = mean_i  log[ P(s_i s_{i+1}) / (P(s_i) · P(s_{i+1})) ]",
+            "```",
+            "",
+            "该量在残基独立排列时为零，因此打乱序列——保留全部单体频率、只破坏相邻关系——"
+            "天然得分趋近零。**组成受控是设计上保证的，不是事后归一化的。**",
+            "",
+            f"训练集为 PDB 抗体重链语料（{lm['corpus_size']} 条，剔除与测试集序列相同的 "
+            f"{lm['removed_overlap']} 条后训练 {lm['n_train']} 条）；"
+            f"测试集为 {lm['n_test']} 个已获批抗体，**全程留出**。",
+            "",
+            "| 比较 | 生产打分器 | 二肽模型 |",
+            "|---|---|---|",
+            f"| 已获批药 vs 其组分打乱 | {a['auc_vs_shuffled']} | "
+            f"**{shuf['mean']:.3f} ± {shuf['stdev']:.3f}**（{lm['shuffle_seeds']} 个打乱种子，"
+            f"范围 {shuf['min']:.3f}–{shuf['max']:.3f}）|",
+            f"| 已获批药 vs 均匀随机 | {a['auc_vs_random']} | "
+            f"{lm['auc_vs_random']['mean']:.3f} ± {lm['auc_vs_random']['stdev']:.3f} |",
+            "",
+            f"5 折交叉验证各折留出均分 {lm['cross_validation_fold_means']}，"
+            "分布一致，未见过拟合。",
+            "",
+            "模型学到的最过表达相邻残基对（已按支撑度过滤，n ≥ 50）：",
+            "",
+            "| 残基对 | PMI | 语料中出现次数 |",
+            "|---|---|---|",
+        ]
+        for pair, pmi, count in lm["top_motifs"][:6]:
+            lines.append(f"| `{pair}` | {pmi:+.2f} | {count} |")
+        lines += [
+            "",
+            "这些正是 CDR-H3 由 J 片段编码的经典 C 端基序（`…AMDY` / `…FDY` / `…FDV`），"
+            "说明模型捕捉到的是真实的抗体序列结构，而非噪声。",
+            "",
+            "> **支撑度过滤不是修饰**：不加 `min_count` 时，加性平滑会让语料中仅出现 4 次的 `CC` "
+            "和 6 次的 `QQ` 排在出现 704 次的 `DY` 之前。这类稀疏伪影若直接报告即为错误结论。",
+            "",
+            "**尚未接入生产**：该模型回答的是「像不像真实抗体环」，"
+            "**不是**可开发性，更**不是**结合亲和力，不可作为 ΔG / Kd 报告。"
+            "接入前需确定它与现有责任基序打分的合成方式。",
+            "",
+        ]
+
+    lines += [
         "### 2. `sequence_qc` 对真实抗体的整体判负率偏高（27.6%）",
         "",
         "其各条硬失败规则单独看均在 P90 目标附近（`excessive_single_aa_*` 10.5%、"

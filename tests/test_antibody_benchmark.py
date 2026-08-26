@@ -196,3 +196,73 @@ class TestBenchmarkScript:
         (ROOT / "reports" / "antibody_benchmark_results_pytest.csv").unlink(missing_ok=True)
         (ROOT / "reports" / "antibody_benchmark_summary_pytest.json").unlink(missing_ok=True)
         (ROOT / "reports" / "antibody_benchmark_report_pytest.md").unlink(missing_ok=True)
+
+
+class TestCDRH3BigramModel:
+    """The adjacency model must be composition-controlled by construction."""
+
+    CORPUS = [
+        "ARDYGSSYFDY", "AKDRGYSSGWFDV", "ARGGYSSSWYFDY", "ASDYYGSGSYFDY",
+        "AKDGYSSGWFDY", "ARSSGWYFDV", "ATDYGDYGMDV", "ARDLGYYFDY",
+        "AKGYSSGWYFDV", "ARDYYGSGSAMDY", "ARGDYGMDV", "AKDSSGWFDY",
+    ]
+
+    def _model(self):
+        from biochat.eval.cdrh3_lm import CDRH3BigramModel
+
+        return CDRH3BigramModel.fit(self.CORPUS)
+
+    def test_real_corpus_outscores_its_own_shuffles(self):
+        from biochat.eval.antibody_benchmark import mann_whitney_u, shuffled_decoys
+
+        model = self._model()
+        real = model.score_many(self.CORPUS)
+        shuffled = model.score_many(shuffled_decoys(self.CORPUS, seed=3))
+        assert mann_whitney_u(real, shuffled)[1] > 0.5
+
+    def test_short_and_empty_sequences_score_zero(self):
+        model = self._model()
+        assert model.score("") == 0.0
+        assert model.score("A") == 0.0
+
+    def test_noncanonical_residues_are_skipped_not_fatal(self):
+        model = self._model()
+        assert isinstance(model.score("ARDXYGMDY"), float)
+
+    def test_round_trips_through_json(self, tmp_path):
+        from biochat.eval.cdrh3_lm import CDRH3BigramModel
+
+        model = self._model()
+        path = model.save(tmp_path / "m.json")
+        reloaded = CDRH3BigramModel.load(path)
+        assert reloaded.score("ARDYGSSYFDY") == model.score("ARDYGSSYFDY")
+        assert reloaded.n_train == model.n_train
+
+    def test_load_rejects_a_foreign_file(self, tmp_path):
+        import json
+
+        import pytest
+
+        from biochat.eval.cdrh3_lm import CDRH3BigramModel
+
+        path = tmp_path / "other.json"
+        path.write_text(json.dumps({"model": "something_else"}))
+        with pytest.raises(ValueError):
+            CDRH3BigramModel.load(path)
+
+    def test_top_motifs_require_support(self):
+        from biochat.eval.cdrh3_lm import top_motifs
+
+        model = self._model()
+        # Without a support floor, add-alpha smoothing lets pairs seen once or
+        # twice outrank pairs seen hundreds of times.
+        assert top_motifs(model, n=5, min_count=1000) == []
+        for _pair, _pmi, count in top_motifs(model, n=5, min_count=3):
+            assert count >= 3
+
+    def test_cross_validation_returns_one_score_per_fold(self):
+        from biochat.eval.cdrh3_lm import cross_validate
+
+        folds = cross_validate(self.CORPUS, folds=4)
+        assert len(folds) == 4
+        assert all(isinstance(f, float) for f in folds)
