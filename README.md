@@ -8,19 +8,19 @@
   <img src="https://img.shields.io/badge/LangChain-Agent-orange.svg?style=for-the-badge" alt="LangChain" />
   <img src="https://img.shields.io/badge/License-Apache%202.0-orange.svg?style=for-the-badge" alt="License" />
   <img src="https://img.shields.io/badge/Version-v0.0.8-red.svg?style=for-the-badge" alt="Version" />
-  <img src="https://img.shields.io/badge/Tools-600+-brightgreen.svg?style=for-the-badge" alt="Tools" />
+  <img src="https://img.shields.io/badge/Tools-226-brightgreen.svg?style=for-the-badge" alt="Tools" />
 </p>
 
 # Biochat: 通用生物医学 AI Agent
 
-> 🧬 自主执行生物医学研究任务的 AI Agent — 600+ 专业工具、代码级推理、多模态 UI
+> 🧬 自主执行生物医学研究任务的 AI Agent — 226 个专业工具、代码级推理、多模态 UI
 >
 > 规划 → 工具检索 → 代码执行 → 自我反思的完整 Agent 循环，加速你的科研发现
 
 ## ✨ 核心特性
 
 - 🤖 **自主任务执行** — 规划 → 工具检索 → 代码执行 → 观察反思的完整 Agent 循环，端到端完成复杂研究任务
-- 🧬 **600+ 生物医学工具** — 覆盖 20+ 子领域：基因组学、CRISPR 筛选设计、scRNA-seq 注释、ADMET 预测、罕见病诊断、文献挖掘等
+- 🧬 **226 个生物医学工具** — 覆盖 23 个子领域：基因组学、CRISPR 筛选设计、scRNA-seq 注释、ADMET 预测、罕见病诊断、文献挖掘等
 - 💊 **抗体设计管线** — 扩散模型序列生成、结构预测、HDock 分子对接、可开发性评估、多维度候选排序的一站式工作流
 - 📚 **知识库增强** — 内置 sgRNA 设计指南、单细胞注释等 know-how 文档，检索增强规划
 - 🔌 **8 大 LLM 供应商** — Anthropic / OpenAI / Azure / Gemini / Groq / Bedrock / Ollama / 任意 OpenAI 兼容接口（DeepSeek、vLLM…）
@@ -33,7 +33,7 @@
 - **框架**: LangChain + Pydantic + Streamlit / Gradio
 - **Agent 引擎**: A1（规划-检索-执行-反思循环）
 - **LLM**: Anthropic Claude / OpenAI GPT / Gemini / DeepSeek 等 8 种供应商
-- **数据湖**: ~11GB 精选生物医学数据集（首次运行自动下载）
+- **数据湖**: 76 个精选生物医学数据集 + 113 个软件库（~11GB，首次运行自动下载）
 - **工具协议**: MCP (Model Context Protocol)
 - **工程化**: ruff + pre-commit + pytest
 
@@ -169,27 +169,27 @@ agent.go("Find FDA active ingredient information for ibuprofen")
 用户任务
    │
    ▼
-┌─────────────────────────────────────────────────┐
-│  ① 规划 Planning                                  │
-│     结合任务模板与知识库制定分步执行计划              │
-└────────────────────────┬────────────────────────┘
-                         ▼
-┌─────────────────────────────────────────────────┐
-│  ② 工具检索 Tool Retrieval                        │
-│     从 600+ 生物医学工具中检索本次任务所需函数        │
-└────────────────────────┬────────────────────────┘
-                         ▼
-┌─────────────────────────────────────────────────┐
-│  ③ 代码执行 Code Execution                        │
+┌─────────────────────────────────────────────────────────┐
+│  ① 规划 Planning                                        │
+│     结合任务模板与知识库制定分步执行计划                │
+└────────────────────────────┬────────────────────────────┘
+                             ▼
+┌─────────────────────────────────────────────────────────┐
+│  ② 工具检索 Tool Retrieval                              │
+│     从 226 个生物医学工具中检索本次任务所需函数         │
+└────────────────────────────┬────────────────────────────┘
+                             ▼
+┌─────────────────────────────────────────────────────────┐
+│  ③ 代码执行 Code Execution                              │
 │     生成并运行分析代码（查询数据库 / 统计分析 / 建模）  │
-└────────────────────────┬────────────────────────┘
-                         ▼
-┌─────────────────────────────────────────────────┐
-│  ④ 观察与反思 Observation & Self-critique         │
-│     检查中间结果、修正假设、必要时重新规划            │
-└────────────────────────┬────────────────────────┘
-                         │
-                         └──────► 迭代直至输出最终解决方案
+└────────────────────────────┬────────────────────────────┘
+                             ▼
+┌─────────────────────────────────────────────────────────┐
+│  ④ 观察与反思 Observation & Self-critique               │
+│     检查中间结果、修正假设、必要时重新规划              │
+└────────────────────────────┬────────────────────────────┘
+                             │
+                             └──────► 迭代直至输出最终解决方案
 ```
 
 ### 典型任务示例
@@ -221,8 +221,8 @@ Biochat-main/
 │   │   ├── source_detector.py              # API Key 自动检测
 │   │   └── providers/                      # anthropic/openai/azure/gemini/
 │   │                                       #   groq/bedrock/ollama/custom
-│   ├── tool/                               # 600+ 生物医学工具
-│   │   ├── genomics.py / pharmacology.py … # 20+ 子领域工具模块
+│   ├── tool/                               # 226 个生物医学工具
+│   │   ├── genomics.py / pharmacology.py … # 23 个子领域工具模块
 │   │   ├── tool_registry.py                # 工具注册中心
 │   │   ├── tool_description/               # 工具描述与目录（catalog.yaml）
 │   │   ├── antibody_design/                # 抗体设计管线（扩散/对接/可开发性）

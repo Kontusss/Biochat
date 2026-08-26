@@ -63,7 +63,7 @@ def launch_biochat_about(server_name: str = "0.0.0.0", share: bool = False):
                 ### Why Biochat
 
                 Biochat combines a powerful autonomous agent loop (planning → tool retrieval →
-                code execution → self-critique) with 600+ biomedical tool functions, an antibody
+                code execution → self-critique) with 226 biomedical tool functions, an antibody
                 design pipeline, and a modern chat-centered interface.
 
                 ### License
