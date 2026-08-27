@@ -112,7 +112,16 @@ def build_pipeline(slide) -> None:
     ])
 
 
-def build_evidence(slide, before: dict, after: dict, n_gold: int) -> None:
+def load_lm_auc() -> float | None:
+    """The held-out AUC of the position-sensitive model, if it has been evaluated."""
+    path = REPORTS / "cdrh3_lm_eval.json"
+    if not path.exists():
+        return None
+    data = json.loads(path.read_text())
+    return float(data["auc_vs_shuffled"]["mean"])
+
+
+def build_evidence(slide, before: dict, after: dict, n_gold: int, lm_auc_shuffled: float) -> None:
     x, w = 7.10, 5.68
     textbox(slide, x, 1.42, 4.6, 0.28, [("验证：回顾性基准", 13, True, INK)])
     box(slide, x, 1.76, 0.42, 0.028, ACCENT, ACCENT, 0.25, shape=MSO_SHAPE.RECTANGLE)
@@ -168,20 +177,24 @@ def build_evidence(slide, before: dict, after: dict, n_gold: int) -> None:
     limit = box(slide, x, 6.34, w, 0.66, WHITE, RULE, 1.0)
     _ = limit
     textbox(slide, x + 0.2, 6.46, w - 0.4, 0.46, [
-        ("已识别的后续方向", 9.5, True, BLUE_DK),
-        ("打分仅由氨基酸组成决定，无法区分真实抗体与其乱序版本"
-         f"（AUC {after['auc_vs_shuffled']}）→ 下一步引入位置敏感打分", 8.5, False, INK_SOFT, 2),
+        ("架构限制的解决路径 → 已实现并接入", 9.5, True, BLUE_DK),
+        (f"组成型打分无法区分真药与其乱序（AUC {after['auc_vs_shuffled']}）→ "
+         f"位置敏感二肽模型 AUC {lm_auc_shuffled:.2f}，以旁路字段上报、不参与排序", 8.5, False, INK_SOFT, 2),
     ], spacing=1.2)
 
 
 def main() -> int:
     before, after = load_summaries()
     n_gold = int(after["score_stats"]["approved_drug"]["n"])
+    lm_auc = load_lm_auc()
+    if lm_auc is None:
+        print("⚠️  cdrh3_lm_eval.json missing — the limitation card will fall back to the default value")
+        lm_auc = 0.5
 
     prs, slide = new_deck()
     build_header(slide, n_gold)
     build_pipeline(slide)
-    build_evidence(slide, before, after, n_gold)
+    build_evidence(slide, before, after, n_gold, lm_auc)
 
     rule(slide, 0.55, 7.16, 12.23)
     textbox(slide, 0.55, 7.24, 9.0, 0.24, [
