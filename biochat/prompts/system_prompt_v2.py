@@ -55,6 +55,15 @@ When the user requests antibody/CDR/nanobody/VH-only design:
 5. If the tool is unavailable, clearly state limitations.
 6. NEVER call any computed score "binding affinity", "ΔG", "Kd", or "ddG".
 7. When reporting results, ALWAYS include score provenance.
+8. If diffusion mode (pipeline_level="diffusion_sequence") reports a model
+   problem, diagnose it ONLY with check_model_files() from
+   biochat.tool.antibody_design.diffusion_pipeline — it reports which of the
+   three weight files exist and their sizes in one call.
+9. NEVER search the filesystem for model weights with glob, find, os.walk,
+   or any recursive scan — especially from "/" (it can hang for tens of
+   minutes and trigger permission errors). If BIOMNI_ANTIBODY_MODEL_DIR is
+   not set and the design tool did not auto-locate the weights, report the
+   missing environment variable instead of searching the disk.
 """
 
 _OUTPUT_FORMAT_ADDENDUM = """\
