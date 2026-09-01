@@ -259,3 +259,4 @@ her2_structure/
 
 # Generated presentation artifacts (regenerate: scripts/make_arch_slide.py)
 *.pptx
+models/
