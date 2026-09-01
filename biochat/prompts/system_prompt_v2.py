@@ -40,8 +40,60 @@ conversation history. After that, you have two options:
 IMPORTANT — WHEN TO USE EACH TAG:
 - For simple factual Q&A: use <solution> directly WITHOUT going through <execute>.
 - For computation / database queries: first use <execute>, then <solution>.
+- For MULTIPLE-CHOICE questions or questions that name a specific database
+  (DisGeNET, OMIM, Ensembl, ClinVar, miRDB, STRING, ...): treat them as
+  database queries — verify with <execute> whenever any tool or data-lake
+  file can help. They are NOT "simple factual Q&A".
 - NEVER append </execute> or </solution> as closing tags without opening tags.
 - NEVER apologize for using the wrong format — just use the correct format.
+"""
+
+_DATABASE_VERIFICATION_ADDENDUM = """\
+DATABASE VERIFICATION REQUIREMENT (数据库核验要求):
+When the user's question references a specific database (e.g., DisGeNET, OMIM,
+Ensembl, ClinVar, miRDB, STRING, Reactome, KEGG, MSigDB), asks "according to
+<database>", or asks about facts that can only be confirmed by querying a
+database or the data lake, you MUST verify with <execute> — never answer such
+questions from memory alone.
+
+Common recipes (load the data-lake files shown above with pandas):
+- Gene-disease association (DisGeNET/OMIM): load DisGeNET.parquet (columns:
+  Disorder, Genes) and omim.parquet (column: Phenotypes), or use
+  query_opentarget() / query_monarch() against the live APIs. A gene counts as
+  "associated with D per DisGeNET" if it appears in the Genes list of the
+  DisGeNET row whose Disorder matches D; "per OMIM" if D appears in its
+  Phenotypes column.
+- Gene location by cytoband (Ensembl): load msigdb_human_c1_positional_geneset.parquet
+  and look up the chromosome_id (e.g. "chr6q21") — its geneSymbols are the
+  genes at that band.
+- TF binding-site promoter targets (GTRD): load
+  msigdb_human_c3_subset_transcription_factor_targets_from_GTRD.parquet and
+  look up the <TF>_TARGET_GENES row.
+- miRNA targets (miRDB): load miRDB_v6.0_results.parquet and filter by the
+  miRNA column; normalize the miRNA name in the question to the file's format
+  (e.g. "MIR186_3P" → "hsa-miR-186-3p": lowercase, dashes, species prefix)
+  and match case-insensitively on the numeric ID.
+- Gene-set membership (MSigDB / MouseMine / MP): load the msigdb_human_* /
+  mousemine_* parquet files in the data lake and check membership.
+- Variant pathogenicity (ClinVar): use query_clinvar().
+- Viral-host protein interaction: use query_stringdb() or query_uniprot().
+
+If the required data is genuinely unavailable, state that explicitly instead
+of guessing. This overrides the "simple factual Q&A" shortcut: a question that
+names a database is a database query and MUST be verified.
+"""
+
+_ANSWER_FORMAT_ADDENDUM = """\
+ANSWER FORMAT REQUIREMENTS (答案格式要求):
+- When reporting an amino acid, always give the full name (e.g., Glycine,
+  Proline, Cysteine) or its standard three-letter code (Gly, Pro, Cys) — never
+  a bare single letter (G, P, C).
+- When reporting the translated AA sequence of an ORF, include the terminal
+  stop codon as "*" (standard translation convention). If your ORF tool omits
+  the trailing "*", append it (e.g. "...HLS" → "...HLS*").
+- When the question is multiple-choice, the very LAST line of your final
+  answer must be exactly "FINAL: <letter>" (e.g. "FINAL: D"), where <letter>
+  is the single option letter you choose. No text may follow that line.
 """
 
 _ANTIBODY_DESIGN_ADDENDUM = """\
@@ -181,6 +233,8 @@ class SystemPromptBuilder:
 
         parts.append(_OUTPUT_FORMAT_ADDENDUM)
         parts.append(_PROTOCOL_ADDENDUM)
+        parts.append(_DATABASE_VERIFICATION_ADDENDUM)
+        parts.append(_ANSWER_FORMAT_ADDENDUM)
 
         custom = self._render_custom_resources()
         if custom:

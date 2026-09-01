@@ -1,0 +1,255 @@
+{
+  "overall": {
+    "n": 15,
+    "accuracy": 66.7,
+    "success_rate": 100.0,
+    "tool_use_rate": 6.7,
+    "avg_tool_calls": 0.07,
+    "avg_seconds": 20.1,
+    "error_rate": 0.0,
+    "top_tools": [
+      {
+        "tool": "molecular_biology.annotate_open_reading_frames",
+        "calls": 1
+      }
+    ]
+  },
+  "per_benchmark": {
+    "DbQA": {
+      "n": 5,
+      "accuracy": 60.0,
+      "success_rate": 100.0,
+      "tool_use_rate": 0.0,
+      "avg_tool_calls": 0.0,
+      "avg_seconds": 28.7,
+      "error_rate": 0.0,
+      "top_tools": []
+    },
+    "SeqQA": {
+      "n": 5,
+      "accuracy": 100.0,
+      "success_rate": 100.0,
+      "tool_use_rate": 20.0,
+      "avg_tool_calls": 0.2,
+      "avg_seconds": 20.3,
+      "error_rate": 0.0,
+      "top_tools": [
+        {
+          "tool": "molecular_biology.annotate_open_reading_frames",
+          "calls": 1
+        }
+      ]
+    },
+    "HLE": {
+      "n": 5,
+      "accuracy": 40.0,
+      "success_rate": 100.0,
+      "tool_use_rate": 0.0,
+      "avg_tool_calls": 0.0,
+      "avg_seconds": 11.5,
+      "error_rate": 0.0,
+      "top_tools": []
+    }
+  },
+  "details": {
+    "items": [
+      {
+        "benchmark": "DbQA",
+        "id": "965724f2-fa9d-4445-93cd-e6416b5f7290",
+        "status": "completed",
+        "has_answer": true,
+        "ok": true,
+        "gold": "E",
+        "pred": "E",
+        "ideal": "PAX6",
+        "n_tools": 0,
+        "tools": [],
+        "seconds": 15.3
+      },
+      {
+        "benchmark": "DbQA",
+        "id": "70015574-0671-4f30-8a10-b24017d2ade5",
+        "status": "completed",
+        "has_answer": true,
+        "ok": false,
+        "gold": "A",
+        "pred": "E",
+        "ideal": "HBB",
+        "n_tools": 0,
+        "tools": [],
+        "seconds": 12.9
+      },
+      {
+        "benchmark": "DbQA",
+        "id": "57a9dba8-8c80-4b4f-8b84-8dc266195604",
+        "status": "completed",
+        "has_answer": true,
+        "ok": true,
+        "gold": "D",
+        "pred": "D",
+        "ideal": "BRD2",
+        "n_tools": 0,
+        "tools": [],
+        "seconds": 47.0
+      },
+      {
+        "benchmark": "DbQA",
+        "id": "8fe1eb62-592b-4b3d-81d6-25e6486e6e2e",
+        "status": "completed",
+        "has_answer": true,
+        "ok": true,
+        "gold": "E",
+        "pred": "E",
+        "ideal": "NFE2L2",
+        "n_tools": 0,
+        "tools": [],
+        "seconds": 56.7
+      },
+      {
+        "benchmark": "DbQA",
+        "id": "76e5345b-cc63-4c6b-9fe8-b8ab968523f9",
+        "status": "completed",
+        "has_answer": true,
+        "ok": false,
+        "gold": "A",
+        "pred": "D",
+        "ideal": "HTC2",
+        "n_tools": 0,
+        "tools": [],
+        "seconds": 11.5
+      },
+      {
+        "benchmark": "SeqQA",
+        "id": "1e4ef437-b22f-4988-90fd-8ed2ea313193",
+        "status": "completed",
+        "has_answer": true,
+        "ok": true,
+        "gold": "E",
+        "pred": "E",
+        "ideal": "R",
+        "n_tools": 1,
+        "tools": [
+          "molecular_biology.annotate_open_reading_frames"
+        ],
+        "seconds": 42.0
+      },
+      {
+        "benchmark": "SeqQA",
+        "id": "a2158f39-ac1c-434e-9924-fe191729fafe",
+        "status": "completed",
+        "has_answer": true,
+        "ok": true,
+        "gold": "A",
+        "pred": "A",
+        "ideal": "Arginine",
+        "n_tools": 0,
+        "tools": [],
+        "seconds": 11.4
+      },
+      {
+        "benchmark": "SeqQA",
+        "id": "1874ebb3-c4e4-4fe6-ae06-dac0bda28638",
+        "status": "completed",
+        "has_answer": true,
+        "ok": true,
+        "gold": "D",
+        "pred": "D",
+        "ideal": "Valine",
+        "n_tools": 0,
+        "tools": [],
+        "seconds": 11.0
+      },
+      {
+        "benchmark": "SeqQA",
+        "id": "b9c4cc93-5bb7-423b-b55c-9c2a641551ab",
+        "status": "completed",
+        "has_answer": true,
+        "ok": true,
+        "gold": "E",
+        "pred": "E",
+        "ideal": "I",
+        "n_tools": 0,
+        "tools": [],
+        "seconds": 20.2
+      },
+      {
+        "benchmark": "SeqQA",
+        "id": "463405ac-037b-45db-a322-e6fc94de9a67",
+        "status": "completed",
+        "has_answer": true,
+        "ok": true,
+        "gold": "A",
+        "pred": "A",
+        "ideal": "Serine",
+        "n_tools": 0,
+        "tools": [],
+        "seconds": 16.7
+      },
+      {
+        "benchmark": "HLE",
+        "id": "672413d8b05b29ab9732088b",
+        "status": "completed",
+        "has_answer": true,
+        "ok": true,
+        "gold": "B",
+        "pred": "B",
+        "ideal": "B",
+        "n_tools": 0,
+        "tools": [],
+        "seconds": 8.7
+      },
+      {
+        "benchmark": "HLE",
+        "id": "6725080f2cc2a1349f1ffaf4",
+        "status": "completed",
+        "has_answer": true,
+        "ok": true,
+        "gold": "A",
+        "pred": "A",
+        "ideal": "A",
+        "n_tools": 0,
+        "tools": [],
+        "seconds": 13.7
+      },
+      {
+        "benchmark": "HLE",
+        "id": "66ea1dd348eb93c2aef1c735",
+        "status": "completed",
+        "has_answer": true,
+        "ok": false,
+        "gold": "E",
+        "pred": "A",
+        "ideal": "E",
+        "n_tools": 0,
+        "tools": [],
+        "seconds": 14.5
+      },
+      {
+        "benchmark": "HLE",
+        "id": "67383288f2df805520bc86b5",
+        "status": "completed",
+        "has_answer": true,
+        "ok": false,
+        "gold": "E",
+        "pred": "B",
+        "ideal": "E",
+        "n_tools": 0,
+        "tools": [],
+        "seconds": 9.6
+      },
+      {
+        "benchmark": "HLE",
+        "id": "67241750cf2f76f66b81fe10",
+        "status": "completed",
+        "has_answer": true,
+        "ok": false,
+        "gold": "C",
+        "pred": "D",
+        "ideal": "C",
+        "n_tools": 0,
+        "tools": [],
+        "seconds": 10.8
+      }
+    ]
+  }
+}

@@ -1,0 +1,116 @@
+{
+  "DbQA": {
+    "n": 3,
+    "correct": 0,
+    "accuracy": 0.0,
+    "avg_tool_calls": 0.0,
+    "avg_seconds": 22.2,
+    "details": [
+      {
+        "id": "be9beb22-6594-4f70-a6e8-55759fb557d5",
+        "pred": "PDE6C",
+        "gold": "NBAS",
+        "ok": false,
+        "n_tools": 0,
+        "tools": [],
+        "seconds": 30.6
+      },
+      {
+        "id": "967529aa-bb35-46af-9b87-7b88d0990a1b",
+        "pred": "TGFBI",
+        "gold": "IL10",
+        "ok": false,
+        "n_tools": 0,
+        "tools": [],
+        "seconds": 17.2
+      },
+      {
+        "id": "7dd49b58-499a-4cea-9204-15267342b4fa",
+        "pred": "TGFBI",
+        "gold": "IL6",
+        "ok": false,
+        "n_tools": 0,
+        "tools": [],
+        "seconds": 18.9
+      }
+    ]
+  },
+  "SeqQA": {
+    "n": 3,
+    "correct": 0,
+    "accuracy": 0.0,
+    "avg_tool_calls": 1.0,
+    "avg_seconds": 44.1,
+    "details": [
+      {
+        "id": "31306dcf-5216-449f-bcea-900d8bc73a94",
+        "pred": "L",
+        "gold": "Gly",
+        "ok": false,
+        "n_tools": 1,
+        "tools": [
+          "molecular_biology.annotate_open_reading_frames"
+        ],
+        "seconds": 74.9
+      },
+      {
+        "id": "c291421f-9fdb-49e2-b957-cb1ca88436a3",
+        "pred": "P",
+        "gold": "Proline",
+        "ok": false,
+        "n_tools": 1,
+        "tools": [
+          "molecular_biology.annotate_open_reading_frames"
+        ],
+        "seconds": 25.2
+      },
+      {
+        "id": "74e00910-cde2-4683-82b2-9c24479a4708",
+        "pred": "C",
+        "gold": "Cysteine",
+        "ok": false,
+        "n_tools": 1,
+        "tools": [
+          "molecular_biology.annotate_open_reading_frames"
+        ],
+        "seconds": 32.2
+      }
+    ]
+  },
+  "HLE": {
+    "n": 3,
+    "correct": 2,
+    "accuracy": 66.7,
+    "avg_tool_calls": 0.0,
+    "avg_seconds": 15.4,
+    "details": [
+      {
+        "id": "672413d8b05b29ab9732088b",
+        "pred": "B",
+        "gold": "B",
+        "ok": true,
+        "n_tools": 0,
+        "tools": [],
+        "seconds": 8.6
+      },
+      {
+        "id": "6725080f2cc2a1349f1ffaf4",
+        "pred": "A",
+        "gold": "A",
+        "ok": true,
+        "n_tools": 0,
+        "tools": [],
+        "seconds": 23.9
+      },
+      {
+        "id": "66ea1dd348eb93c2aef1c735",
+        "pred": "F",
+        "gold": "E",
+        "ok": false,
+        "n_tools": 0,
+        "tools": [],
+        "seconds": 13.8
+      }
+    ]
+  }
+}

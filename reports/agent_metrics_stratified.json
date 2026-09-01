@@ -1,0 +1,321 @@
+{
+  "overall": {
+    "n": 15,
+    "accuracy": 60.0,
+    "success_rate": 100.0,
+    "tool_use_rate": 33.3,
+    "execution_rate": 66.7,
+    "avg_tool_calls": 0.47,
+    "avg_executions": 3.6,
+    "avg_seconds": 39.7,
+    "error_rate": 0.0,
+    "top_tools": [
+      {
+        "tool": "molecular_biology.annotate_open_reading_frames",
+        "calls": 3
+      },
+      {
+        "tool": "database.query_ensembl",
+        "calls": 1
+      },
+      {
+        "tool": "molecular_biology.find_restriction_sites",
+        "calls": 1
+      },
+      {
+        "tool": "molecular_biology.get_gene_coding_sequence",
+        "calls": 1
+      },
+      {
+        "tool": "molecular_biology.get_plasmid_sequence",
+        "calls": 1
+      }
+    ]
+  },
+  "per_benchmark": {
+    "DbQA": {
+      "n": 5,
+      "accuracy": 80.0,
+      "success_rate": 100.0,
+      "tool_use_rate": 20.0,
+      "execution_rate": 100.0,
+      "avg_tool_calls": 0.2,
+      "avg_executions": 5.0,
+      "avg_seconds": 42.1,
+      "error_rate": 0.0,
+      "top_tools": [
+        {
+          "tool": "database.query_ensembl",
+          "calls": 1
+        }
+      ]
+    },
+    "SeqQA": {
+      "n": 5,
+      "accuracy": 60.0,
+      "success_rate": 100.0,
+      "tool_use_rate": 80.0,
+      "execution_rate": 100.0,
+      "avg_tool_calls": 1.2,
+      "avg_executions": 5.8,
+      "avg_seconds": 50.0,
+      "error_rate": 0.0,
+      "top_tools": [
+        {
+          "tool": "molecular_biology.annotate_open_reading_frames",
+          "calls": 3
+        },
+        {
+          "tool": "molecular_biology.find_restriction_sites",
+          "calls": 1
+        },
+        {
+          "tool": "molecular_biology.get_gene_coding_sequence",
+          "calls": 1
+        },
+        {
+          "tool": "molecular_biology.get_plasmid_sequence",
+          "calls": 1
+        }
+      ]
+    },
+    "HLE": {
+      "n": 5,
+      "accuracy": 40.0,
+      "success_rate": 100.0,
+      "tool_use_rate": 0.0,
+      "execution_rate": 0.0,
+      "avg_tool_calls": 0.0,
+      "avg_executions": 0.0,
+      "avg_seconds": 27.1,
+      "error_rate": 0.0,
+      "top_tools": []
+    }
+  },
+  "details": {
+    "items": [
+      {
+        "benchmark": "DbQA",
+        "id": "965724f2-fa9d-4445-93cd-e6416b5f7290",
+        "status": "completed",
+        "has_answer": true,
+        "ok": true,
+        "gold": "E",
+        "pred": "E",
+        "ideal": "PAX6",
+        "n_tools": 0,
+        "tools": [],
+        "n_exec": 2,
+        "seconds": 13.0
+      },
+      {
+        "benchmark": "DbQA",
+        "id": "0d7b48d8-39ed-42b9-8bb9-f300e5cc7414",
+        "status": "completed",
+        "has_answer": true,
+        "ok": true,
+        "gold": "A",
+        "pred": "A",
+        "ideal": "RN7SL617P",
+        "n_tools": 1,
+        "tools": [
+          "database.query_ensembl"
+        ],
+        "n_exec": 3,
+        "seconds": 82.6
+      },
+      {
+        "benchmark": "DbQA",
+        "id": "38271723-3413-469b-8ec7-f488b416fd8e",
+        "status": "completed",
+        "has_answer": true,
+        "ok": false,
+        "gold": "D",
+        "pred": "B",
+        "ideal": "KANSL1L",
+        "n_tools": 0,
+        "tools": [],
+        "n_exec": 10,
+        "seconds": 39.7
+      },
+      {
+        "benchmark": "DbQA",
+        "id": "b08c5d21-f3ea-43fd-8c38-6cec81cae612",
+        "status": "completed",
+        "has_answer": true,
+        "ok": true,
+        "gold": "E",
+        "pred": "E",
+        "ideal": "Tes",
+        "n_tools": 0,
+        "tools": [],
+        "n_exec": 8,
+        "seconds": 34.8
+      },
+      {
+        "benchmark": "DbQA",
+        "id": "7827cf73-61aa-4c5e-8496-e9a5574fd76c",
+        "status": "completed",
+        "has_answer": true,
+        "ok": true,
+        "gold": "A",
+        "pred": "A",
+        "ideal": "ADRB3",
+        "n_tools": 0,
+        "tools": [],
+        "n_exec": 2,
+        "seconds": 40.6
+      },
+      {
+        "benchmark": "SeqQA",
+        "id": "1e4ef437-b22f-4988-90fd-8ed2ea313193",
+        "status": "completed",
+        "has_answer": true,
+        "ok": true,
+        "gold": "E",
+        "pred": "E",
+        "ideal": "R",
+        "n_tools": 1,
+        "tools": [
+          "molecular_biology.annotate_open_reading_frames"
+        ],
+        "n_exec": 7,
+        "seconds": 62.9
+      },
+      {
+        "benchmark": "SeqQA",
+        "id": "2e9b71bb-65cf-4663-83f0-ebefba7e510e",
+        "status": "completed",
+        "has_answer": true,
+        "ok": false,
+        "gold": "F",
+        "pred": "ORF的末尾是TAA（终止密码子），但`annotate_open_reading_frames`函数默认不包含终止密码",
+        "ideal": "MWPFCGVCLSPPARPGLLTWPFWSLPEWSSRSHLS*",
+        "n_tools": 1,
+        "tools": [
+          "molecular_biology.annotate_open_reading_frames"
+        ],
+        "n_exec": 5,
+        "seconds": 31.8
+      },
+      {
+        "benchmark": "SeqQA",
+        "id": "d56970cd-0385-421a-8582-67f944acd22d",
+        "status": "completed",
+        "has_answer": true,
+        "ok": true,
+        "gold": "D",
+        "pred": "D",
+        "ideal": "2",
+        "n_tools": 1,
+        "tools": [
+          "molecular_biology.annotate_open_reading_frames"
+        ],
+        "n_exec": 1,
+        "seconds": 10.2
+      },
+      {
+        "benchmark": "SeqQA",
+        "id": "b1d7dc70-258b-4b7c-8e6f-a5414f09723c",
+        "status": "completed",
+        "has_answer": true,
+        "ok": false,
+        "gold": "E",
+        "pred": "D",
+        "ideal": "GUAGCUGCCAAGAGGUAACACUGCUAUUGGUCAUUCAUCA",
+        "n_tools": 0,
+        "tools": [],
+        "n_exec": 7,
+        "seconds": 72.5
+      },
+      {
+        "benchmark": "SeqQA",
+        "id": "5e14e6c5-5b3d-45eb-9013-d63f760da987",
+        "status": "completed",
+        "has_answer": true,
+        "ok": true,
+        "gold": "A",
+        "pred": "A",
+        "ideal": "AAGCTTATGCACGGTAATTCTGAAATGCAAAAA, CCCGG",
+        "n_tools": 3,
+        "tools": [
+          "molecular_biology.find_restriction_sites",
+          "molecular_biology.get_gene_coding_sequence",
+          "molecular_biology.get_plasmid_sequence"
+        ],
+        "n_exec": 9,
+        "seconds": 72.4
+      },
+      {
+        "benchmark": "HLE",
+        "id": "672413d8b05b29ab9732088b",
+        "status": "completed",
+        "has_answer": true,
+        "ok": true,
+        "gold": "B",
+        "pred": "B",
+        "ideal": "B",
+        "n_tools": 0,
+        "tools": [],
+        "n_exec": 0,
+        "seconds": 12.5
+      },
+      {
+        "benchmark": "HLE",
+        "id": "6725080f2cc2a1349f1ffaf4",
+        "status": "completed",
+        "has_answer": true,
+        "ok": true,
+        "gold": "A",
+        "pred": "A",
+        "ideal": "A",
+        "n_tools": 0,
+        "tools": [],
+        "n_exec": 0,
+        "seconds": 72.9
+      },
+      {
+        "benchmark": "HLE",
+        "id": "66ea1dd348eb93c2aef1c735",
+        "status": "completed",
+        "has_answer": true,
+        "ok": false,
+        "gold": "E",
+        "pred": "这是一个需要仔细分析的遗传学和进化生物学问题。让我逐一分析每个陈述。\n\n**陈述1：所测表型没有发生选择。**\n- 题目",
+        "ideal": "E",
+        "n_tools": 0,
+        "tools": [],
+        "n_exec": 0,
+        "seconds": 22.5
+      },
+      {
+        "benchmark": "HLE",
+        "id": "67383288f2df805520bc86b5",
+        "status": "completed",
+        "has_answer": true,
+        "ok": false,
+        "gold": "E",
+        "pred": "B",
+        "ideal": "E",
+        "n_tools": 0,
+        "tools": [],
+        "n_exec": 0,
+        "seconds": 11.7
+      },
+      {
+        "benchmark": "HLE",
+        "id": "67241750cf2f76f66b81fe10",
+        "status": "completed",
+        "has_answer": true,
+        "ok": false,
+        "gold": "C",
+        "pred": "D",
+        "ideal": "C",
+        "n_tools": 0,
+        "tools": [],
+        "n_exec": 0,
+        "seconds": 16.1
+      }
+    ]
+  }
+}

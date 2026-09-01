@@ -1,0 +1,99 @@
+{
+  "overall": {
+    "n": 3,
+    "accuracy": 100.0,
+    "success_rate": 100.0,
+    "tool_use_rate": 33.3,
+    "avg_tool_calls": 0.33,
+    "avg_seconds": 41.8,
+    "error_rate": 0.0,
+    "top_tools": [
+      {
+        "tool": "molecular_biology.annotate_open_reading_frames",
+        "calls": 1
+      }
+    ]
+  },
+  "per_benchmark": {
+    "DbQA": {
+      "n": 1,
+      "accuracy": 100.0,
+      "success_rate": 100.0,
+      "tool_use_rate": 0.0,
+      "avg_tool_calls": 0.0,
+      "avg_seconds": 20.1,
+      "error_rate": 0.0,
+      "top_tools": []
+    },
+    "SeqQA": {
+      "n": 1,
+      "accuracy": 100.0,
+      "success_rate": 100.0,
+      "tool_use_rate": 100.0,
+      "avg_tool_calls": 1.0,
+      "avg_seconds": 90.5,
+      "error_rate": 0.0,
+      "top_tools": [
+        {
+          "tool": "molecular_biology.annotate_open_reading_frames",
+          "calls": 1
+        }
+      ]
+    },
+    "HLE": {
+      "n": 1,
+      "accuracy": 100.0,
+      "success_rate": 100.0,
+      "tool_use_rate": 0.0,
+      "avg_tool_calls": 0.0,
+      "avg_seconds": 14.9,
+      "error_rate": 0.0,
+      "top_tools": []
+    }
+  },
+  "details": {
+    "items": [
+      {
+        "benchmark": "DbQA",
+        "id": "965724f2-fa9d-4445-93cd-e6416b5f7290",
+        "status": "completed",
+        "has_answer": true,
+        "ok": true,
+        "gold": "E",
+        "pred": "E",
+        "ideal": "PAX6",
+        "n_tools": 0,
+        "tools": [],
+        "seconds": 20.1
+      },
+      {
+        "benchmark": "SeqQA",
+        "id": "1e4ef437-b22f-4988-90fd-8ed2ea313193",
+        "status": "completed",
+        "has_answer": true,
+        "ok": true,
+        "gold": "E",
+        "pred": "E",
+        "ideal": "R",
+        "n_tools": 1,
+        "tools": [
+          "molecular_biology.annotate_open_reading_frames"
+        ],
+        "seconds": 90.5
+      },
+      {
+        "benchmark": "HLE",
+        "id": "672413d8b05b29ab9732088b",
+        "status": "completed",
+        "has_answer": true,
+        "ok": true,
+        "gold": "B",
+        "pred": "B",
+        "ideal": "B",
+        "n_tools": 0,
+        "tools": [],
+        "seconds": 14.9
+      }
+    ]
+  }
+}
