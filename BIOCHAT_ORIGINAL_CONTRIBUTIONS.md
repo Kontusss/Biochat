@@ -73,7 +73,7 @@ metadata and license policy:
 
 `biomni/tool/antibody_design/` — the "Fusion Plan" phases 3A–3D
 (CDRH3 scoring/filtering, DiffCDRH3 diffusion generation, NanoBodyBuilder2
-structure prediction, HDOCK docking). See `FINAL_FUSION_STATUS.md` and
+structure prediction, HDOCK docking). See `docs/FINAL_FUSION_STATUS.md` and
 `docs/antibody_design_hdock_docker.md`.
 
 ## 5. Tool profiles — minimal vs full runtime (original)

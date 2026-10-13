@@ -268,3 +268,8 @@ outputs/
 
 # 本地测试用结构文件（RCSB 下载的 PDB，不进仓库）
 her2_structure/
+
+# ── 演示素材与临时压缩包（体积过大，不入库） ────────────────
+movie/
+Biochat.pptx
+未命名文件夹.zip
